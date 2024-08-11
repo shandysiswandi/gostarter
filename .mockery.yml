@@ -1,0 +1,11 @@
+quiet: True
+with-expecter: True
+disable-version-string: True
+packages:
+  github.com/shandysiswandi/gostarter/pkg:
+    config:
+      all: True
+      recursive: True
+      outpkg: "pkgmock"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: pkg/pkgmock
