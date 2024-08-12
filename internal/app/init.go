@@ -1,3 +1,10 @@
+// Package app provides a structured framework for initializing, configuring,
+// and managing the core components of the application. It handles the setup
+// of essential services such as logging, configuration management, database
+// connections, Redis client, HTTP router and server, utility libraries, and
+// background tasks. The package ensures that all components are properly
+// initialized at startup and gracefully shut down when the application stops,
+// offering a robust foundation for building and maintaining the application.
 package app
 
 import (
@@ -20,10 +27,17 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
+// initSTDLog initializes the standard logger with specific flags to include the date, time,
+// and file location in log messages. This method is typically called during the initialization
+// phase of the application to ensure consistent logging behavior.
 func (a *App) initSTDLog() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
+// initConfig initializes the application's configuration by loading settings from a specified
+// YAML file using the Viper library. If the configuration cannot be loaded, the application
+// will log a fatal error and terminate. This method should be called early in the application's
+// initialization process.
 func (a *App) initConfig() {
 	cfg, err := config.NewViperConfig("config/config.yaml")
 	if err != nil {
@@ -33,6 +47,9 @@ func (a *App) initConfig() {
 	a.config = cfg
 }
 
+// initDatabase initializes the application's database connection using settings from the
+// configuration. It sets up connection pooling parameters and tests the connection by pinging
+// the database. If any step fails, the application will log a fatal error and terminate.
 func (a *App) initDatabase() {
 	maxOpen := a.config.GetInt(`database.max.open`)
 	maxIdle := a.config.GetInt(`database.max.idle`)
@@ -67,6 +84,9 @@ func (a *App) initDatabase() {
 	a.database = database
 }
 
+// initRedis initializes a Redis client using settings from the configuration.
+// It verifies the connection by pinging the Redis server. If the connection fails,
+// the application will log a fatal error and terminate.
 func (a *App) initRedis() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: a.config.GetString("redis.addr"),
@@ -79,6 +99,9 @@ func (a *App) initRedis() {
 	a.redisdb = rdb
 }
 
+// initHTTPRouter initializes the HTTP router using the httprouter library.
+// It sets up custom handlers for "Not Found" and "Method Not Allowed" errors,
+// returning JSON responses with appropriate status codes.
 func (a *App) initHTTPRouter() {
 	router := httprouter.New()
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -102,6 +125,10 @@ func (a *App) initHTTPRouter() {
 	a.httpRouter = router
 }
 
+// initHTTPServer initializes the HTTP server with settings from the configuration,
+// such as address, timeouts, and the router handler wrapped with CORS middleware.
+// This method should be called after initializing the router to ensure the server
+// is ready to handle incoming requests.
 func (a *App) initHTTPServer() {
 	handler := cors.Default().Handler(a.httpRouter)
 
@@ -115,6 +142,9 @@ func (a *App) initHTTPServer() {
 	}
 }
 
+// initLibraries initializes various utility libraries used throughout the application,
+// such as UID generators, clock, codecs for JSON and MsgPack, and the validation library.
+// If any library fails to initialize, the application will log a fatal error and terminate.
 func (a *App) initLibraries() {
 	snow, err := uid.NewSnowflakeNumber()
 	if err != nil {
@@ -129,6 +159,8 @@ func (a *App) initLibraries() {
 	a.validator = validation.NewV10Validator()
 }
 
+// initTasks starts all background tasks or services registered with the application.
+// If any task fails to start, the application will log a fatal error and terminate.
 func (a *App) initTasks() {
 	for _, runnable := range a.runables {
 		if err := runnable.Start(); err != nil {
