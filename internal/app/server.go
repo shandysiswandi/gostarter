@@ -40,17 +40,17 @@ func (a *App) Start() <-chan struct{} {
 }
 
 func (a *App) Stop(ctx context.Context) {
-	// close resources
-	for _, closer := range a.closersFn {
-		if err := closer(ctx); err != nil {
-			log.Println("failed to close", err)
-		}
-	}
-
 	// close tasks or jobs
 	for _, run := range a.runables {
 		if err := run.Stop(ctx); err != nil {
 			log.Println("failed to close runner", err)
+		}
+	}
+
+	// close resources
+	for _, closer := range a.closersFn {
+		if err := closer(ctx); err != nil {
+			log.Println("failed to close", err)
 		}
 	}
 }

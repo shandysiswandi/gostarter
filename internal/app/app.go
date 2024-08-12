@@ -43,8 +43,8 @@ func (a *App) ensureInitialized() {
 	a.initHTTPRouter()
 	a.initHTTPServer()
 	a.initLibraries()
-	a.initTasks()
 	a.initModules()
+	a.initTasks()
 }
 
 func (a *App) ensureClosed() {
