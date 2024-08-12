@@ -10,6 +10,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
@@ -26,6 +27,7 @@ type App struct {
 	redisdb      *redis.Client
 	httpServer   *http.Server
 	httpRouter   *httprouter.Router
+	runables     []task.Runner
 	closersFn    []func(context.Context) error
 }
 
@@ -40,7 +42,8 @@ func (a *App) ensureInitialized() {
 	a.initRedis()
 	a.initHTTPRouter()
 	a.initHTTPServer()
-	a.initlibraries()
+	a.initLibraries()
+	a.initTasks()
 	a.initModules()
 }
 

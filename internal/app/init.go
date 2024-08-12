@@ -13,7 +13,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
+	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/uid"
+	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 func (a *App) initSTDLog() {
@@ -108,5 +112,27 @@ func (a *App) initHTTPServer() {
 		ReadHeaderTimeout: 2 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
+	}
+}
+
+func (a *App) initLibraries() {
+	snow, err := uid.NewSnowflakeNumber()
+	if err != nil {
+		log.Fatalln("failed to init uid number snowflake", err)
+	}
+
+	a.uidnumber = snow
+	a.clock = clock.NewClock()
+	a.uuid = uid.NewUUIDString()
+	a.codecJSON = codec.NewJSONCodec()
+	a.codecMsgPack = codec.NewMsgpackCodec()
+	a.validator = validation.NewV10Validator()
+}
+
+func (a *App) initTasks() {
+	for _, runnable := range a.runables {
+		if err := runnable.Start(); err != nil {
+			log.Fatalln("failed to init initTasks", err)
+		}
 	}
 }
