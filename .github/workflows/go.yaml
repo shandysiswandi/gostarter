@@ -19,11 +19,6 @@ jobs:
         with:
           go-version: "1.19"
 
-      - name: Clear Go modules cache directory
-        run: |
-          sudo rm -rf ~/go/pkg/mod
-          sudo rm -rf ~/.cache/go-build
-
       - name: Cache Go modules
         id: cache-go-mod
         uses: actions/cache@v4
