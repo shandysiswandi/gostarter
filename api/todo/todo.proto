@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package gostarter;
+
+import "google/type/decimal.proto";
+import "buf/validate/validate.proto";
+
+message EXAMPLE {
+    google.type.Decimal amount = 1;
+}
+
+enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_INITIATE = 1;
+    STATUS_IN_PROGRESS = 2;
+    STATUS_DROP = 3;
+    STATUS_DONE = 4;
+}
+
+message Todo {
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+message CreateRequest { 
+    string title = 1 [(buf.validate.field).string.min_len = 5];
+    string description = 2 [(buf.validate.field).string.min_len = 5];
+}
+
+message CreateResponse {
+    uint64 id = 1;
+}
+
+message DeleteRequest { 
+    uint64 id = 1;
+}
+
+message DeleteResponse { 
+    uint64 id = 1;
+}
+
+message GetByIDRequest { 
+    uint64 id = 1;
+}
+
+message GetByIDResponse { 
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+message GetWithFilterRequest { 
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+message GetWithFilterResponse { 
+    repeated Todo todos = 1;
+}
+
+message UpdateStatusRequest { 
+    uint64 id = 1;
+    Status status = 2;
+}
+
+message UpdateStatusResponse { 
+    uint64 id = 1;
+    Status status = 2;
+}
+
+message UpdateRequest { 
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+message UpdateResponse { 
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+service TodoService {
+    rpc Create (CreateRequest) returns (CreateResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+    rpc GetByID (GetByIDRequest) returns (GetByIDResponse);
+    rpc GetWithFilter (GetWithFilterRequest) returns (GetWithFilterResponse);
+    rpc UpdateStatus (UpdateStatusRequest) returns (UpdateStatusResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+}

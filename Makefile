@@ -10,6 +10,9 @@ test:
 mock:
 	@mockery
 
+proto:
+	@cd api && buf mod update && buf build && buf generate && cd ..
+
 migration-create:
 	@goose -dir migration create example sql
 

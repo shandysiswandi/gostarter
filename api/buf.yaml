@@ -1,0 +1,13 @@
+version: v1
+name: buf.build/shandysiswandi/gostarter
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
+  except:
+    - RULE_NAME
+deps:
+  - buf.build/bufbuild/protovalidate:v0.7.1
+  - buf.build/googleapis/googleapis

@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "editor.wordWrap": "on",
+  "editor.rulers": [120],
+  "go.formatTool": "default"
+}
