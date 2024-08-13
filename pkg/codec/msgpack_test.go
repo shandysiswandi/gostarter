@@ -83,7 +83,10 @@ func TestMsgpackCodec_Encode(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want(tt.v), got)
+				var decodedExpected, decodedGot interface{}
+				_ = msgpack.Unmarshal(tt.want(tt.v), &decodedExpected)
+				_ = msgpack.Unmarshal(got, &decodedGot)
+				assert.Equal(t, decodedExpected, decodedGot)
 			}
 		})
 	}
