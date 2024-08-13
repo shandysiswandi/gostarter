@@ -159,7 +159,13 @@ func (a *App) initLibraries() {
 		log.Fatalln("failed to init uid number snowflake", err)
 	}
 
+	pvalidator, err := validation.NewProtoValidator()
+	if err != nil {
+		log.Fatalln("failed to init validation protovalidate", err)
+	}
+
 	a.uidnumber = snow
+	a.pvalidator = pvalidator
 	a.clock = clock.NewClock()
 	a.uuid = uid.NewUUIDString()
 	a.codecJSON = codec.NewJSONCodec()

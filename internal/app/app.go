@@ -35,6 +35,7 @@ type App struct {
 	codecJSON    codec.Codec
 	codecMsgPack codec.Codec
 	validator    validation.Validator
+	pvalidator   validation.Validator
 	database     *sql.DB
 	redisdb      *redis.Client
 	httpServer   *http.Server
