@@ -16,7 +16,7 @@ type testStruct struct {
 }
 
 // MockRow implementation for testStruct
-func (r *testStruct) Columns() []any {
+func (r *testStruct) ScanColumn() []any {
 	return []any{&r.ID, &r.Name}
 }
 

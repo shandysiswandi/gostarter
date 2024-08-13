@@ -23,7 +23,7 @@ func SQLGet[T any, PT Row[T]](
 
 	var t T
 	ptr := PT(&t)
-	err = querier.QueryRowContext(ctx, query, args...).Scan(ptr.Columns()...)
+	err = querier.QueryRowContext(ctx, query, args...).Scan(ptr.ScanColumn()...)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil //nolint:nilnil // no rows is not an error, just a nil result
 	}
@@ -61,7 +61,7 @@ func SQLGets[T any, PT Row[T]](
 		var t T
 		ptr := PT(&t)
 
-		if err := rows.Scan(ptr.Columns()...); err != nil {
+		if err := rows.Scan(ptr.ScanColumn()...); err != nil {
 			return nil, ErrScanRow
 		}
 

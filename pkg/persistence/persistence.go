@@ -15,6 +15,6 @@ type Execer interface {
 }
 
 type Row[T any] interface {
-	Columns() []any
+	ScanColumn() []any
 	*T
 }
