@@ -10,6 +10,7 @@ The following command-line tools are used:
 - [GolangCI-Lint](https://github.com/golangci/golangci-lint)
 - [Goose](https://github.com/pressly/goose)
 - [Reflex](https://github.com/cespare/reflex)
+- [Buf](https://github.com/bufbuild/buf)
 
 ## Running the Application
 
@@ -27,10 +28,13 @@ The following command-line tools are used:
 
 - **Generate Mocks**: Run `make mock` to generate mocks. Ensure you have configured `.mockery.yml`.
 
+- **Generate Protobuf**: Run `make proto` to generate protobuf.
+
 - **Run Linter**: Check code quality with `make lint`.
 
 ## Libraries Used
 
+- [protovalidate](https://github.com/bufbuild/protovalidate)
 - [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock)
 - [snowflake](https://github.com/bwmarrin/snowflake)
 - [validator](https://github.com/go-playground/validator/v10)
@@ -40,6 +44,10 @@ The following command-line tools are used:
 - [go-nanoid](https://github.com/matoous/go-nanoid/v2)
 - [go-redis](https://github.com/redis/go-redis/v9)
 - [cors](https://github.com/rs/cors)
+- [decimal](https://github.com/shopspring/decimal)
 - [viper](https://github.com/spf13/viper)
 - [testify](https://github.com/stretchr/testify)
 - [msgpack](https://github.com/vmihailenco/msgpack/v5)
+- [genproto](google.golang.org/genproto)
+- [grpc](google.golang.org/grpc)
+- [protobuf](google.golang.org/protobuf)
