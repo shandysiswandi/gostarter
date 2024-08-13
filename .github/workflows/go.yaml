@@ -21,8 +21,8 @@ jobs:
 
       - name: Clear Go modules cache directory
         run: |
-          rm -rf ~/go/pkg/mod
-          rm -rf ~/.cache/go-build
+          sudo rm -rf ~/go/pkg/mod
+          sudo rm -rf ~/.cache/go-build
 
       - name: Cache Go modules
         id: cache-go-mod
