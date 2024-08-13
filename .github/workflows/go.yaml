@@ -9,23 +9,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.19", "1.20", "1.21", "1.22", "1.23"]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - name: Set up Go ${{ matrix.go }}
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.19"
+          go-version: ${{ matrix.go }}
 
       - name: Cache Go modules
         id: cache-go-mod
         uses: actions/cache@v4
         with:
           path: |
-            sudo chmod -R +w ~/go/pkg/mod
-            sudo chmod -R +w ~/.cache/go-build
+            chmod -R +w ~/go/pkg/mod
+            chmod -R +w ~/.cache/go-build
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
