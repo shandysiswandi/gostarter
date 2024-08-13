@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"strconv"
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-go/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
@@ -93,10 +94,10 @@ func (e *Endpoint) GetWithFilter(ctx context.Context, req *pb.GetWithFilterReque
 	}
 
 	resp, err := e.getWithFilterUC.Execute(ctx, usecase.GetWithFilterInput{
-		ID:          req.GetDescription(),
-		Title:       req.GetDescription(),
+		ID:          strconv.FormatUint(req.GetId(), 10),
+		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
-		Status:      req.GetDescription(),
+		Status:      req.GetStatus().String(),
 	})
 	if err != nil {
 		return nil, err
@@ -120,7 +121,10 @@ func (e *Endpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest
 		return nil, err
 	}
 
-	resp, err := e.updateStatusUC.Execute(ctx, usecase.UpdateStatusInput{ID: req.GetId(), Status: req.GetStatus().String()})
+	resp, err := e.updateStatusUC.Execute(ctx, usecase.UpdateStatusInput{
+		ID:     req.GetId(),
+		Status: req.GetStatus().String(),
+	})
 	if err != nil {
 		return nil, err
 	}
