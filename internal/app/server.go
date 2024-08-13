@@ -11,10 +11,13 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"google.golang.org/grpc"
 )
 
 // Start initializes and starts the server and listens for termination signals.
@@ -36,6 +39,21 @@ func (a *App) Start() <-chan struct{} {
 		err := a.httpServer.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalln("http server:", err)
+		}
+	}()
+
+	grpcPort := a.config.GetString("server.address.grpc")
+	listener, err := net.Listen("tcp", grpcPort)
+	if err != nil {
+		log.Fatalln("open tcp listener:", err)
+	}
+
+	go func() {
+		log.Println("grpc server listen on", grpcPort)
+		if err := a.grpcServer.Serve(listener); err != nil {
+			if !errors.Is(err, grpc.ErrServerStopped) {
+				log.Fatalln("grpc server, err:", err)
+			}
 		}
 	}()
 

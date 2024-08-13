@@ -25,6 +25,8 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // initSTDLog initializes the standard logger with specific flags to include the date, time,
@@ -140,6 +142,12 @@ func (a *App) initHTTPServer() {
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
 	}
+}
+
+func (a *App) initGRPCServer() {
+	server := grpc.NewServer()
+	reflection.Register(server)
+	a.grpcServer = server
 }
 
 // initLibraries initializes various utility libraries used throughout the application,

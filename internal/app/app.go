@@ -20,6 +20,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"google.golang.org/grpc"
 )
 
 // App encapsulates the core components of the application, including configuration,
@@ -37,6 +38,7 @@ type App struct {
 	database     *sql.DB
 	redisdb      *redis.Client
 	httpServer   *http.Server
+	grpcServer   *grpc.Server
 	httpRouter   *httprouter.Router
 	runables     []task.Runner
 	closersFn    []func(context.Context) error
@@ -59,6 +61,7 @@ func (a *App) ensureInitialized() {
 	a.initRedis()
 	a.initHTTPRouter()
 	a.initHTTPServer()
+	a.initGRPCServer()
 	a.initLibraries()
 	a.initModules()
 	a.initTasks()
