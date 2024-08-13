@@ -5,7 +5,7 @@ lint:
 	@golangci-lint run
 
 test:
-	@go test ./... -parallel 4 -cover -v
+	@go test ./... -coverprofile=coverage.out -parallel 4
 
 mock:
 	@mockery
