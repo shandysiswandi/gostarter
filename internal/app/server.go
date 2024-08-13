@@ -29,9 +29,6 @@ import (
 //
 // The returned channel is closed once a termination signal is received and processed.
 func (a *App) Start() <-chan struct{} {
-	a.ensureInitialized()
-	a.ensureClosed()
-
 	terminateChan := make(chan struct{})
 
 	go func() {

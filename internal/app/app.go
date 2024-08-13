@@ -46,46 +46,24 @@ type App struct {
 }
 
 // New creates and returns a new instance of the App structure. This function initializes
-// an empty App object, which can then be configured and started by calling its methods.
+// all the core components of the application, including standard logging, configuration,
+// database connections, Redis client, HTTP router, HTTP server, gRPC Srever and various
+// utility libraries. This method is typically called before starting the application to
+// ensure that all components are properly set up.
 func New() *App {
-	return &App{}
-}
+	app := &App{}
 
-// ensureInitialized initializes all the core components of the application, including
-// standard logging, configuration, database connections, Redis client, HTTP router,
-// HTTP server, and various utility libraries. This method is typically called before
-// starting the application to ensure that all components are properly set up.
-func (a *App) ensureInitialized() {
-	a.initSTDLog()
-	a.initConfig()
-	a.initDatabase()
-	a.initRedis()
-	a.initHTTPRouter()
-	a.initHTTPServer()
-	a.initGRPCServer()
-	a.initLibraries()
-	a.initModules()
-	a.initTasks()
-}
+	app.initSTDLog()
+	app.initConfig()
+	app.initDatabase()
+	app.initRedis()
+	app.initHTTPRouter()
+	app.initHTTPServer()
+	app.initGRPCServer()
+	app.initLibraries()
+	app.initModules()
+	app.initTasks()
+	app.iniClosed()
 
-// ensureClosed registers cleanup functions for all core components of the application.
-// These functions are responsible for gracefully shutting down the HTTP server,
-// closing database connections, terminating the Redis client, and cleaning up
-// the configuration. This method is typically called when stopping the application
-// to ensure all resources are released properly.
-func (a *App) ensureClosed() {
-	a.closersFn = append(a.closersFn, []func(ctx context.Context) error{
-		func(ctx context.Context) error {
-			return a.httpServer.Shutdown(ctx)
-		},
-		func(context.Context) error {
-			return a.database.Close()
-		},
-		func(context.Context) error {
-			return a.redisdb.Close()
-		},
-		func(context.Context) error {
-			return a.config.Close()
-		},
-	}...)
+	return app
 }

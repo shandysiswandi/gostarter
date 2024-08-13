@@ -182,3 +182,30 @@ func (a *App) initTasks() {
 		}
 	}
 }
+
+// iniClosed registers cleanup functions for all core components of the application.
+// These functions are responsible for gracefully shutting down the HTTP server,
+// gRPC Server, closing database connections, terminating the Redis client, and
+// cleaning up the configuration. This method is typically called when stopping
+// the application to ensure all resources are released properly.
+func (a *App) iniClosed() {
+	a.closersFn = append(a.closersFn, []func(ctx context.Context) error{
+		func(ctx context.Context) error {
+			return a.httpServer.Shutdown(ctx)
+		},
+		func(_ context.Context) error {
+			a.grpcServer.GracefulStop()
+
+			return nil
+		},
+		func(context.Context) error {
+			return a.database.Close()
+		},
+		func(context.Context) error {
+			return a.redisdb.Close()
+		},
+		func(context.Context) error {
+			return a.config.Close()
+		},
+	}...)
+}
