@@ -1,7 +1,5 @@
 // Package googlepubsub provides a client for interacting with Google Cloud Pub/Sub.
 // It includes functionality for publishing and subscribing to messages with various configuration options.
-//
-//nolint:ireturn // ignore this linter in this file
 package googlepubsub
 
 import (
@@ -152,6 +150,8 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 // handler: The function to handle incoming messages.
 //
 // Returns a SubscriptionHandler to manage the subscription and an error if the subscription could not be created.
+//
+//nolint:ireturn // ignore this linter in this file
 func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, handler messaging.SubscriberHandlerFunc) (
 	messaging.SubscriptionHandler, error,
 ) {
