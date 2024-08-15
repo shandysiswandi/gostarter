@@ -2,13 +2,13 @@
 // It includes functionality for publishing and subscribing to messages with various configuration options.
 package googlepubsub
 
-// ClientOption defines a function type used to configure the Pub/Sub client.
-type ClientOption func(*Client)
+// Option defines a function type used to configure the Pub/Sub client.
+type Option func(*Client)
 
 // WithAutoAck configures the client to automatically acknowledge messages.
 //
 // isAuto: If true, messages will be automatically acknowledged after being received.
-func WithAutoAck(isAuto bool) ClientOption {
+func WithAutoAck(isAuto bool) Option {
 	return func(client *Client) {
 		client.autoAck = isAuto
 	}
@@ -17,7 +17,7 @@ func WithAutoAck(isAuto bool) ClientOption {
 // WithAutoCreateTopic configures the client to automatically create a topic if it does not exist.
 //
 // isAuto: If true, the client will create the topic when attempting to publish or subscribe.
-func WithAutoCreateTopic(isAuto bool) ClientOption {
+func WithAutoCreateTopic(isAuto bool) Option {
 	return func(client *Client) {
 		client.autoCreateTopic = isAuto
 	}
@@ -27,7 +27,7 @@ func WithAutoCreateTopic(isAuto bool) ClientOption {
 // and associated topic if they do not exist.
 //
 // isAuto: If true, the client will create both the subscription and the topic as necessary.
-func WithAutoCreateSubscriber(isAuto bool) ClientOption {
+func WithAutoCreateSubscriber(isAuto bool) Option {
 	return func(client *Client) {
 		if isAuto {
 			client.autoCreateTopic = true
@@ -39,7 +39,7 @@ func WithAutoCreateSubscriber(isAuto bool) ClientOption {
 // WithSyncPublisher configures the client to publish messages synchronously.
 //
 // isSyncPublisher: If true, the Publish call will wait for the message to be acknowledged before returning.
-func WithSyncPublisher(isSyncPublisher bool) ClientOption {
+func WithSyncPublisher(isSyncPublisher bool) Option {
 	return func(client *Client) {
 		client.syncPublisher = isSyncPublisher
 	}

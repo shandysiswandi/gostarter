@@ -9,7 +9,7 @@ test:
 
 mock:
 	@mockery
-	@rm pkg/pkgmock/mock_client_option.go
+	@rm pkg/pkgmock/mock_option.go
 
 tidy:
 	@go mod tidy

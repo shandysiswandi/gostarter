@@ -47,7 +47,7 @@ type Client struct {
 // opts: Configuration options for the client.
 //
 // Returns a pointer to the created Client or an error if the client could not be created.
-func NewClient(ctx context.Context, projectID string, opts ...ClientOption) (*Client, error) {
+func NewClient(ctx context.Context, projectID string, opts ...Option) (*Client, error) {
 	client := &Client{
 		subscriptions:        make(map[string]*SubscriberHandler),
 		clientOptions:        []option.ClientOption{},
