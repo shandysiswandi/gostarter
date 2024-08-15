@@ -35,6 +35,7 @@ The following command-line tools are used:
 ## Libraries Used
 
 - [protovalidate](https://github.com/bufbuild/protovalidate)
+- [gogle-pubsub](https://cloud.google.com/go/pubsub)
 - [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock)
 - [snowflake](https://github.com/bwmarrin/snowflake)
 - [validator](https://github.com/go-playground/validator/v10)
@@ -48,6 +49,7 @@ The following command-line tools are used:
 - [viper](https://github.com/spf13/viper)
 - [testify](https://github.com/stretchr/testify)
 - [msgpack](https://github.com/vmihailenco/msgpack/v5)
-- [genproto](google.golang.org/genproto)
-- [grpc](google.golang.org/grpc)
-- [protobuf](google.golang.org/protobuf)
+- [google-api](https://google.golang.org/api)
+- [genproto](https://google.golang.org/genproto)
+- [grpc](https://google.golang.org/grpc)
+- [protobuf](https://google.golang.org/protobuf)

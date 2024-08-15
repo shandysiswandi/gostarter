@@ -17,12 +17,12 @@ func (_m *MockRow[T]) EXPECT() *MockRow_Expecter[T] {
 	return &MockRow_Expecter[T]{mock: &_m.Mock}
 }
 
-// Columns provides a mock function with given fields:
-func (_m *MockRow[T]) Columns() []interface{} {
+// ScanColumn provides a mock function with given fields:
+func (_m *MockRow[T]) ScanColumn() []interface{} {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for Columns")
+		panic("no return value specified for ScanColumn")
 	}
 
 	var r0 []interface{}
@@ -37,29 +37,29 @@ func (_m *MockRow[T]) Columns() []interface{} {
 	return r0
 }
 
-// MockRow_Columns_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Columns'
-type MockRow_Columns_Call[T interface{}] struct {
+// MockRow_ScanColumn_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ScanColumn'
+type MockRow_ScanColumn_Call[T interface{}] struct {
 	*mock.Call
 }
 
-// Columns is a helper method to define mock.On call
-func (_e *MockRow_Expecter[T]) Columns() *MockRow_Columns_Call[T] {
-	return &MockRow_Columns_Call[T]{Call: _e.mock.On("Columns")}
+// ScanColumn is a helper method to define mock.On call
+func (_e *MockRow_Expecter[T]) ScanColumn() *MockRow_ScanColumn_Call[T] {
+	return &MockRow_ScanColumn_Call[T]{Call: _e.mock.On("ScanColumn")}
 }
 
-func (_c *MockRow_Columns_Call[T]) Run(run func()) *MockRow_Columns_Call[T] {
+func (_c *MockRow_ScanColumn_Call[T]) Run(run func()) *MockRow_ScanColumn_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *MockRow_Columns_Call[T]) Return(_a0 []interface{}) *MockRow_Columns_Call[T] {
+func (_c *MockRow_ScanColumn_Call[T]) Return(_a0 []interface{}) *MockRow_ScanColumn_Call[T] {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockRow_Columns_Call[T]) RunAndReturn(run func() []interface{}) *MockRow_Columns_Call[T] {
+func (_c *MockRow_ScanColumn_Call[T]) RunAndReturn(run func() []interface{}) *MockRow_ScanColumn_Call[T] {
 	_c.Call.Return(run)
 	return _c
 }

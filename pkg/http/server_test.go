@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// MockHandler returns a successful response.
-func MockHandler(ctx context.Context, r *http.Request) (any, error) {
+// MockHandlerTest returns a successful response.
+func MockHandlerTest(ctx context.Context, r *http.Request) (any, error) {
 	return map[string]string{"message": "success"}, nil
 }
 
@@ -40,7 +40,7 @@ func TestServe_NewServe(t *testing.T) {
 // TestServe_Endpoint checks endpoint creation without middleware.
 func TestServe_Endpoint(t *testing.T) {
 	serve := NewServe()
-	endpoint := serve.Endpoint(MockHandler)
+	endpoint := serve.Endpoint(MockHandlerTest)
 
 	assert.NotNil(t, endpoint)
 }
@@ -48,7 +48,7 @@ func TestServe_Endpoint(t *testing.T) {
 // TestServe_EndpointWithMiddleware checks endpoint creation with middleware.
 func TestServe_EndpointWithMiddleware(t *testing.T) {
 	serve := NewServe(WithMiddlewares(testMiddleware))
-	endpoint := serve.Endpoint(MockHandler, testMiddleware)
+	endpoint := serve.Endpoint(MockHandlerTest, testMiddleware)
 
 	req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 	rr := httptest.NewRecorder()

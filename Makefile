@@ -9,9 +9,15 @@ test:
 
 mock:
 	@mockery
+	@rm pkg/pkgmock/mock_client_option.go
+
+tidy:
+	@go mod tidy
 
 proto:
 	@cd api && buf mod update && buf build && buf generate && cd ..
+
+check: proto mock tidy lint test
 
 migration-create:
 	@goose -dir migration create example sql
