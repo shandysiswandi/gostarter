@@ -9,11 +9,11 @@ import (
 	"io"
 )
 
-// Handler is a function type that processes a message received on a specific topic
+// SubscriberHandlerFunc is a function type that processes a message received on a specific topic
 // and subscription. It takes a context for managing deadlines and cancellations,
 // a topic string, a subscription ID string, and the message content as a byte slice.
 // It returns an error if the message could not be processed.
-type Handler func(ctx context.Context, topic string, subscriptionID string, message []byte) error
+type SubscriberHandlerFunc func(ctx context.Context, topic string, subscriptionID string, message []byte) error
 
 // SubscriptionHandler is an interface for managing a subscription to a topic.
 // It embeds the io.Closer interface, requiring an implementation of the Close method,
@@ -42,5 +42,6 @@ type Client interface {
 	// handler function. The handler is called whenever a message is received on the
 	// topic. The method returns a SubscriptionHandler, which can be used to manage
 	// the subscription, and an error if the subscription could not be created.
-	Subscribe(ctx context.Context, topic string, subscriptionID string, handler Handler) (SubscriptionHandler, error)
+	Subscribe(ctx context.Context, topic, subscriptionID string, handler SubscriberHandlerFunc) (
+		SubscriptionHandler, error)
 }

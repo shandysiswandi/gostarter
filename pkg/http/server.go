@@ -13,10 +13,10 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/errs"
 )
 
-// Handler defines a function that processes an HTTP request within a given context
+// ServeHandlerFunc defines a function that processes an HTTP request within a given context
 // and returns a response of any type along with an error, if one occurred.
 // The context can be used to carry request-scoped values, cancellation signals, and deadlines.
-type Handler func(context.Context, *http.Request) (any, error)
+type ServeHandlerFunc func(context.Context, *http.Request) (any, error)
 
 // Middleware defines a function type that wraps an http.Handler, adding additional
 // functionality such as logging, authentication, or request modification.
@@ -67,7 +67,7 @@ func NewServe(options ...ServeOption) *Serve {
 // Endpoint creates and returns a new Endpoint with the specified handler and optional middleware.
 // The endpoint will execute the middleware stack defined in Serve, followed by the provided middleware
 // for the specific endpoint.
-func (s *Serve) Endpoint(h Handler, mws ...Middleware) *Endpoint {
+func (s *Serve) Endpoint(h ServeHandlerFunc, mws ...Middleware) *Endpoint {
 	return &Endpoint{
 		h:   h,
 		mws: append(s.mws, mws...),
@@ -85,7 +85,7 @@ func WithMiddlewares(mws ...Middleware) ServeOption { //nolint:ireturn // ignore
 // Endpoint represents an HTTP endpoint with an associated handler and middleware stack.
 // It is responsible for processing HTTP requests, executing middleware, and encoding responses.
 type Endpoint struct {
-	h   Handler
+	h   ServeHandlerFunc
 	mws []Middleware
 }
 
