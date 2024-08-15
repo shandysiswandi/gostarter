@@ -78,6 +78,10 @@ func (c *Client) Close() error {
 		return nil
 	}
 
+	for _, sub := range c.subscriptions {
+		_ = sub.Close()
+	}
+
 	if err := c.client.Close(); err != nil {
 		return err
 	}
@@ -148,7 +152,7 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 // handler: The function to handle incoming messages.
 //
 // Returns a SubscriptionHandler to manage the subscription and an error if the subscription could not be created.
-func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, handler messaging.Handler) (
+func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, handler messaging.SubscriberHandlerFunc) (
 	messaging.SubscriptionHandler, error,
 ) {
 	if c.client == nil {
@@ -302,7 +306,7 @@ func (c *Client) removeHandler(key string) {
 // subscription: The ID of the subscription within the Pub/Sub system.
 // handler: A messaging.Handler function that processes the message data.
 func (c *Client) subscribingMessage(ctx context.Context, subs *pubsub.Subscription, topic, subscription string,
-	handler messaging.Handler,
+	handler messaging.SubscriberHandlerFunc,
 ) {
 	defer func() {
 		if r := recover(); r != nil {
