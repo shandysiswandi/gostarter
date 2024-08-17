@@ -11,7 +11,7 @@ import (
 	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
 )
 
-func RegisterHTTPEndpoint(router *httprouter.Router, h *Endpoint) {
+func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 	serve := pkghttp.NewServe(
 		pkghttp.WithMiddlewares(recovery),
 	)
