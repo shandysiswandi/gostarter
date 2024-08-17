@@ -39,13 +39,13 @@ func (a *App) Start() <-chan struct{} {
 		}
 	}()
 
-	grpcPort := a.config.GetString("server.address.grpc")
-	listener, err := net.Listen("tcp", grpcPort)
-	if err != nil {
-		log.Fatalln("open tcp listener:", err)
-	}
-
 	go func() {
+		grpcPort := a.config.GetString("server.address.grpc")
+		listener, err := net.Listen("tcp", grpcPort)
+		if err != nil {
+			log.Fatalln("open tcp listener:", err)
+		}
+
 		log.Println("grpc server listen on", grpcPort)
 		if err := a.grpcServer.Serve(listener); err != nil {
 			if !errors.Is(err, grpc.ErrServerStopped) {
