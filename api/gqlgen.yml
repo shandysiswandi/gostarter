@@ -1,0 +1,30 @@
+# REF: https://gqlgen.com/config/
+
+schema:
+  - todo-gql/*.gql
+
+exec:
+  filename: gen-gql/todo/generated.go
+  package: todo
+
+model:
+  filename: gen-gql/todo/models.gql.go
+  package: todo
+
+resolver:
+  layout: follow-schema
+  dir: gen-gql/todo
+  package: todo
+  filename_template: "resolvers.go"
+
+omit_slice_element_pointers: true
+
+# gqlgen will search for any type names in the schema in these go packages
+# if they match it will use them, otherwise it will generate them.
+autobind:
+#  - "github.com/shandysiswandi/gostarter/api/graph/model"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.Uint64

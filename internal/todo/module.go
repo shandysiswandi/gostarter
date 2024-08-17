@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
+	inboundgql "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/gql"
 	inboundgrpc "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/grpc"
 	inboundhttp "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/http"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
@@ -49,18 +50,18 @@ func New(dep Dependency) (*Expose, error) {
 	updateUC := service.NewUpdate(mysqlTodo, dep.Validator)
 	updateStatusUC := service.NewUpdateStatus(mysqlTodo, dep.Validator)
 
-	// init inbound endpoint http
-	endpointHTTP := &inboundhttp.Endpoint{
+	// register endpoint REST
+	inboundhttp.RegisterRESTEndpoint(dep.Router, &inboundhttp.Endpoint{
 		GetByIDUC:       getByIDUC,
 		CreateUC:        createUC,
 		DeleteUC:        deleteUC,
 		GetWithFilterUC: getWithFilterUC,
 		UpdateUC:        updateUC,
 		UpdateStatusUC:  updateStatusUC,
-	}
+	})
 
-	// init inbound endpoint grpc
-	endpointGRPC := inboundgrpc.NewEndpoint(
+	// register endpoint GRPC
+	pb.RegisterTodoServiceServer(dep.GRPCServer, inboundgrpc.NewEndpoint(
 		dep.ProtoValidator,
 		getByIDUC,
 		getWithFilterUC,
@@ -68,13 +69,17 @@ func New(dep Dependency) (*Expose, error) {
 		deleteUC,
 		updateUC,
 		updateStatusUC,
-	)
+	))
 
-	// register endpoint HTTP
-	inboundhttp.RegisterHTTPEndpoint(dep.Router, endpointHTTP)
-
-	// register endpoint GRPC | GRAPHQL | etc.
-	pb.RegisterTodoServiceServer(dep.GRPCServer, endpointGRPC)
+	// register endpoint GRAPHQL
+	inboundgql.RegisterGQLEndpoint(dep.Router, dep.Config, &inboundgql.Endpoint{
+		GetByIDUC:       getByIDUC,
+		CreateUC:        createUC,
+		DeleteUC:        deleteUC,
+		GetWithFilterUC: getWithFilterUC,
+		UpdateUC:        updateUC,
+		UpdateStatusUC:  updateStatusUC,
+	})
 
 	// jobs | background tasks
 	exampleJob := &job.ExampleJob{}

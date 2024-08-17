@@ -9,13 +9,16 @@ test:
 
 mock:
 	@mockery
-	@rm pkg/pkgmock/mock_option.go
+	@rm pkg/pkgmock/mock_option.go # remove unused mock from messaging/*
 
 tidy:
 	@go mod tidy
 
 proto:
-	@cd api && buf mod update && buf build && buf generate && cd ..
+	@cd api && rm -rf gen-proto && buf mod update && buf build && buf generate && cd ..
+
+gql:
+	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.48 generate
 
 check: proto mock tidy lint test
 

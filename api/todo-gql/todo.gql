@@ -1,0 +1,64 @@
+# The query type, represents all of the entry points into our object graph
+type Query {
+  getWithFilter(in: FilterInput): [Todo!]!
+  getByID(id: String!): Todo
+}
+
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+  create(in: CreateInput!): Todo!
+  delete(id: String!): String!
+  updateStatus(id: String!, status: Status!): UpdateStatusResponse!
+  update(id: String!, in: UpdateInput!): UpdateResponse!
+}
+
+# type ...........................
+
+type Todo {
+  id: String!
+  title: String!
+  description: String!
+  status: Status!
+}
+
+enum Status {
+  UNKNOWN
+  INITIATE
+  IN_PROGRESS
+  DROP
+  DONE
+}
+
+# inputs .........................
+
+input FilterInput {
+  id: String
+  title: String
+  description: String
+  status: Status
+}
+
+input CreateInput {
+  title: String!
+  description: String!
+}
+
+input UpdateInput {
+  title: String!
+  description: String!
+  status: Status!
+}
+
+# response .......................
+
+type UpdateResponse {
+  id: String!
+  title: String!
+  description: String!
+  status: Status!
+}
+
+type UpdateStatusResponse {
+  id: String!
+  status: Status!
+}

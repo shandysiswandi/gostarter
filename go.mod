@@ -5,6 +5,7 @@ go 1.19
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240717164558-a6c49f84cc0f.2
 	cloud.google.com/go/pubsub v1.34.0
+	github.com/99designs/gqlgen v0.17.48
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/bufbuild/protovalidate-go v0.6.3
 	github.com/bwmarrin/snowflake v0.3.0
@@ -17,6 +18,7 @@ require (
 	github.com/rs/cors v1.11.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.9.0
+	github.com/vektah/gqlparser/v2 v2.5.12
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	google.golang.org/api v0.155.0
 	google.golang.org/genproto v0.0.0-20240123012728-ef4313101c80
@@ -30,6 +32,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -47,6 +50,8 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -55,6 +60,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
