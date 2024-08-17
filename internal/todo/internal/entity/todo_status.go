@@ -3,6 +3,7 @@ package entity
 import (
 	"database/sql/driver"
 	"errors"
+	"strings"
 )
 
 var ErrScanTodoStatus = errors.New("failed to scan todo status")
@@ -18,7 +19,7 @@ const (
 )
 
 func ParseTodoStatus(s string) TodoStatus {
-	switch s {
+	switch strings.TrimPrefix(s, "STATUS_") {
 	case TodoStatusInitiate.String():
 		return TodoStatusInitiate
 	case TodoStatusInprogres.String():
