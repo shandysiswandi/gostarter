@@ -8,14 +8,14 @@ managed:
       - buf.build/bufbuild/protovalidate
 plugins:
   - plugin: buf.build/protocolbuffers/go:v1.34.2
-    out: gen-go
+    out: gen-proto
     opt:
       - paths=source_relative
   - plugin: buf.build/grpc/go:v1.2.0
-    out: gen-go
+    out: gen-proto
     opt:
       - paths=source_relative
   - plugin: buf.build/grpc-ecosystem/openapiv2:v2.21.0
-    out: openapi
+    out: gen-proto
     opt:
       - logtostderr=true

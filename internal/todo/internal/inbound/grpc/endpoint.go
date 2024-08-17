@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	pb "github.com/shandysiswandi/gostarter/api/gen-go/todo"
+	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )

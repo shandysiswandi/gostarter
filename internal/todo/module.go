@@ -5,7 +5,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
-	pb "github.com/shandysiswandi/gostarter/api/gen-go/todo"
+	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	inboundgrpc "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/grpc"
 	inboundhttp "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/http"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
