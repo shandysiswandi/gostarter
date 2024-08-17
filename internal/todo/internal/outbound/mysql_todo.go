@@ -3,6 +3,7 @@ package outbound
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
 	"github.com/shandysiswandi/gostarter/pkg/persistence"
@@ -19,44 +20,28 @@ func NewMysqlTodo(db *sql.DB) *MysqlTodo {
 }
 
 func (mt *MysqlTodo) Create(ctx context.Context, todo entity.Todo) error {
-	query := `INSERT INTO todos(id,title,description,status) VALUES(?,?,?,?)`
+	query := func() (string, []any, error) {
+		query := `INSERT INTO todos(id,title,description,status) VALUES(?,?,?,?)`
 
-	ir, err := mt.db.ExecContext(ctx, query,
-		todo.ID, todo.Title, todo.Description, todo.Status.String())
-	if err != nil {
-		return err
+		return query, []any{todo.ID, todo.Title, todo.Description, todo.Status.String()}, nil
 	}
 
-	aff, err := ir.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if aff == 0 {
+	err := persistence.Exec(ctx, mt.db, query, true)
+	if errors.Is(err, persistence.ErrZeroRowsAffected) {
 		return entity.ErrTodoNotCreated
 	}
 
-	return nil
+	return err
 }
 
 func (mt *MysqlTodo) Delete(ctx context.Context, id uint64) error {
-	query := `DELETE FROM todos WHERE id=?`
+	query := func() (string, []any, error) {
+		query := `DELETE FROM todos WHERE id=?`
 
-	ir, err := mt.db.ExecContext(ctx, query, id)
-	if err != nil {
-		return err
+		return query, []any{id}, nil
 	}
 
-	aff, err := ir.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if aff == 0 {
-		return entity.ErrTodoNotDeleted
-	}
-
-	return nil
+	return persistence.Exec(ctx, mt.db, query)
 }
 
 func (mt *MysqlTodo) GetByID(ctx context.Context, id uint64) (*entity.Todo, error) {
@@ -88,42 +73,21 @@ func (mt *MysqlTodo) GetWithFilter(ctx context.Context, _ map[string]string) ([]
 }
 
 func (mt *MysqlTodo) UpdateStatus(ctx context.Context, id uint64, sts entity.TodoStatus) error {
-	query := `UPDATE todos SET status=? WHERE id=?`
+	query := func() (string, []any, error) {
+		query := `UPDATE todos SET status=? WHERE id=?`
 
-	ir, err := mt.db.ExecContext(ctx, query, sts.String(), id)
-	if err != nil {
-		return err
+		return query, []any{sts.String(), id}, nil
 	}
 
-	aff, err := ir.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if aff == 0 {
-		return entity.ErrTodoNotUpdated
-	}
-
-	return nil
+	return persistence.Exec(ctx, mt.db, query)
 }
 
 func (mt *MysqlTodo) Update(ctx context.Context, todo entity.Todo) error {
-	query := `UPDATE todos SET title=?,description=?,status=? WHERE id=?`
+	query := func() (string, []any, error) {
+		query := `UPDATE todos SET title=?,description=?,status=? WHERE id=?`
 
-	ir, err := mt.db.ExecContext(ctx, query,
-		todo.Title, todo.Description, todo.Status.String(), todo.ID)
-	if err != nil {
-		return err
+		return query, []any{todo.Title, todo.Description, todo.Status.String(), todo.ID}, nil
 	}
 
-	aff, err := ir.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if aff == 0 {
-		return entity.ErrTodoNotUpdated
-	}
-
-	return nil
+	return persistence.Exec(ctx, mt.db, query)
 }
