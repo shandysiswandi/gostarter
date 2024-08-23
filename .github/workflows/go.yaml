@@ -87,8 +87,8 @@ jobs:
 
       - name: Create configuration file
         run: |
-          mkdir -p /config
-          cat <<EOF > /config/config.yaml
+          mkdir -p ${{ github.workspace }}/config
+          cat <<EOF > ${{ github.workspace }}/config/config.yaml
           server.address.http: localhost:8081
           server.address.grpc: localhost:50001
 
