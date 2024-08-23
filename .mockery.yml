@@ -6,31 +6,31 @@ packages:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"
   github.com/shandysiswandi/gostarter/pkg/codec:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"
   github.com/shandysiswandi/gostarter/pkg/config:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"
   github.com/shandysiswandi/gostarter/pkg/emitter:
     interfaces:
       Emitter:
         config:
           inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock.go"
+          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
           dir: "{{ .InterfaceDir }}"
       TimeProvider:
         config:
           inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock.go"
+          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
           dir: "{{ .InterfaceDir }}"
   # errs: skip, because errs does not have interfaces
   # http: skip, using net/http/httptest instead
@@ -38,14 +38,14 @@ packages:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"
   github.com/shandysiswandi/gostarter/pkg/messaging:
     interfaces:
       Client:
         config:
           inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock.go"
+          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
           dir: "{{ .InterfaceDir }}"
   # persistence: skip, using github.com/DATA-DOG/go-sqlmock instead
   # task: skip, because i dont know the usecases yet
@@ -53,11 +53,11 @@ packages:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"
   github.com/shandysiswandi/gostarter/pkg/validation:
     config:
       all: True
       inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock.go"
+      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
       dir: "{{ .InterfaceDir }}"

@@ -6,6 +6,7 @@ lint:
 
 test:
 	@go test ./... -coverprofile=coverage.out -parallel 4
+	@go tool cover -func=coverage.out | grep total
 
 mock:
 	@mockery
