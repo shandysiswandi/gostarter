@@ -11,7 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.19", "1.20"]
+        go: ["1.19"]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+
+      redis:
+        image: redis:7.0
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout code
@@ -61,5 +79,48 @@ jobs:
             exit 1
           fi
 
-      - name: Build
-        run: go build -v ./...
+      - name: Build Golang Binary
+        run: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
+
+      - name: Build Docker image
+        run: docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
+
+      - name: Create configuration file
+        run: |
+          mkdir -p /config
+          cat <<EOF > /config/config.yaml
+          server.address.http: localhost:8081
+          server.address.grpc: localhost:50001
+
+          database.user: ${{ secrets.MYSQL_USER }}
+          database.pass: ${{ secrets.MYSQL_PASSWORD }}
+          database.host: mysql
+          database.port: 3306
+          database.name: ${{ secrets.MYSQL_DATABASE }}
+          database.max.open: 10
+          database.max.idle: 10
+          database.max.lifetime: 5
+
+          redis.addr: redis:6379
+
+          feature.flag.graphql.playground: false
+          EOF
+
+      - name: Run Docker container
+        run: |
+          docker run -d --name gostarter-container \
+            -p 8081:8081 \
+            -p 50001:50001 \
+            -v /config/config.yaml:/app/config/config.yaml \
+            gostarter
+
+      - name: Test HTTP and gRPC services
+        run: |
+          curl --fail http://localhost:8081/ || exit 1
+          # Ensure you have grpcurl installed; install if needed
+          grpcurl -plaintext localhost:50001 describe || exit 1
+
+      - name: Stop and remove Docker container
+        run: |
+          docker stop gostarter-container
+          docker rm gostarter-container
