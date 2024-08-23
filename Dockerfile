@@ -41,8 +41,5 @@ COPY --from=builder /app/server /server
 # Expose the HTTP and gRPC ports
 EXPOSE 8081 50001
 
-# Set the working directory
-WORKDIR /config
-
 # Command to run the application
 ENTRYPOINT ["/server"]

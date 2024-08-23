@@ -30,3 +30,15 @@ migration-up:
 
 migration-down:
 	@goose -dir migration mysql "${DB_USR}:${DB_PWD}@tcp(localhost:3306)/gostarter?parseTime=true" down
+
+docker-build:
+	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
+
+docker-run:
+	@docker run --name gostarter-container \
+	-p 8081:8081 -p 50001:50001 \
+	-v ./config/config.docker.yaml:/config/config.yaml \
+	gostarter
+
+docker-rm:
+	@docker rm gostarter-container

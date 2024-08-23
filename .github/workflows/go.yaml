@@ -79,9 +79,6 @@ jobs:
             exit 1
           fi
 
-      - name: Build Golang Binary
-        run: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
-
       - name: Build Docker image
         run: docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
 
@@ -111,7 +108,7 @@ jobs:
           docker run -d --name gostarter-container \
             -p 8081:8081 \
             -p 50001:50001 \
-            -v ${{ github.workspace }}/config/config.yaml:/app/config/config.yaml \
+            -v ${{ github.workspace }}/config/config.yaml:/config/config.yaml \
             gostarter
 
       - name: Install grpcurl
@@ -120,7 +117,7 @@ jobs:
           tar -xzf grpcurl_1.9.1_linux_x86_64.tar.gz
           sudo mv grpcurl /usr/local/bin/
 
-      - name: Cache Linter
+      - name: Cache grpcurl
         uses: actions/cache@v4
         with:
           path: /usr/local/bin/grpcurl
