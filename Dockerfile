@@ -38,9 +38,6 @@ ENV TZ=${TZ}
 # Copy the pre-built binary from the builder stage
 COPY --from=builder /app/server /server
 
-# Copy the configuration file
-COPY --from=builder /app/config/config.yaml /config/config.yaml
-
 # Expose the HTTP and gRPC ports
 EXPOSE 8081 50001
 
