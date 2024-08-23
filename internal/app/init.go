@@ -125,6 +125,10 @@ func (a *App) initHTTPRouter() {
 		}
 	})
 
+	router.GET("/health", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	a.httpRouter = router
 }
 
