@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	"github.com/shandysiswandi/gostarter/pkg/persistence"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 )
 
 type MysqlTodo struct {
@@ -26,8 +26,8 @@ func (mt *MysqlTodo) Create(ctx context.Context, todo entity.Todo) error {
 		return query, []any{todo.ID, todo.Title, todo.Description, todo.Status.String()}, nil
 	}
 
-	err := persistence.Exec(ctx, mt.db, query, true)
-	if errors.Is(err, persistence.ErrZeroRowsAffected) {
+	err := dbops.Exec(ctx, mt.db, query, true)
+	if errors.Is(err, dbops.ErrZeroRowsAffected) {
 		return entity.ErrTodoNotCreated
 	}
 
@@ -41,7 +41,7 @@ func (mt *MysqlTodo) Delete(ctx context.Context, id uint64) error {
 		return query, []any{id}, nil
 	}
 
-	return persistence.Exec(ctx, mt.db, query)
+	return dbops.Exec(ctx, mt.db, query)
 }
 
 func (mt *MysqlTodo) GetByID(ctx context.Context, id uint64) (*entity.Todo, error) {
@@ -51,7 +51,7 @@ func (mt *MysqlTodo) GetByID(ctx context.Context, id uint64) (*entity.Todo, erro
 		return query, []any{id}, nil
 	}
 
-	todo, err := persistence.SQLGet[entity.Todo](ctx, mt.db, query)
+	todo, err := dbops.SQLGet[entity.Todo](ctx, mt.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (mt *MysqlTodo) GetWithFilter(ctx context.Context, _ map[string]string) ([]
 		return "SELECT id, title, description, status FROM todos", nil, nil
 	}
 
-	todos, err := persistence.SQLGets[entity.Todo](ctx, mt.db, query)
+	todos, err := dbops.SQLGets[entity.Todo](ctx, mt.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (mt *MysqlTodo) UpdateStatus(ctx context.Context, id uint64, sts entity.Tod
 		return query, []any{sts.String(), id}, nil
 	}
 
-	return persistence.Exec(ctx, mt.db, query)
+	return dbops.Exec(ctx, mt.db, query)
 }
 
 func (mt *MysqlTodo) Update(ctx context.Context, todo entity.Todo) error {
@@ -89,5 +89,5 @@ func (mt *MysqlTodo) Update(ctx context.Context, todo entity.Todo) error {
 		return query, []any{todo.Title, todo.Description, todo.Status.String(), todo.ID}, nil
 	}
 
-	return persistence.Exec(ctx, mt.db, query)
+	return dbops.Exec(ctx, mt.db, query)
 }

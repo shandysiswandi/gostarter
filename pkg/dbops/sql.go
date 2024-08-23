@@ -1,8 +1,8 @@
-// Package persistence provides abstractions and utility functions for database operations.
+// Package dbops provides abstractions and utility functions for database operations.
 //
 // This package defines interfaces for querying and executing SQL commands,
 // and includes helper functions to simplify common database operations.
-package persistence
+package dbops
 
 import (
 	"context"

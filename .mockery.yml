@@ -2,6 +2,11 @@ quiet: True
 with-expecter: True
 disable-version-string: True
 packages:
+  # dbops: skip, using github.com/DATA-DOG/go-sqlmock instead
+  # task: skip, because i dont know the usecases yet
+  # errs: skip, because errs does not have interfaces
+  # http: skip, using net/http/httptest instead
+
   github.com/shandysiswandi/gostarter/pkg/clock:
     config:
       all: True
@@ -32,8 +37,6 @@ packages:
           inpackage: True
           filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
           dir: "{{ .InterfaceDir }}"
-  # errs: skip, because errs does not have interfaces
-  # http: skip, using net/http/httptest instead
   github.com/shandysiswandi/gostarter/pkg/logger:
     config:
       all: True
@@ -47,8 +50,6 @@ packages:
           inpackage: True
           filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
           dir: "{{ .InterfaceDir }}"
-  # persistence: skip, using github.com/DATA-DOG/go-sqlmock instead
-  # task: skip, because i dont know the usecases yet
   github.com/shandysiswandi/gostarter/pkg/uid:
     config:
       all: True

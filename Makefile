@@ -20,7 +20,7 @@ proto:
 gql:
 	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.48 generate
 
-check: proto mock tidy lint test
+check: proto gql mock tidy lint test run
 
 migration-create:
 	@goose -dir migration create example sql
