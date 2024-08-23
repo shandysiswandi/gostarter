@@ -56,8 +56,8 @@ func TestNewEventEmitter(t *testing.T) {
 			t.Parallel()
 			got := NewEventEmitter(tt.options...)
 			assert.NotNil(t, got)
-			assert.Equal(t, tt.expectedArgsValidation, got.argsValidation(tt.inputArgsValidation))
-			assert.Equal(t, tt.expectedTopicValidation, got.topicValidation(tt.inputTopicValidation))
+			assert.Equal(t, tt.expectedArgsValidation, got.options.ArgumentsValidation(tt.inputArgsValidation))
+			assert.Equal(t, tt.expectedTopicValidation, got.options.TopicValidation(tt.inputTopicValidation))
 		})
 	}
 }
@@ -86,8 +86,10 @@ func TestEventEmitter_Emit(t *testing.T) {
 			expectedError: assert.AnError,
 			mockFn: func(topic string, args ...any) *EventEmitter {
 				return &EventEmitter{
-					topicValidation: func(topic string) error { return assert.AnError },
-					argsValidation:  func(a []any) error { return nil },
+					options: Options{
+						TopicValidation:     func(topic string) error { return assert.AnError },
+						ArgumentsValidation: func(a []any) error { return nil },
+					},
 				}
 			},
 		},
@@ -98,8 +100,10 @@ func TestEventEmitter_Emit(t *testing.T) {
 			expectedError: assert.AnError,
 			mockFn: func(topic string, args ...any) *EventEmitter {
 				return &EventEmitter{
-					argsValidation:  func(args []any) error { return assert.AnError },
-					topicValidation: func(topic string) error { return nil },
+					options: Options{
+						TopicValidation:     func(topic string) error { return nil },
+						ArgumentsValidation: func(args []any) error { return assert.AnError },
+					},
 				}
 			},
 		},
@@ -113,9 +117,11 @@ func TestEventEmitter_Emit(t *testing.T) {
 				mTime.EXPECT().Now().Return(time.Time{})
 
 				return &EventEmitter{
-					argsValidation:  func(args []any) error { return nil },
-					topicValidation: func(topic string) error { return nil },
-					timeProvider:    mTime,
+					options: Options{
+						TopicValidation:     func(topic string) error { return nil },
+						ArgumentsValidation: func(args []any) error { return nil },
+						TimeProvider:        mTime,
+					},
 				}
 			},
 		},
@@ -134,10 +140,12 @@ func TestEventEmitter_Emit(t *testing.T) {
 				listeners["testTopic"] = []chan Event{listenerCh}
 
 				return &EventEmitter{
-					listeners:       listeners,
-					argsValidation:  func(args []any) error { return nil },
-					topicValidation: func(topic string) error { return nil },
-					timeProvider:    mTime,
+					listeners: listeners,
+					options: Options{
+						TopicValidation:     func(topic string) error { return nil },
+						ArgumentsValidation: func(args []any) error { return nil },
+						TimeProvider:        mTime,
+					},
 				}
 			},
 		},
@@ -161,10 +169,12 @@ func TestEventEmitter_Emit(t *testing.T) {
 				}()
 
 				return &EventEmitter{
-					listeners:       listeners,
-					argsValidation:  func(args []any) error { return nil },
-					topicValidation: func(topic string) error { return nil },
-					timeProvider:    mTime,
+					listeners: listeners,
+					options: Options{
+						TopicValidation:     func(topic string) error { return nil },
+						ArgumentsValidation: func(args []any) error { return nil },
+						TimeProvider:        mTime,
+					},
 				}
 			},
 		},
@@ -210,7 +220,7 @@ func TestEventEmitter_AddListener(t *testing.T) {
 			t.Parallel()
 
 			ee := &EventEmitter{
-				bufferSize: tt.bufferSize,
+				options: Options{BufferSize: tt.bufferSize},
 			}
 
 			ch1 := ee.AddListener("topic1")

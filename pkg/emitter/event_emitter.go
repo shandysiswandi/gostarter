@@ -8,44 +8,52 @@ import (
 	"time"
 )
 
+const (
+	// DefaultBufferSize a constant for a default buffer size on channel.
+	DefaultBufferSize = 3
+)
+
 // EventEmitter is a thread-safe event emitter that allows for
 // registering listeners, emitting events, and managing listeners.
 // It supports custom validation for topics and arguments, and
 // allows for configurable buffer sizes for listener channels.
 type EventEmitter struct {
-	mu              sync.RWMutex
-	listeners       map[string][]chan Event
-	timeProvider    TimeProvider
-	topicValidation func(string) error
-	argsValidation  func([]any) error
-	bufferSize      int
+	mu        sync.RWMutex
+	listeners map[string][]chan Event
+	options   Options
 }
 
-// NewEventEmitter creates a new instance of EventEmitter with
-// optional configuration options. The returned EventEmitter
-// is ready to be used for adding listeners and emitting events.
+// NewEventEmitter creates a new EventEmitter with the provided options.
 //
-// Options can include:
-//   - WithTimeProvider: To provide a custom time provider.
-//   - WithTopicValidation: To specify a custom topic validation function.
-//   - WithArgumentsValidation: To specify a custom arguments validation function.
-//   - WithBufferSize: To set a custom buffer size for listener channels.
+// You can customize the behavior of the EventEmitter by passing one
+// or more options. If no options are provided, default values are used.
 //
-// Usage example:
+// Example:
 //
-//	emitter := NewEventEmitter(WithBufferSize(10), WithTimeProvider(myTimeProvider))
+//	emitter := NewEventEmitter(
+//	    WithTimeProvider(myTimeProvider),
+//	    WithTopicValidation(myValidator),
+//	    WithArgumentsValidation(myArgValidator),
+//	    WithBufferSize(10),
+//	)
+//
+// The EventEmitter can then be used to register listeners and emit events.
 func NewEventEmitter(opts ...Option) *EventEmitter {
-	ee := &EventEmitter{
-		listeners:       make(map[string][]chan Event),
-		argsValidation:  func([]any) error { return nil },
-		topicValidation: func(string) error { return nil },
+	options := &Options{
+		TimeProvider:        nil,
+		TopicValidation:     func(string) error { return nil },
+		ArgumentsValidation: func([]any) error { return nil },
+		BufferSize:          0,
 	}
 
 	for _, opt := range opts {
-		opt(ee)
+		opt(options)
 	}
 
-	return ee
+	return &EventEmitter{
+		listeners: make(map[string][]chan Event),
+		options:   *options,
+	}
 }
 
 // Emit sends an event to all listeners registered under the
@@ -62,21 +70,21 @@ func NewEventEmitter(opts ...Option) *EventEmitter {
 //   - error: An error if the event could not be emitted due to
 //     validation failure.
 func (e *EventEmitter) Emit(topic string, args ...any) error {
-	if e.topicValidation == nil || e.argsValidation == nil {
+	if e.options.TopicValidation == nil || e.options.ArgumentsValidation == nil {
 		return nil
 	}
 
-	if err := e.topicValidation(topic); err != nil {
+	if err := e.options.TopicValidation(topic); err != nil {
 		return err
 	}
 
-	if err := e.argsValidation(args); err != nil {
+	if err := e.options.ArgumentsValidation(args); err != nil {
 		return err
 	}
 
 	now := time.Now()
-	if e.timeProvider != nil {
-		now = e.timeProvider.Now()
+	if e.options.TimeProvider != nil {
+		now = e.options.TimeProvider.Now()
 	}
 
 	event := Event{topic: topic, args: args, timestamp: now}
@@ -117,11 +125,11 @@ func (e *EventEmitter) AddListener(topic string) <-chan Event {
 		e.listeners = make(map[string][]chan Event)
 	}
 
-	if e.bufferSize <= 0 {
-		e.bufferSize = 3 // Default buffer size if not set
+	if e.options.BufferSize <= 0 {
+		e.options.BufferSize = DefaultBufferSize
 	}
 
-	ch := make(chan Event, e.bufferSize)
+	ch := make(chan Event, e.options.BufferSize)
 
 	e.mu.Lock()
 	e.listeners[topic] = append(e.listeners[topic], ch)
