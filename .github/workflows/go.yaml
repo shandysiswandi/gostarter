@@ -14,16 +14,16 @@ jobs:
         go: ["1.19"]
 
     services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-          MYSQL_USER: ${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+      # mysql:
+      #   image: mysql:8.0
+      #   env:
+      #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      #     MYSQL_USER: ${{ secrets.MYSQL_USER }}
+      #     MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      #   ports:
+      #     - 3306:3306
+      #   options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
 
       redis:
         image: redis:7.0
@@ -32,6 +32,11 @@ jobs:
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
+      - name: "Mysql Setup"
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ secrets.MYSQL_DATABASE }};' -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
