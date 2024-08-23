@@ -23,6 +23,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	"google.golang.org/grpc"
@@ -171,6 +172,7 @@ func (a *App) initLibraries() {
 	a.codecJSON = codec.NewJSONCodec()
 	a.codecMsgPack = codec.NewMsgpackCodec()
 	a.validator = validation.NewV10Validator()
+	a.logger = logger.NewStdLogger()
 }
 
 // initTasks starts all background tasks or services registered with the application.

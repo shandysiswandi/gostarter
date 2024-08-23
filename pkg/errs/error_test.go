@@ -153,6 +153,33 @@ func TestNewServerFrom(t *testing.T) {
 	}
 }
 
+func TestWrapValidation(t *testing.T) {
+	underlyingErr := errors.New("underlying error")
+	customMsg := "custom validation message"
+	err := WrapValidation(customMsg, underlyingErr)
+
+	// Check if the returned error is non-nil and of the correct type
+	e, ok := err.(*Error)
+	if !ok {
+		t.Errorf("WrapValidation() returned %T, want *Error", err)
+		return
+	}
+
+	// Check if the wrapped error, custom message, error type, and code are correct
+	if e.err != underlyingErr {
+		t.Errorf("WrapValidation().err = %v, want %v", e.err, underlyingErr)
+	}
+	if e.msg != customMsg {
+		t.Errorf("WrapValidation().msg = %v, want %v", e.msg, customMsg)
+	}
+	if e.errType != TypeValidation {
+		t.Errorf("WrapValidation().errType = %v, want TypeValidation", e.errType)
+	}
+	if e.code != CodeInvalidInput {
+		t.Errorf("WrapValidation().code = %v, want CodeInvalidInput", e.code)
+	}
+}
+
 func TestWrap(t *testing.T) {
 	t.Run("generic_error", func(t *testing.T) {
 		underlyingErr := errors.New("internal system")

@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	uc "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -24,17 +25,19 @@ func NewUpdateStatus(store UpdateStatusStore, validator validation.Validator) *U
 	}
 }
 
-func (s *UpdateStatus) Execute(ctx context.Context, in usecase.UpdateStatusInput) (
-	*usecase.UpdateStatusOutput, error,
-) {
+func (s *UpdateStatus) Execute(ctx context.Context, in uc.UpdateStatusInput) (*uc.UpdateStatusOutput, error) {
+	if err := s.validator.Validate(in); err != nil {
+		return nil, errs.WrapValidation("validation input fail", err)
+	}
+
 	sts := entity.ParseTodoStatus(in.Status)
 
 	err := s.store.UpdateStatus(ctx, in.ID, sts)
 	if err != nil {
-		return nil, err
+		return nil, errs.NewServerFrom(err)
 	}
 
-	return &usecase.UpdateStatusOutput{
+	return &uc.UpdateStatusOutput{
 		ID:     in.ID,
 		Status: sts,
 	}, nil

@@ -42,7 +42,7 @@ func (q *query) GetWithFilter(ctx context.Context, in *ql.FilterInput) ([]ql.Tod
 func (q *query) GetByID(ctx context.Context, id string) (*ql.Todo, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := q.GetByIDUC.Execute(ctx, usecase.GetByIDInput{ID: idu64})

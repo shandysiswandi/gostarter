@@ -9,7 +9,6 @@ test:
 
 mock:
 	@mockery
-	@rm pkg/pkgmock/mock_option.go # remove unused mock from messaging/*
 
 tidy:
 	@go mod tidy

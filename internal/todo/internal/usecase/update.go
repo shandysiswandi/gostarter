@@ -11,10 +11,10 @@ type Update interface {
 }
 
 type UpdateInput struct {
-	ID          uint64
-	Title       string
-	Description string
-	Status      string
+	ID          uint64 `validate:"gt=0"`
+	Title       string `validate:"min=5"`
+	Description string `validate:"min=15"`
+	Status      string `validate:"required"`
 }
 
 type UpdateOutput struct {

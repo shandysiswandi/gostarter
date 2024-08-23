@@ -197,10 +197,21 @@ func TestViperConfig_GetBinary(t *testing.T) {
 		{
 			name: "Success",
 			args: args{key: "key"},
-			want: []byte("value"),
+			want: []byte("foo"),
 			mockFn: func(a args) *ViperConfig {
 				v := viper.New()
-				v.Set("key", []byte("value"))
+				v.Set("key", []byte("Zm9v"))
+
+				return &ViperConfig{v: v}
+			},
+		},
+		{
+			name: "Error",
+			args: args{key: "key"},
+			want: nil,
+			mockFn: func(a args) *ViperConfig {
+				v := viper.New()
+				v.Set("key", "==")
 
 				return &ViperConfig{v: v}
 			},
@@ -233,7 +244,7 @@ func TestViperConfig_GetArray(t *testing.T) {
 			want: []string{"one", "two"},
 			mockFn: func(a args) *ViperConfig {
 				v := viper.New()
-				v.Set("key", []string{"one", "two"})
+				v.Set("key", "one,two")
 
 				return &ViperConfig{v: v}
 			},
@@ -263,10 +274,10 @@ func TestViperConfig_GetMap(t *testing.T) {
 		{
 			name: "Success",
 			args: args{key: "key"},
-			want: map[string]string{"key": "value"},
+			want: map[string]string{"key": "value", "key1": "value1"},
 			mockFn: func(a args) *ViperConfig {
 				v := viper.New()
-				v.Set("key", map[string]string{"key": "value"})
+				v.Set("key", "key:value,key1:value1")
 
 				return &ViperConfig{v: v}
 			},

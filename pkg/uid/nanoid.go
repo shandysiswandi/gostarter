@@ -2,8 +2,12 @@
 package uid
 
 import (
+	"errors"
+
 	nanoid "github.com/matoous/go-nanoid/v2"
 )
+
+var ErrInvalidLength = errors.New("uid: invalid length, must be between 1 and 255")
 
 // NanoIDString is an implementation of UIDString that uses go-nanoid for generating unique string-based UIDs.
 //

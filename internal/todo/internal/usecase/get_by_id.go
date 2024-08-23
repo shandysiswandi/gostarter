@@ -11,7 +11,7 @@ type GetByID interface {
 }
 
 type GetByIDInput struct {
-	ID uint64 `validate:"required,gte=0"`
+	ID uint64 `validate:"gt=0"`
 }
 
 type GetByIDOutput struct {

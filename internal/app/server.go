@@ -17,6 +17,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"google.golang.org/grpc"
 )
 
@@ -32,7 +33,7 @@ func (a *App) Start() <-chan struct{} {
 	terminateChan := make(chan struct{})
 
 	go func() {
-		log.Println("http server listen on", a.httpServer.Addr)
+		a.logger.Info(context.TODO(), "http server listening", logger.String("address", a.httpServer.Addr))
 		err := a.httpServer.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalln("http server:", err)
@@ -46,7 +47,7 @@ func (a *App) Start() <-chan struct{} {
 			log.Fatalln("open tcp listener:", err)
 		}
 
-		log.Println("grpc server listen on", grpcPort)
+		a.logger.Info(context.TODO(), "grpc server listening", logger.String("address", grpcPort))
 		if err := a.grpcServer.Serve(listener); err != nil {
 			if !errors.Is(err, grpc.ErrServerStopped) {
 				log.Fatalln("grpc server, err:", err)

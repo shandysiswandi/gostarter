@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	uc "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -24,9 +25,7 @@ func NewGetWithFilter(store GetWithFilterStore, validator validation.Validator) 
 	}
 }
 
-func (s *GetWithFilter) Execute(ctx context.Context, in usecase.GetWithFilterInput) (
-	*usecase.GetWithFilterOutput, error,
-) {
+func (s *GetWithFilter) Execute(ctx context.Context, in uc.GetWithFilterInput) (*uc.GetWithFilterOutput, error) {
 	filter := map[string]string{
 		"id":          in.ID,
 		"title":       in.Title,
@@ -36,10 +35,10 @@ func (s *GetWithFilter) Execute(ctx context.Context, in usecase.GetWithFilterInp
 
 	todos, err := s.store.GetWithFilter(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, errs.NewServerFrom(err)
 	}
 
-	return &usecase.GetWithFilterOutput{
+	return &uc.GetWithFilterOutput{
 		Todos: todos,
 	}, nil
 }

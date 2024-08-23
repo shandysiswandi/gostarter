@@ -8,17 +8,68 @@
   <body>
     <h1>Title</h1>
 
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- SSE Client -->
+    <section>
+      <h1>SSE Client</h1>
+      <hr />
+      <ul id="sse-data"></ul>
+    </section>
+
     <script>
-      const URL = "http://localhost:8081";
+      const URL = "http://localhost:8000";
+      const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+      });
+    </script>
+    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
       axios
         .get(`${URL}/todos`)
         .then(function (response) {
-          console.log(response);
+          console.log("Todos response:", response.data);
         })
         .catch(function (error) {
-          console.log(error);
+          console.error("Error fetching todos:", error);
         });
+    </script> -->
+    <script>
+      const evtSource = new EventSource(`${URL}/events?room=${params.room}`);
+      const eventList = document.getElementById("sse-data");
+
+      evtSource.onopen = (e) => {
+        console.log("The connection has been established.");
+      };
+
+      evtSource.onclose = (e) => {
+        console.log("The connection has been closed.");
+      };
+
+      evtSource.onmessage = function (event) {
+        const newElement = document.createElement("li");
+
+        let end = event.data.includes("Stream has ended");
+        if (end) evtSource.close();
+
+        try {
+          const data = JSON.parse(event.data);
+          newElement.textContent = `Event: ${data.name}, Value: ${data.value}`;
+        } catch (err) {
+          newElement.textContent = `Error parsing data: ${event.data}`;
+        }
+
+        eventList.appendChild(newElement);
+      };
+
+      evtSource.onerror = (error) => {
+        console.error("onerror:", error);
+        evtSource.close();
+      };
+
+      window.addEventListener("beforeunload", () => {
+        if (evtSource) {
+          evtSource.close();
+        }
+      });
     </script>
   </body>
 </html>

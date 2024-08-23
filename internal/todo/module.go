@@ -15,6 +15,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
@@ -29,13 +30,14 @@ type Dependency struct {
 	Database       *sql.DB
 	RedisDB        *redis.Client
 	Config         config.Config
-	UIDNumber      uid.Number
+	UIDNumber      uid.NumberID
 	Clock          clock.Clocker
 	CodecJSON      codec.Codec
 	Validator      validation.Validator
 	ProtoValidator validation.Validator
 	Router         *httprouter.Router
 	GRPCServer     *grpc.Server
+	Logger         logger.Logger
 }
 
 func New(dep Dependency) (*Expose, error) {
@@ -59,6 +61,11 @@ func New(dep Dependency) (*Expose, error) {
 		UpdateUC:        updateUC,
 		UpdateStatusUC:  updateStatusUC,
 	})
+
+	inboundhttp.RegisterSSEEndpoint(dep.Router, inboundhttp.NewSSE(
+		dep.CodecJSON,
+		dep.Logger,
+	))
 
 	// register endpoint GRPC
 	pb.RegisterTodoServiceServer(dep.GRPCServer, inboundgrpc.NewEndpoint(

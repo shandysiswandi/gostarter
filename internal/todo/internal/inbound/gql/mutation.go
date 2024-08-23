@@ -28,7 +28,7 @@ func (m *mutation) Create(ctx context.Context, in ql.CreateInput) (*ql.Todo, err
 func (m *mutation) Delete(ctx context.Context, id string) (string, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return "", err
+		return "", errfailedParseToUint
 	}
 
 	resp, err := m.DeleteUC.Execute(ctx, usecase.DeleteInput{ID: idu64})
@@ -42,7 +42,7 @@ func (m *mutation) Delete(ctx context.Context, id string) (string, error) {
 func (m *mutation) UpdateStatus(ctx context.Context, id string, status ql.Status) (*ql.UpdateStatusResponse, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := m.UpdateStatusUC.Execute(ctx, usecase.UpdateStatusInput{ID: idu64, Status: status.String()})
@@ -56,7 +56,7 @@ func (m *mutation) UpdateStatus(ctx context.Context, id string, status ql.Status
 func (m *mutation) Update(ctx context.Context, id string, in ql.UpdateInput) (*ql.UpdateResponse, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := m.UpdateUC.Execute(ctx, usecase.UpdateInput{

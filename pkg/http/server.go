@@ -76,7 +76,7 @@ func (s *Serve) Endpoint(h ServeHandlerFunc, mws ...Middleware) *Endpoint {
 
 // WithMiddlewares is a helper function that creates a ServeOption to add middleware to the Serve instance.
 // It appends the provided middleware to the Serve's global middleware stack.
-func WithMiddlewares(mws ...Middleware) ServeOption { //nolint:ireturn // ignore for now
+func WithMiddlewares(mws ...Middleware) ServeOption {
 	return ServeOptionFunc(func(s *Serve) {
 		s.mws = append(s.mws, mws...)
 	})

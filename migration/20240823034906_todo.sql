@@ -1,0 +1,10 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS todos (
+    ID BIGINT UNSIGNED PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    Status ENUM('UNKNOWN', 'INITIATE', 'IN_PROGRESS','DROP','DONE') NOT NULL
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS todos;

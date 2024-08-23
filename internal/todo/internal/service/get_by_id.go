@@ -5,6 +5,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -25,13 +26,17 @@ func NewGetByID(store GetByIDStore, validator validation.Validator) *GetByID {
 }
 
 func (s *GetByID) Execute(ctx context.Context, in usecase.GetByIDInput) (*usecase.GetByIDOutput, error) {
+	if err := s.validator.Validate(in); err != nil {
+		return nil, errs.WrapValidation("validation input fail", err)
+	}
+
 	todo, err := s.store.GetByID(ctx, in.ID)
 	if err != nil {
-		return nil, err
+		return nil, errs.NewServerFrom(err)
 	}
 
 	if todo == nil {
-		return nil, entity.ErrTodoNotFound
+		return nil, errs.NewBusiness("todo not found")
 	}
 
 	return &usecase.GetByIDOutput{

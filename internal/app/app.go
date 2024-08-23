@@ -17,6 +17,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
@@ -29,13 +30,14 @@ import (
 // these components.
 type App struct {
 	config       config.Config
-	uidnumber    uid.Number
-	uuid         uid.String
+	uidnumber    uid.NumberID
+	uuid         uid.StringID
 	clock        clock.Clocker
 	codecJSON    codec.Codec
 	codecMsgPack codec.Codec
 	validator    validation.Validator
 	pvalidator   validation.Validator
+	logger       logger.Logger
 	database     *sql.DB
 	redisdb      *redis.Client
 	httpServer   *http.Server

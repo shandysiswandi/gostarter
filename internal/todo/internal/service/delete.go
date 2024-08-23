@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -24,9 +25,13 @@ func NewDelete(store DeleteStore, validator validation.Validator) *Delete {
 }
 
 func (s *Delete) Execute(ctx context.Context, in usecase.DeleteInput) (*usecase.DeleteOutput, error) {
+	if err := s.validator.Validate(in); err != nil {
+		return nil, errs.WrapValidation("validation input fail", err)
+	}
+
 	err := s.store.Delete(ctx, in.ID)
 	if err != nil {
-		return nil, err
+		return nil, errs.NewServerFrom(err)
 	}
 
 	return &usecase.DeleteOutput{

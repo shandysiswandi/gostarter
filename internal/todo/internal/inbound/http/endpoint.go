@@ -8,8 +8,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
 )
+
+var errfailedParseToUint = errs.NewValidation("failed parse id to uint")
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 	serve := pkghttp.NewServe(
@@ -53,7 +56,7 @@ func (e *Endpoint) Delete(ctx context.Context, _ *http.Request) (any, error) {
 
 	id, err := strconv.ParseUint(idstr, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := e.DeleteUC.Execute(ctx, usecase.DeleteInput{ID: id})
@@ -70,7 +73,7 @@ func (e *Endpoint) GetByID(ctx context.Context, _ *http.Request) (any, error) {
 
 	id, err := strconv.ParseUint(idstr, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := e.GetByIDUC.Execute(ctx, usecase.GetByIDInput{ID: id})
@@ -128,7 +131,7 @@ func (e *Endpoint) UpdateStatus(ctx context.Context, r *http.Request) (any, erro
 
 	id, err := strconv.ParseUint(idstr, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := e.UpdateStatusUC.Execute(ctx, usecase.UpdateStatusInput{ID: id, Status: req.Status})
@@ -150,7 +153,7 @@ func (e *Endpoint) Update(ctx context.Context, r *http.Request) (any, error) {
 
 	id, err := strconv.ParseUint(idstr, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errfailedParseToUint
 	}
 
 	resp, err := e.UpdateUC.Execute(ctx, usecase.UpdateInput{

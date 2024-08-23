@@ -1,7 +1,8 @@
-//nolint:ireturn // ignore for some reason
 package gql
 
 import (
+	"context"
+	"log"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -10,11 +11,19 @@ import (
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func RegisterGQLEndpoint(router *httprouter.Router, cfg config.Config, h *Endpoint) {
 	exec := ql.NewExecutableSchema(ql.Config{Resolvers: h})
 	gqlServer := handler.NewDefaultServer(exec)
+	gqlServer.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
+		log.Printf("%T \n", err)
+		log.Println("CTX", ctx)
+		log.Println("ERR", err)
+
+		return gqlerror.Errorf("internal server error")
+	})
 
 	router.Handler(http.MethodPost, "/graphql", gqlServer)
 

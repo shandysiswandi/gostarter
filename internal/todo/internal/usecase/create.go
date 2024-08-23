@@ -7,8 +7,8 @@ type Create interface {
 }
 
 type CreateInput struct {
-	Title       string
-	Description string
+	Title       string `validate:"min=5"`
+	Description string `validate:"min=15"`
 }
 
 type CreateOutput struct {

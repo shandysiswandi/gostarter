@@ -7,7 +7,7 @@ type Delete interface {
 }
 
 type DeleteInput struct {
-	ID uint64
+	ID uint64 `validate:"gt=0"`
 }
 
 type DeleteOutput struct {

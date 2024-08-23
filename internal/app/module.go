@@ -25,6 +25,7 @@ func (a *App) initModules() {
 		ProtoValidator: a.pvalidator,
 		Router:         a.httpRouter,
 		GRPCServer:     a.grpcServer,
+		Logger:         a.logger,
 	})
 	if err != nil {
 		log.Fatalln("failed to init module todo", err)

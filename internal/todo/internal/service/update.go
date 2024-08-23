@@ -5,6 +5,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/errs"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -25,7 +26,12 @@ func NewUpdate(store UpdateStore, validator validation.Validator) *Update {
 }
 
 func (s *Update) Execute(ctx context.Context, in usecase.UpdateInput) (*usecase.UpdateOutput, error) {
+	if err := s.validator.Validate(in); err != nil {
+		return nil, errs.WrapValidation("validation input fail", err)
+	}
+
 	sts := entity.ParseTodoStatus(in.Status)
+
 	err := s.store.Update(ctx, entity.Todo{
 		ID:          in.ID,
 		Title:       in.Title,
@@ -33,7 +39,7 @@ func (s *Update) Execute(ctx context.Context, in usecase.UpdateInput) (*usecase.
 		Status:      sts,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.NewServerFrom(err)
 	}
 
 	return &usecase.UpdateOutput{

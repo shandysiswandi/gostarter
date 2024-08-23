@@ -150,8 +150,6 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 // handler: The function to handle incoming messages.
 //
 // Returns a SubscriptionHandler to manage the subscription and an error if the subscription could not be created.
-//
-//nolint:ireturn // ignore this linter in this file
 func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, handler messaging.SubscriberHandlerFunc) (
 	messaging.SubscriptionHandler, error,
 ) {

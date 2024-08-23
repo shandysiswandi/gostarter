@@ -152,6 +152,16 @@ func NewServerFrom(err error) error {
 	}
 }
 
+// WrapValidation wraps an existing error with a custom validation message.
+func WrapValidation(msg string, err error) error {
+	return &Error{
+		err:     err,
+		msg:     msg,
+		errType: TypeValidation,
+		code:    CodeInvalidInput,
+	}
+}
+
 // Wrap adds context to an existing error, preserving its type and code.
 func Wrap(err error, msg string) error {
 	var e *Error
