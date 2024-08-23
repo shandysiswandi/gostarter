@@ -86,8 +86,8 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/config
           cat <<EOF > ${{ github.workspace }}/config/config.yaml
-          server.address.http: localhost:8081
-          server.address.grpc: localhost:50001
+          server.address.http: 0.0.0.0:8081
+          server.address.grpc: 0.0.0.0:50001
 
           database.user: ${{ secrets.MYSQL_USER }}
           database.pass: ${{ secrets.MYSQL_PASSWORD }}
@@ -105,7 +105,7 @@ jobs:
 
       - name: Run Docker container
         run: |
-          docker run -d --name gostarter-container \
+          docker run --name gostarter-container \
             -p 8081:8081 \
             -p 50001:50001 \
             -v ${{ github.workspace }}/config/config.yaml:/config/config.yaml \
