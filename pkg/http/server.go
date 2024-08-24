@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/shandysiswandi/gostarter/pkg/errs"
@@ -132,10 +133,11 @@ func (e *Endpoint) errorEncoder(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(e.errCode(err))
 
-	//nolint:errcheck,errchkjson // ignoring error as we're encoding JSON
-	_ = json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"error": err.Error(),
-	})
+	}); err != nil {
+		log.Println("failed to encode json error response")
+	}
 }
 
 // responseEncoder encodes the response as a JSON object. It sets the HTTP status code

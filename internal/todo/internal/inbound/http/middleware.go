@@ -22,10 +22,11 @@ func recovery(h http.Handler) http.Handler {
 				}
 
 				debug.PrintStack()
-				//nolint:errcheck // never error, maybe
-				_ = json.NewEncoder(w).Encode(map[string]string{
+				if err := json.NewEncoder(w).Encode(map[string]string{
 					"error": http.StatusText(http.StatusInternalServerError),
-				})
+				}); err != nil {
+					log.Println("failed to encode json error response")
+				}
 			}
 		}()
 
