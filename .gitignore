@@ -28,4 +28,5 @@ go.work.sum
 .env
 config/*
 !config/config.example.yaml
+!config/config.docker.compose.yaml
 *.local
