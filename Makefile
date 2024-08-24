@@ -26,9 +26,11 @@ migration-create:
 	@goose -dir migration create example sql
 
 migration-up:
+	@goose -dir migration fix
 	@goose -dir migration mysql "${DB_USR}:${DB_PWD}@tcp(localhost:3306)/gostarter?parseTime=true" up
 
 migration-down:
+	@goose -dir migration fix
 	@goose -dir migration mysql "${DB_USR}:${DB_PWD}@tcp(localhost:3306)/gostarter?parseTime=true" down
 
 docker-build:
