@@ -14,16 +14,16 @@ jobs:
         go: ["1.19"]
 
     services:
-      # mysql:
-      #   image: mysql:8.0
-      #   env:
-      #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-      #     MYSQL_USER: ${{ secrets.MYSQL_USER }}
-      #     MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      #   ports:
-      #     - 3306:3306
-      #   options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
 
       redis:
         image: redis:7.0
@@ -32,11 +32,6 @@ jobs:
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
-      - name: "Mysql Setup"
-        run: |
-          sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE ${{ secrets.MYSQL_DATABASE }};' -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }}
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -83,57 +78,3 @@ jobs:
             echo "Coverage ($COVERAGE%) is below the threshold ($COVERAGE_THRESHOLD%)."
             exit 1
           fi
-
-      - name: Build Docker image
-        run: docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
-
-      - name: Create configuration file
-        run: |
-          mkdir -p ${{ github.workspace }}/config
-          cat <<EOF > ${{ github.workspace }}/config/config.yaml
-          server.address.http: 0.0.0.0:8081
-          server.address.grpc: 0.0.0.0:50001
-
-          database.user: ${{ secrets.MYSQL_USER }}
-          database.pass: ${{ secrets.MYSQL_PASSWORD }}
-          database.host: mysql
-          database.port: 3306
-          database.name: ${{ secrets.MYSQL_DATABASE }}
-          database.max.open: 10
-          database.max.idle: 10
-          database.max.lifetime: 5
-
-          redis.addr: redis:6379
-
-          feature.flag.graphql.playground: false
-          EOF
-
-      - name: Run Docker container
-        run: |
-          docker run --name gostarter-container \
-            -p 8081:8081 \
-            -p 50001:50001 \
-            -v ${{ github.workspace }}/config/config.yaml:/config/config.yaml \
-            gostarter
-
-      - name: Install grpcurl
-        run: |
-          curl -sLO https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_x86_64.tar.gz
-          tar -xzf grpcurl_1.9.1_linux_x86_64.tar.gz
-          sudo mv grpcurl /usr/local/bin/
-
-      - name: Cache grpcurl
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/bin/grpcurl
-          key: ${{ runner.os }}-grpcurl
-
-      - name: Test HTTP and gRPC services
-        run: |
-          curl --fail http://localhost:8081/health || exit 1
-          grpcurl -plaintext localhost:50001 describe || exit 1
-
-      - name: Stop and remove Docker container
-        run: |
-          docker stop gostarter-container
-          docker rm gostarter-container

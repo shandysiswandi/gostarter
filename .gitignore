@@ -28,3 +28,4 @@ go.work.sum
 .env
 config/*
 !config/config.example.yaml
+*.local
