@@ -21,14 +21,15 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
+	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 )
 
 // RegisterSSEEndpoint registers the SSE endpoints for handling event streams
 // and triggering events using the provided httprouter.Router.
 func RegisterSSEEndpoint(router *httprouter.Router, h *SSE) {
-	router.Handler(http.MethodGet, "/events", recovery(http.HandlerFunc(h.HandleEvent)))
-	router.Handler(http.MethodGet, "/triger-event", recovery(http.HandlerFunc(h.TrigerEvent)))
+	router.Handler(http.MethodGet, "/events", pkghttp.Recovery(http.HandlerFunc(h.HandleEvent)))
+	router.Handler(http.MethodGet, "/triger-event", pkghttp.Recovery(http.HandlerFunc(h.TrigerEvent)))
 }
 
 // Event represents a simple event with a name and value to be sent to clients.

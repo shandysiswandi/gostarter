@@ -16,7 +16,7 @@ var errfailedParseToUint = errs.NewValidation("failed parse id to uint")
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 	serve := pkghttp.NewServe(
-		pkghttp.WithMiddlewares(recovery),
+		pkghttp.WithMiddlewares(pkghttp.Recovery),
 	)
 
 	router.Handler(http.MethodGet, "/todos/:id", serve.Endpoint(h.GetByID))

@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 )
 
-func recovery(h http.Handler) http.Handler {
+func Recovery(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
