@@ -35,6 +35,7 @@ import (
 // and file location in log messages. This method is typically called during the initialization
 // phase of the application to ensure consistent logging behavior.
 func (a *App) initSTDLog() {
+	//nolint:errcheck,dupword // no error happened here, it's just banner
 	log.New(os.Stderr, "", log.Lmsgprefix).Output(2, `                        
         GGGGGGGGGGGGG    OOOOOOOOO     
      GGG::::::::::::G  OO:::::::::OO   
