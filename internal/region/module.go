@@ -14,37 +14,6 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
-/*
-- /regions/search
-- /regions/search?ids=&by=
-- /regions/search?ids=
-- /regions/search?by=
-# These paths will return a 200 status with an empty list.
-
-- /regions/search?by=provinces
-- /regions/search?by=cities
-- /regions/search?by=districts
-- /regions/search?by=villages
-# These paths will return a 200 status with all records from the specified table.
-
-- /regions/search?ids=1
-- /regions/search?ids=1,2
-- /regions/search?ids=1,2,......n
-# These paths will return a 200 status with all records corresponding to the IDs,
-searching across all tables from provinces to villages.
-
-- /regions/search?ids=1,2&by=provinces
-- /regions/search?ids=1,2&by=cities
-- /regions/search?ids=1,2&by=districts
-- /regions/search?ids=1,2&by=villages
-# These paths will return a 200 status with records based on the IDs, searching within
-the table specified by the by parameter.
-
-# If the by parameter is not one of provinces, cities, districts, or villages,
-the response will be a 400 status.
-# If the ids parameter contains non-numeric values, the response will be a 400 status.
-*/
-
 type Expose struct{}
 
 type Dependency struct {
