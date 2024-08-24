@@ -18,5 +18,6 @@ func FromListEntityRegion(list []entity.Region) []Region {
 
 // SearchResponse is ..
 type SearchResponse struct {
+	Type    string   `json:"type"`
 	Regions []Region `json:"regions"`
 }

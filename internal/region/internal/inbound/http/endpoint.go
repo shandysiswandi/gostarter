@@ -31,5 +31,5 @@ func (e *Endpoint) Search(ctx context.Context, r *http.Request) (any, error) {
 		return nil, err
 	}
 
-	return SearchResponse{Regions: FromListEntityRegion(resp.Regions)}, nil
+	return SearchResponse{Type: by, Regions: FromListEntityRegion(resp.Regions)}, nil
 }

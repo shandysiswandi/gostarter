@@ -31,7 +31,8 @@ func NewSearch(validate validation.Validator, store SearchStore) *Search {
 }
 
 func (s *Search) Execute(ctx context.Context, in usecase.SearchInput) (*usecase.SearchOutput, error) {
-	in.By = strings.ToLower(in.By)
+	in.By = strings.TrimSpace(strings.ToLower(in.By))
+	in.ParentID = strings.TrimSpace(in.ParentID)
 	if err := s.validate.Validate(in); err != nil {
 		return nil, errs.WrapValidation("validation input fail", err)
 	}
@@ -60,7 +61,8 @@ func (s *Search) Execute(ctx context.Context, in usecase.SearchInput) (*usecase.
 	}
 }
 
-func (s *Search) parseIDs(ids string) (result []string) {
+func (s *Search) parseIDs(ids string) []string {
+	result := make([]string, 0)
 	idList := strings.Split(ids, ",")
 	for _, id := range idList {
 		if _, err := strconv.Atoi(id); err == nil {
