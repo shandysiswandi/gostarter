@@ -10,6 +10,7 @@ package app
 import (
 	"log"
 
+	"github.com/shandysiswandi/gostarter/internal/region"
 	"github.com/shandysiswandi/gostarter/internal/todo"
 )
 
@@ -29,6 +30,19 @@ func (a *App) initModules() {
 	})
 	if err != nil {
 		log.Fatalln("failed to init module todo", err)
+	}
+
+	_, err = region.New(region.Dependency{
+		Database:  a.database,
+		RedisDB:   a.redisdb,
+		Config:    a.config,
+		CodecJSON: a.codecJSON,
+		Validator: a.validator,
+		Router:    a.httpRouter,
+		Logger:    a.logger,
+	})
+	if err != nil {
+		log.Fatalln("failed to init module region", err)
 	}
 
 	a.runables = append(a.runables, expTodo.Tasks...)
