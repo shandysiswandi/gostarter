@@ -20,13 +20,13 @@ func NewMysqlRegion(db *sql.DB) *MysqlRegion {
 
 func (m *MysqlRegion) Provinces(ctx context.Context, ids ...string) ([]entity.Province, error) {
 	query := func() (string, []any, error) {
-		ops := dbops.New().Select("id,name").From("provinces")
+		ops := dbops.New().Select("id,name").From("provinces").Limit(10)
 		if len(ids) > 0 {
 			ops.WhereIn("id", ids...)
 		}
-		q, args := ops.ToSQL()
+		q, args, err := ops.ToSQL()
 
-		return q, args, nil
+		return q, args, err
 	}
 
 	return dbops.SQLGets[entity.Province](ctx, m.db, query)
@@ -34,7 +34,7 @@ func (m *MysqlRegion) Provinces(ctx context.Context, ids ...string) ([]entity.Pr
 
 func (m *MysqlRegion) Cities(ctx context.Context, pID string, ids ...string) ([]entity.City, error) {
 	query := func() (string, []any, error) {
-		ops := dbops.New().Select("id,province_id,name").From("cities")
+		ops := dbops.New().Select("id,province_id,name").From("cities").Limit(10)
 		if len(ids) > 0 {
 			ops.WhereIn("id", ids...)
 		}
@@ -42,9 +42,9 @@ func (m *MysqlRegion) Cities(ctx context.Context, pID string, ids ...string) ([]
 		if pID != "" {
 			ops.Where("province_id", pID)
 		}
-		q, args := ops.ToSQL()
+		q, args, err := ops.ToSQL()
 
-		return q, args, nil
+		return q, args, err
 	}
 
 	return dbops.SQLGets[entity.City](ctx, m.db, query)
@@ -52,7 +52,7 @@ func (m *MysqlRegion) Cities(ctx context.Context, pID string, ids ...string) ([]
 
 func (m *MysqlRegion) Districts(ctx context.Context, pID string, ids ...string) ([]entity.District, error) {
 	query := func() (string, []any, error) {
-		ops := dbops.New().Select("id,city_id,name").From("districts")
+		ops := dbops.New().Select("id,city_id,name").From("districts").Limit(10)
 		if len(ids) > 0 {
 			ops.WhereIn("id", ids...)
 		}
@@ -60,9 +60,9 @@ func (m *MysqlRegion) Districts(ctx context.Context, pID string, ids ...string) 
 		if pID != "" {
 			ops.Where("city_id", pID)
 		}
-		q, args := ops.ToSQL()
+		q, args, err := ops.ToSQL()
 
-		return q, args, nil
+		return q, args, err
 	}
 
 	return dbops.SQLGets[entity.District](ctx, m.db, query)
@@ -70,7 +70,7 @@ func (m *MysqlRegion) Districts(ctx context.Context, pID string, ids ...string) 
 
 func (m *MysqlRegion) Villages(ctx context.Context, pID string, ids ...string) ([]entity.Village, error) {
 	query := func() (string, []any, error) {
-		ops := dbops.New().Select("id,district_id,name").From("villages")
+		ops := dbops.New().Select("id,district_id,name").From("villages").Limit(10)
 		if len(ids) > 0 {
 			ops.WhereIn("id", ids...)
 		}
@@ -78,9 +78,9 @@ func (m *MysqlRegion) Villages(ctx context.Context, pID string, ids ...string) (
 		if pID != "" {
 			ops.Where("district_id", pID)
 		}
-		q, args := ops.ToSQL()
+		q, args, err := ops.ToSQL()
 
-		return q, args, nil
+		return q, args, err
 	}
 
 	return dbops.SQLGets[entity.Village](ctx, m.db, query)
