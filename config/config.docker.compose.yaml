@@ -1,6 +1,7 @@
 server.address.http: :8081
 server.address.grpc: :50001
 
+database.driver: mysql
 database.user: developer
 database.pass: secret_password
 database.host: mysql

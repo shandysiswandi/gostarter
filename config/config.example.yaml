@@ -1,6 +1,7 @@
 server.address.http: localhost:8080
 server.address.grpc: localhost:50000
 
+database.driver: mysql
 database.user:
 database.pass:
 database.host: localhost

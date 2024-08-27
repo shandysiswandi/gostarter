@@ -70,14 +70,10 @@ func (a *App) initConfig() {
 	a.config = cfg
 }
 
-// initDatabase initializes the application's database connection using settings from the
-// configuration. It sets up connection pooling parameters and tests the connection by pinging
-// the database. If any step fails, the application will log a fatal error and terminate.
-func (a *App) initDatabase() {
-	maxOpen := a.config.GetInt(`database.max.open`)
-	maxIdle := a.config.GetInt(`database.max.idle`)
-	maxLifetime := a.config.GetInt(`database.max.lifetime`)
-	maxIdletime := a.config.GetInt(`database.max.idletime`)
+// dsnMySQL constructs a Data Source Name (DSN) for connecting to a MySQL database
+// using the application's configuration. It includes connection options such as
+// time zone and parseTime settings.
+func (a *App) dsnMySQL() string {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		a.config.GetString(`database.user`),
 		a.config.GetString(`database.pass`),
@@ -90,7 +86,43 @@ func (a *App) initDatabase() {
 	val.Add("loc", "Asia/Jakarta")
 	val.Encode()
 
-	database, err := sql.Open("mysql", fmt.Sprintf("%s?%s", dsn, val.Encode()))
+	return fmt.Sprintf("%s?%s", dsn, val.Encode())
+}
+
+// dsnPostgreSQL constructs a Data Source Name (DSN) for connecting to a PostgreSQL database
+// using the application's configuration. It includes connection options such as SSL mode settings.
+func (a *App) dsnPostgreSQL() string {
+	dsn := fmt.Sprintf("%s:%s@%s:%s/%s",
+		a.config.GetString(`database.user`),
+		a.config.GetString(`database.pass`),
+		a.config.GetString(`database.host`),
+		a.config.GetString(`database.port`),
+		a.config.GetString(`database.name`),
+	)
+	val := url.Values{}
+	val.Add("sslmode", "disable")
+	val.Encode()
+
+	return fmt.Sprintf("postgres://%s?%s", dsn, val.Encode())
+}
+
+// initDatabase initializes the application's database connection using settings from the
+// configuration. It sets up connection pooling parameters and tests the connection by pinging
+// the database. If any step fails, the application will log a fatal error and terminate.
+func (a *App) initDatabase() {
+	maxOpen := a.config.GetInt(`database.max.open`)
+	maxIdle := a.config.GetInt(`database.max.idle`)
+	maxLifetime := a.config.GetInt(`database.max.lifetime`)
+	maxIdletime := a.config.GetInt(`database.max.idletime`)
+
+	dsn := a.dsnMySQL()
+	driver := "mysql"
+	if a.config.GetString(`database.driver`) == "postgres" {
+		dsn = a.dsnPostgreSQL()
+		driver = "postgres"
+	}
+
+	database, err := sql.Open(driver, dsn)
 	if err != nil {
 		log.Fatalln("failed to open database", err)
 	}
