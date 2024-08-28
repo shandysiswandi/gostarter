@@ -10,10 +10,8 @@ import (
 	"strings"
 )
 
-var (
-	// ErrMissingField is an error if the query is missing select columns or table name.
-	ErrMissingField = errors.New("select columns or table name is missing")
-)
+// ErrMissingField is an error if the query is missing select columns or table name.
+var ErrMissingField = errors.New("select columns or table name is missing")
 
 // OrderDirection specifies the direction of ordering in a SQL query.
 type OrderDirection int
@@ -87,6 +85,7 @@ func defaultPlaceholder(placeholder []Placeholder) Placeholder {
 	if len(placeholder) == 0 {
 		return QuestionMark
 	}
+
 	return placeholder[0]
 }
 
@@ -204,7 +203,7 @@ func (qb *QueryBuilder) OrderBy(od OrderDirection, columns ...string) *QueryBuil
 // ToSQL generates the SQL query string and the arguments to be used with it.
 // It applies the specified WHERE, ORDER BY, and pagination clauses.
 // The method returns the SQL query string and a slice of arguments to be passed to the SQL driver.
-// Alse will return an error if the query cannot be constructed due to missing select columns or table name.
+// Else will return an error if the query cannot be constructed due to missing select columns or table name.
 func (qb *QueryBuilder) ToSQL() (string, []any, error) {
 	if qb.selectCols == "" || qb.table == "" {
 		return "", nil, ErrMissingField
@@ -236,6 +235,8 @@ func (qb *QueryBuilder) ToSQL() (string, []any, error) {
 			qb.pagination.limit = DefaultPaginationLimit
 		}
 		query += " LIMIT " + strconv.Itoa(qb.pagination.limit)
+	default:
+		// Optional to satisfying "exhaustive" linter
 	}
 
 	sqlArgs := qb.args
