@@ -42,15 +42,16 @@ type Dependency struct {
 
 func New(dep Dependency) (*Expose, error) {
 	// init outbound | database | http client | grpc client | redis | etc.
-	mysqlTodo := outbound.NewMysqlTodo(dep.Database)
+	// mysqlTodo := outbound.NewMysqlTodo(dep.Database)
+	postgresTodo := outbound.NewPostgresTodo(dep.Database)
 
 	// init service | usecase | interactor | logic
-	getByIDUC := service.NewGetByID(mysqlTodo, dep.Validator)
-	getWithFilterUC := service.NewGetWithFilter(mysqlTodo, dep.Validator)
-	createUC := service.NewCreate(mysqlTodo, dep.Validator, dep.UIDNumber)
-	deleteUC := service.NewDelete(mysqlTodo, dep.Validator)
-	updateUC := service.NewUpdate(mysqlTodo, dep.Validator)
-	updateStatusUC := service.NewUpdateStatus(mysqlTodo, dep.Validator)
+	getByIDUC := service.NewGetByID(postgresTodo, dep.Validator)
+	getWithFilterUC := service.NewGetWithFilter(postgresTodo, dep.Validator)
+	createUC := service.NewCreate(postgresTodo, dep.Validator, dep.UIDNumber)
+	deleteUC := service.NewDelete(postgresTodo, dep.Validator)
+	updateUC := service.NewUpdate(postgresTodo, dep.Validator)
+	updateStatusUC := service.NewUpdateStatus(postgresTodo, dep.Validator)
 
 	// register endpoint REST
 	inboundhttp.RegisterRESTEndpoint(dep.Router, &inboundhttp.Endpoint{
