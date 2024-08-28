@@ -7,6 +7,8 @@ import (
 	"context"
 	"time"
 
+	_ "github.com/doug-martin/goqu/v9/dialect/mysql"
+	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/shandysiswandi/gostarter/internal/app"
