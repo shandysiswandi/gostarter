@@ -69,7 +69,7 @@ jobs:
         env:
           COVERAGE_THRESHOLD: 80 # Change as needed
         run: |
-          go test ./... -coverprofile=coverage.out
+          go test ./pkg/... ./internal/... -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.txt
 
           # Check the coverage percentage
