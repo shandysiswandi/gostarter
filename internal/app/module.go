@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/shandysiswandi/gostarter/internal/region"
+	"github.com/shandysiswandi/gostarter/internal/shortly"
 	"github.com/shandysiswandi/gostarter/internal/todo"
 )
 
@@ -43,6 +44,18 @@ func (a *App) initModules() {
 	})
 	if err != nil {
 		log.Fatalln("failed to init module region", err)
+	}
+
+	_, err = shortly.New(shortly.Dependency{
+		RedisDB:   a.redisdb,
+		Config:    a.config,
+		CodecJSON: a.codecJSON,
+		Validator: a.validator,
+		Router:    a.httpRouter,
+		Logger:    a.logger,
+	})
+	if err != nil {
+		log.Fatalln("failed to init module shortly", err)
 	}
 
 	a.runables = append(a.runables, expTodo.Tasks...)
