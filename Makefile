@@ -1,3 +1,11 @@
+DRIVER ?= mysql
+DB_CONN ?= $(DB_USR):$(DB_PWD)@tcp(localhost:3306)/gostarter?parseTime=true
+
+ifeq ($(DRIVER), postgres)
+	DB_CONN = "postgres://${DB_USR}:${DB_PWD}@localhost:5432/gostarter?sslmode=disable"
+endif
+
+
 run:
 	@reflex -r '\.go$$' -s -- go run main.go
 
@@ -7,6 +15,9 @@ lint:
 test:
 	@go test ./... -coverprofile=coverage.out -parallel 4
 	@go tool cover -func=coverage.out | grep total
+
+test-integration:
+	@go test ./tests/... -parallel 4
 
 mock:
 	@mockery
@@ -26,12 +37,12 @@ migration-create:
 	@goose -dir migration create example sql
 
 migration-up:
-	@goose -dir migration fix
-	@goose -dir migration mysql "${DB_USR}:${DB_PWD}@tcp(localhost:3306)/gostarter?parseTime=true" up
+	@goose -dir migration/$(DRIVER) fix
+	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" up
 
 migration-down:
-	@goose -dir migration fix
-	@goose -dir migration mysql "${DB_USR}:${DB_PWD}@tcp(localhost:3306)/gostarter?parseTime=true" down
+	@goose -dir migration/$(DRIVER) fix
+	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" down
 
 docker-build:
 	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
