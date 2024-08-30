@@ -5,6 +5,7 @@ package messaging
 import (
 	context "context"
 
+	messaging "github.com/shandysiswandi/gostarter/pkg/messaging"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -163,27 +164,27 @@ func (_c *MockClient_Publish_Call) RunAndReturn(run func(context.Context, string
 }
 
 // Subscribe provides a mock function with given fields: ctx, topic, subscriptionID, handler
-func (_m *MockClient) Subscribe(ctx context.Context, topic string, subscriptionID string, handler SubscriberHandlerFunc) (SubscriptionHandler, error) {
+func (_m *MockClient) Subscribe(ctx context.Context, topic string, subscriptionID string, handler messaging.SubscriberHandlerFunc) (messaging.SubscriptionHandler, error) {
 	ret := _m.Called(ctx, topic, subscriptionID, handler)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Subscribe")
 	}
 
-	var r0 SubscriptionHandler
+	var r0 messaging.SubscriptionHandler
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, SubscriberHandlerFunc) (SubscriptionHandler, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, messaging.SubscriberHandlerFunc) (messaging.SubscriptionHandler, error)); ok {
 		return rf(ctx, topic, subscriptionID, handler)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, SubscriberHandlerFunc) SubscriptionHandler); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, messaging.SubscriberHandlerFunc) messaging.SubscriptionHandler); ok {
 		r0 = rf(ctx, topic, subscriptionID, handler)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(SubscriptionHandler)
+			r0 = ret.Get(0).(messaging.SubscriptionHandler)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, SubscriberHandlerFunc) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, messaging.SubscriberHandlerFunc) error); ok {
 		r1 = rf(ctx, topic, subscriptionID, handler)
 	} else {
 		r1 = ret.Error(1)
@@ -201,24 +202,24 @@ type MockClient_Subscribe_Call struct {
 //   - ctx context.Context
 //   - topic string
 //   - subscriptionID string
-//   - handler SubscriberHandlerFunc
+//   - handler messaging.SubscriberHandlerFunc
 func (_e *MockClient_Expecter) Subscribe(ctx interface{}, topic interface{}, subscriptionID interface{}, handler interface{}) *MockClient_Subscribe_Call {
 	return &MockClient_Subscribe_Call{Call: _e.mock.On("Subscribe", ctx, topic, subscriptionID, handler)}
 }
 
-func (_c *MockClient_Subscribe_Call) Run(run func(ctx context.Context, topic string, subscriptionID string, handler SubscriberHandlerFunc)) *MockClient_Subscribe_Call {
+func (_c *MockClient_Subscribe_Call) Run(run func(ctx context.Context, topic string, subscriptionID string, handler messaging.SubscriberHandlerFunc)) *MockClient_Subscribe_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(SubscriberHandlerFunc))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(messaging.SubscriberHandlerFunc))
 	})
 	return _c
 }
 
-func (_c *MockClient_Subscribe_Call) Return(_a0 SubscriptionHandler, _a1 error) *MockClient_Subscribe_Call {
+func (_c *MockClient_Subscribe_Call) Return(_a0 messaging.SubscriptionHandler, _a1 error) *MockClient_Subscribe_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockClient_Subscribe_Call) RunAndReturn(run func(context.Context, string, string, SubscriberHandlerFunc) (SubscriptionHandler, error)) *MockClient_Subscribe_Call {
+func (_c *MockClient_Subscribe_Call) RunAndReturn(run func(context.Context, string, string, messaging.SubscriberHandlerFunc) (messaging.SubscriptionHandler, error)) *MockClient_Subscribe_Call {
 	_c.Call.Return(run)
 	return _c
 }

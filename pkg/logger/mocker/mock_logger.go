@@ -5,6 +5,7 @@ package logger
 import (
 	context "context"
 
+	logger "github.com/shandysiswandi/gostarter/pkg/logger"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -22,7 +23,7 @@ func (_m *MockLogger) EXPECT() *MockLogger_Expecter {
 }
 
 // Debug provides a mock function with given fields: ctx, message, fields
-func (_m *MockLogger) Debug(ctx context.Context, message string, fields ...Field) {
+func (_m *MockLogger) Debug(ctx context.Context, message string, fields ...logger.Field) {
 	_va := make([]interface{}, len(fields))
 	for _i := range fields {
 		_va[_i] = fields[_i]
@@ -41,18 +42,18 @@ type MockLogger_Debug_Call struct {
 // Debug is a helper method to define mock.On call
 //   - ctx context.Context
 //   - message string
-//   - fields ...Field
+//   - fields ...logger.Field
 func (_e *MockLogger_Expecter) Debug(ctx interface{}, message interface{}, fields ...interface{}) *MockLogger_Debug_Call {
 	return &MockLogger_Debug_Call{Call: _e.mock.On("Debug",
 		append([]interface{}{ctx, message}, fields...)...)}
 }
 
-func (_c *MockLogger_Debug_Call) Run(run func(ctx context.Context, message string, fields ...Field)) *MockLogger_Debug_Call {
+func (_c *MockLogger_Debug_Call) Run(run func(ctx context.Context, message string, fields ...logger.Field)) *MockLogger_Debug_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]Field, len(args)-2)
+		variadicArgs := make([]logger.Field, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
-				variadicArgs[i] = a.(Field)
+				variadicArgs[i] = a.(logger.Field)
 			}
 		}
 		run(args[0].(context.Context), args[1].(string), variadicArgs...)
@@ -65,13 +66,13 @@ func (_c *MockLogger_Debug_Call) Return() *MockLogger_Debug_Call {
 	return _c
 }
 
-func (_c *MockLogger_Debug_Call) RunAndReturn(run func(context.Context, string, ...Field)) *MockLogger_Debug_Call {
+func (_c *MockLogger_Debug_Call) RunAndReturn(run func(context.Context, string, ...logger.Field)) *MockLogger_Debug_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Error provides a mock function with given fields: ctx, message, err, fields
-func (_m *MockLogger) Error(ctx context.Context, message string, err error, fields ...Field) {
+func (_m *MockLogger) Error(ctx context.Context, message string, err error, fields ...logger.Field) {
 	_va := make([]interface{}, len(fields))
 	for _i := range fields {
 		_va[_i] = fields[_i]
@@ -91,18 +92,18 @@ type MockLogger_Error_Call struct {
 //   - ctx context.Context
 //   - message string
 //   - err error
-//   - fields ...Field
+//   - fields ...logger.Field
 func (_e *MockLogger_Expecter) Error(ctx interface{}, message interface{}, err interface{}, fields ...interface{}) *MockLogger_Error_Call {
 	return &MockLogger_Error_Call{Call: _e.mock.On("Error",
 		append([]interface{}{ctx, message, err}, fields...)...)}
 }
 
-func (_c *MockLogger_Error_Call) Run(run func(ctx context.Context, message string, err error, fields ...Field)) *MockLogger_Error_Call {
+func (_c *MockLogger_Error_Call) Run(run func(ctx context.Context, message string, err error, fields ...logger.Field)) *MockLogger_Error_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]Field, len(args)-3)
+		variadicArgs := make([]logger.Field, len(args)-3)
 		for i, a := range args[3:] {
 			if a != nil {
-				variadicArgs[i] = a.(Field)
+				variadicArgs[i] = a.(logger.Field)
 			}
 		}
 		run(args[0].(context.Context), args[1].(string), args[2].(error), variadicArgs...)
@@ -115,13 +116,13 @@ func (_c *MockLogger_Error_Call) Return() *MockLogger_Error_Call {
 	return _c
 }
 
-func (_c *MockLogger_Error_Call) RunAndReturn(run func(context.Context, string, error, ...Field)) *MockLogger_Error_Call {
+func (_c *MockLogger_Error_Call) RunAndReturn(run func(context.Context, string, error, ...logger.Field)) *MockLogger_Error_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Info provides a mock function with given fields: ctx, message, fields
-func (_m *MockLogger) Info(ctx context.Context, message string, fields ...Field) {
+func (_m *MockLogger) Info(ctx context.Context, message string, fields ...logger.Field) {
 	_va := make([]interface{}, len(fields))
 	for _i := range fields {
 		_va[_i] = fields[_i]
@@ -140,18 +141,18 @@ type MockLogger_Info_Call struct {
 // Info is a helper method to define mock.On call
 //   - ctx context.Context
 //   - message string
-//   - fields ...Field
+//   - fields ...logger.Field
 func (_e *MockLogger_Expecter) Info(ctx interface{}, message interface{}, fields ...interface{}) *MockLogger_Info_Call {
 	return &MockLogger_Info_Call{Call: _e.mock.On("Info",
 		append([]interface{}{ctx, message}, fields...)...)}
 }
 
-func (_c *MockLogger_Info_Call) Run(run func(ctx context.Context, message string, fields ...Field)) *MockLogger_Info_Call {
+func (_c *MockLogger_Info_Call) Run(run func(ctx context.Context, message string, fields ...logger.Field)) *MockLogger_Info_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]Field, len(args)-2)
+		variadicArgs := make([]logger.Field, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
-				variadicArgs[i] = a.(Field)
+				variadicArgs[i] = a.(logger.Field)
 			}
 		}
 		run(args[0].(context.Context), args[1].(string), variadicArgs...)
@@ -164,13 +165,13 @@ func (_c *MockLogger_Info_Call) Return() *MockLogger_Info_Call {
 	return _c
 }
 
-func (_c *MockLogger_Info_Call) RunAndReturn(run func(context.Context, string, ...Field)) *MockLogger_Info_Call {
+func (_c *MockLogger_Info_Call) RunAndReturn(run func(context.Context, string, ...logger.Field)) *MockLogger_Info_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Warn provides a mock function with given fields: ctx, message, fields
-func (_m *MockLogger) Warn(ctx context.Context, message string, fields ...Field) {
+func (_m *MockLogger) Warn(ctx context.Context, message string, fields ...logger.Field) {
 	_va := make([]interface{}, len(fields))
 	for _i := range fields {
 		_va[_i] = fields[_i]
@@ -189,18 +190,18 @@ type MockLogger_Warn_Call struct {
 // Warn is a helper method to define mock.On call
 //   - ctx context.Context
 //   - message string
-//   - fields ...Field
+//   - fields ...logger.Field
 func (_e *MockLogger_Expecter) Warn(ctx interface{}, message interface{}, fields ...interface{}) *MockLogger_Warn_Call {
 	return &MockLogger_Warn_Call{Call: _e.mock.On("Warn",
 		append([]interface{}{ctx, message}, fields...)...)}
 }
 
-func (_c *MockLogger_Warn_Call) Run(run func(ctx context.Context, message string, fields ...Field)) *MockLogger_Warn_Call {
+func (_c *MockLogger_Warn_Call) Run(run func(ctx context.Context, message string, fields ...logger.Field)) *MockLogger_Warn_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]Field, len(args)-2)
+		variadicArgs := make([]logger.Field, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
-				variadicArgs[i] = a.(Field)
+				variadicArgs[i] = a.(logger.Field)
 			}
 		}
 		run(args[0].(context.Context), args[1].(string), variadicArgs...)
@@ -213,13 +214,13 @@ func (_c *MockLogger_Warn_Call) Return() *MockLogger_Warn_Call {
 	return _c
 }
 
-func (_c *MockLogger_Warn_Call) RunAndReturn(run func(context.Context, string, ...Field)) *MockLogger_Warn_Call {
+func (_c *MockLogger_Warn_Call) RunAndReturn(run func(context.Context, string, ...logger.Field)) *MockLogger_Warn_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WithFields provides a mock function with given fields: fields
-func (_m *MockLogger) WithFields(fields ...Field) Logger {
+func (_m *MockLogger) WithFields(fields ...logger.Field) logger.Logger {
 	_va := make([]interface{}, len(fields))
 	for _i := range fields {
 		_va[_i] = fields[_i]
@@ -232,12 +233,12 @@ func (_m *MockLogger) WithFields(fields ...Field) Logger {
 		panic("no return value specified for WithFields")
 	}
 
-	var r0 Logger
-	if rf, ok := ret.Get(0).(func(...Field) Logger); ok {
+	var r0 logger.Logger
+	if rf, ok := ret.Get(0).(func(...logger.Field) logger.Logger); ok {
 		r0 = rf(fields...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(Logger)
+			r0 = ret.Get(0).(logger.Logger)
 		}
 	}
 
@@ -250,18 +251,18 @@ type MockLogger_WithFields_Call struct {
 }
 
 // WithFields is a helper method to define mock.On call
-//   - fields ...Field
+//   - fields ...logger.Field
 func (_e *MockLogger_Expecter) WithFields(fields ...interface{}) *MockLogger_WithFields_Call {
 	return &MockLogger_WithFields_Call{Call: _e.mock.On("WithFields",
 		append([]interface{}{}, fields...)...)}
 }
 
-func (_c *MockLogger_WithFields_Call) Run(run func(fields ...Field)) *MockLogger_WithFields_Call {
+func (_c *MockLogger_WithFields_Call) Run(run func(fields ...logger.Field)) *MockLogger_WithFields_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]Field, len(args)-0)
+		variadicArgs := make([]logger.Field, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
-				variadicArgs[i] = a.(Field)
+				variadicArgs[i] = a.(logger.Field)
 			}
 		}
 		run(variadicArgs...)
@@ -269,12 +270,12 @@ func (_c *MockLogger_WithFields_Call) Run(run func(fields ...Field)) *MockLogger
 	return _c
 }
 
-func (_c *MockLogger_WithFields_Call) Return(_a0 Logger) *MockLogger_WithFields_Call {
+func (_c *MockLogger_WithFields_Call) Return(_a0 logger.Logger) *MockLogger_WithFields_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockLogger_WithFields_Call) RunAndReturn(run func(...Field) Logger) *MockLogger_WithFields_Call {
+func (_c *MockLogger_WithFields_Call) RunAndReturn(run func(...logger.Field) logger.Logger) *MockLogger_WithFields_Call {
 	_c.Call.Return(run)
 	return _c
 }
