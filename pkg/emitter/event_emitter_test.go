@@ -113,14 +113,11 @@ func TestEventEmitter_Emit(t *testing.T) {
 			args:          []any{"arg1", 2},
 			expectedError: nil,
 			mockFn: func(topic string, args ...any) *EventEmitter {
-				mTime := &MockTimeProvider{}
-				mTime.EXPECT().Now().Return(time.Time{})
-
 				return &EventEmitter{
 					options: Options{
 						TopicValidation:     func(topic string) error { return nil },
 						ArgumentsValidation: func(args []any) error { return nil },
-						TimeProvider:        mTime,
+						TimeProvider:        func() time.Time { return time.Time{} },
 					},
 				}
 			},
@@ -131,9 +128,6 @@ func TestEventEmitter_Emit(t *testing.T) {
 			args:          []any{"arg1", 2},
 			expectedError: nil,
 			mockFn: func(topic string, args ...any) *EventEmitter {
-				mTime := &MockTimeProvider{}
-				mTime.EXPECT().Now().Return(time.Time{})
-
 				listeners := make(map[string][]chan Event)
 				listenerCh := make(chan Event, 1)
 				listenerCh <- Event{} // Fill the channel
@@ -144,7 +138,7 @@ func TestEventEmitter_Emit(t *testing.T) {
 					options: Options{
 						TopicValidation:     func(topic string) error { return nil },
 						ArgumentsValidation: func(args []any) error { return nil },
-						TimeProvider:        mTime,
+						TimeProvider:        func() time.Time { return time.Time{} },
 					},
 				}
 			},
@@ -155,9 +149,6 @@ func TestEventEmitter_Emit(t *testing.T) {
 			args:          []any{"arg1", 2},
 			expectedError: nil,
 			mockFn: func(topic string, args ...any) *EventEmitter {
-				mTime := &MockTimeProvider{}
-				mTime.EXPECT().Now().Return(time.Time{})
-
 				listeners := make(map[string][]chan Event)
 				listenerCh := make(chan Event, 2)
 				listenerCh <- Event{}
@@ -173,7 +164,7 @@ func TestEventEmitter_Emit(t *testing.T) {
 					options: Options{
 						TopicValidation:     func(topic string) error { return nil },
 						ArgumentsValidation: func(args []any) error { return nil },
-						TimeProvider:        mTime,
+						TimeProvider:        func() time.Time { return time.Time{} },
 					},
 				}
 			},
