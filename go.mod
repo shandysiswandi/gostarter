@@ -25,7 +25,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.9.0
-	github.com/vektah/gqlparser/v2 v2.5.12
+	github.com/vektah/gqlparser/v2 v2.5.15
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	go.uber.org/zap v1.21.0
 	google.golang.org/api v0.155.0
