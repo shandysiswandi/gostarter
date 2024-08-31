@@ -28,7 +28,6 @@ func TestNewSet(t *testing.T) {
 		{name: "Success", args: args{}, want: &Set{now: time.Now}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewSet(tt.args.store, tt.args.v, tt.args.l)
@@ -139,7 +138,6 @@ func TestSet_Call(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got, err := tt.mockFn(tt.args).Call(tt.args.ctx, tt.args.in)

@@ -36,7 +36,6 @@ func TestNewKoanfConfig(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tt.beforeFn()
@@ -74,7 +73,6 @@ func TestKoanfConfig_GetInt(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -106,7 +104,6 @@ func TestKoanfConfig_GetBool(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -138,7 +135,6 @@ func TestKoanfConfig_GetFloat(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -170,7 +166,6 @@ func TestKoanfConfig_GetString(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -212,7 +207,6 @@ func TestKoanfConfig_GetBinary(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -244,7 +238,6 @@ func TestKoanfConfig_GetArray(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -276,7 +269,6 @@ func TestKoanfConfig_GetMap(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			kc := tt.mockFn(tt.args)
@@ -297,7 +289,6 @@ func TestKoanfConfig_Close(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := &KoanfConfig{}

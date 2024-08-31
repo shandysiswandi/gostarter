@@ -28,7 +28,6 @@ func TestRegisterHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			RegisterHTTP(tt.args.router, tt.args.h)
@@ -101,7 +100,6 @@ func TestEndpoint_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			arg := tt.args()
@@ -181,7 +179,6 @@ func TestEndpoint_Set(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			arg := tt.args()

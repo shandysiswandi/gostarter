@@ -17,7 +17,6 @@ func TestNewJSONCodec(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewJSONCodec()
@@ -61,7 +60,6 @@ func TestJSONCodec_Encode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &JSONCodec{}
@@ -117,7 +115,6 @@ func TestJSONCodec_Decode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &JSONCodec{}

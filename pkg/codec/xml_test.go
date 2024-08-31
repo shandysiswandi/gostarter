@@ -19,7 +19,6 @@ func TestNewXMLCodec(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewXMLCodec()
@@ -67,7 +66,6 @@ func TestXMLCodec_Encode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &XMLCodec{}
@@ -127,7 +125,6 @@ func TestXMLCodec_Decode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &XMLCodec{}

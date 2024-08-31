@@ -29,7 +29,6 @@ func TestNewRedisShort(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewRedisShort(tt.args.client, tt.args.json)
@@ -134,7 +133,6 @@ func TestRedisShort_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got, err := tt.mockFn(tt.args).Get(tt.args.ctx, tt.args.key)
@@ -212,7 +210,6 @@ func TestRedisShort_Set(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			err := tt.mockFn(tt.args).Set(tt.args.ctx, tt.args.value)

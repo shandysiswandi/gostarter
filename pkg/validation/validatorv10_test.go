@@ -72,7 +72,6 @@ func TestV10Validator_Validate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := NewV10Validator()

@@ -16,7 +16,6 @@ func TestNewMapShort(t *testing.T) {
 		{name: "Success", want: NewMapShort()},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewMapShort()
@@ -64,7 +63,6 @@ func TestMapShort_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ms := tt.mockFn(tt.args)
@@ -98,7 +96,6 @@ func TestMapShort_Set(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ms := tt.mockFn(tt.args)

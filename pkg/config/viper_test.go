@@ -36,7 +36,6 @@ func TestNewViperConfig(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tt.beforeFn()
@@ -75,7 +74,6 @@ func TestViperConfig_GetInt(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -108,7 +106,6 @@ func TestViperConfig_GetBool(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -141,7 +138,6 @@ func TestViperConfig_GetFloat(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -174,7 +170,6 @@ func TestViperConfig_GetString(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -218,7 +213,6 @@ func TestViperConfig_GetBinary(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -251,7 +245,6 @@ func TestViperConfig_GetArray(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -284,7 +277,6 @@ func TestViperConfig_GetMap(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := tt.mockFn(tt.args)
@@ -305,7 +297,6 @@ func TestViperConfig_Close(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			vc := &ViperConfig{}

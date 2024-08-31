@@ -26,7 +26,6 @@ func TestEvent_GetTopic(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := tt.event.GetTopic()
@@ -54,7 +53,6 @@ func TestEvent_GetArgs(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := tt.event.GetArgs()
@@ -83,7 +81,6 @@ func TestEvent_GetTimestamp(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := tt.event.GetTimestamp()

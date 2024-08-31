@@ -18,7 +18,6 @@ func TestNewMsgpackCodec(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewMsgpackCodec()
@@ -74,7 +73,6 @@ func TestMsgpackCodec_Encode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &MsgpackCodec{}
@@ -146,7 +144,6 @@ func TestMsgpackCodec_Decode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c := &MsgpackCodec{}
