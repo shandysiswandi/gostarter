@@ -38,6 +38,46 @@ type Client struct {
 	mu                   sync.RWMutex
 }
 
+// WithAutoAck configures the client to automatically acknowledge messages.
+//
+// isAuto: If true, messages will be automatically acknowledged after being received.
+func WithAutoAck(isAuto bool) func(*Client) {
+	return func(client *Client) {
+		client.autoAck = isAuto
+	}
+}
+
+// WithAutoCreateTopic configures the client to automatically create a topic if it does not exist.
+//
+// isAuto: If true, the client will create the topic when attempting to publish or subscribe.
+func WithAutoCreateTopic(isAuto bool) func(*Client) {
+	return func(client *Client) {
+		client.autoCreateTopic = isAuto
+	}
+}
+
+// WithAutoCreateSubscriber configures the client to automatically create a subscription
+// and associated topic if they do not exist.
+//
+// isAuto: If true, the client will create both the subscription and the topic as necessary.
+func WithAutoCreateSubscriber(isAuto bool) func(*Client) {
+	return func(client *Client) {
+		if isAuto {
+			client.autoCreateTopic = true
+		}
+		client.autoCreateSubscriber = isAuto
+	}
+}
+
+// WithSyncPublisher configures the client to publish messages synchronously.
+//
+// isSyncPublisher: If true, the Publish call will wait for the message to be acknowledged before returning.
+func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
+	return func(client *Client) {
+		client.syncPublisher = isSyncPublisher
+	}
+}
+
 // NewClient creates a new Google Cloud Pub/Sub client with the provided configuration options.
 //
 // ctx: The context to use for client initialization.
@@ -45,7 +85,7 @@ type Client struct {
 // opts: Configuration options for the client.
 //
 // Returns a pointer to the created Client or an error if the client could not be created.
-func NewClient(ctx context.Context, projectID string, opts ...Option) (*Client, error) {
+func NewClient(ctx context.Context, projectID string, opts ...func(*Client)) (*Client, error) {
 	client := &Client{
 		subscriptions:        make(map[string]*SubscriberHandler),
 		clientOptions:        []option.ClientOption{},

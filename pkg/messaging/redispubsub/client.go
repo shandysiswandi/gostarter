@@ -25,13 +25,33 @@ type Client struct {
 	mu            sync.RWMutex                  // Mutex for protecting access to subscriptions.
 }
 
+// WithSyncPublisher configures the client to publish messages synchronously.
+//
+// isSyncPublisher: If true, the Publish call will wait for the message to be acknowledged before returning.
+func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
+	return func(client *Client) {
+		client.syncPublisher = isSyncPublisher
+	}
+}
+
+// WithExistsClient uses an existing Redis client.
+//
+// ruc: An instance of redis.UniversalClient. This option allows you to provide
+// your own Redis client to the Pub/Sub client, useful for custom configurations
+// or sharing the client across different parts of your application.
+func WithExistsClient(ruc redis.UniversalClient) func(*Client) {
+	return func(client *Client) {
+		client.client = ruc
+	}
+}
+
 // NewRedisClient creates a new Client instance configured with the given Redis URL and options.
 //
 // url: The Redis server URL.
 // opts: A list of Option functions for configuring the client.
 //
 // Returns a new Client instance or an error if the client could not be created.
-func NewRedisClient(url string, opts ...Option) (*Client, error) {
+func NewRedisClient(url string, opts ...func(*Client)) (*Client, error) {
 	client := &Client{
 		subscriptions: make(map[string]*SubscriberHandler),
 	}
