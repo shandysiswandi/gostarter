@@ -25,7 +25,7 @@ type Dependency struct {
 
 func New(dep Dependency) (*Expose, error) {
 	// redisOutbound := outbound.NewRedisShort(dep.RedisDB, dep.CodecJSON)
-	mapOutbound := outbound.NewMapShort(dep.CodecJSON)
+	mapOutbound := outbound.NewMapShort()
 
 	getUC := service.NewGet(mapOutbound, dep.Validator, dep.Logger)
 	setUC := service.NewSet(mapOutbound, dep.Validator, dep.Logger)

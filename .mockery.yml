@@ -10,55 +10,49 @@ packages:
   github.com/shandysiswandi/gostarter/pkg/clock:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/codec:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/config:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/emitter:
     interfaces:
       Emitter:
         config:
-          inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-          dir: "{{ .InterfaceDir }}"
-      TimeProvider:
-        config:
-          inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-          dir: "{{ .InterfaceDir }}"
+          filename: "mock_{{ .InterfaceName | snakecase }}.go"
+          dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/logger:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/messaging:
     interfaces:
       Client:
         config:
-          inpackage: True
-          filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-          dir: "{{ .InterfaceDir }}"
+          filename: "mock_{{ .InterfaceName | snakecase }}.go"
+          dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/uid:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/validation:
     config:
       all: True
-      inpackage: True
-      filename: "{{ .InterfaceName | snakecase }}_mock_test.go"
-      dir: "{{ .InterfaceDir }}"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: "{{ .InterfaceDir }}/mocker"

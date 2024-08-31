@@ -5,35 +5,13 @@ package emitter
 
 import "time"
 
-// TimeProvider is an interface that allows the EventEmitter
-// to obtain the current time. This is useful for testing and
-// other scenarios where the standard time.Now() function needs
-// to be overridden.
-//
-// Implementing this interface allows you to control the time source
-// in a predictable manner, which is particularly valuable in testing
-// environments.
-//
-// Example:
-//
-//	type MockTimeProvider struct {}
-//
-//	func (m MockTimeProvider) Now() time.Time {
-//	    return time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
-//	}
-//
-//	emitter := NewEventEmitter(WithTimeProvider(MockTimeProvider{}))
-type TimeProvider interface {
-	Now() time.Time
-}
-
 // Options holds the configuration options for the EventEmitter.
 //
 // You can customize the behavior of the EventEmitter by providing
 // these options, such as a custom time provider, topic validation,
 // arguments validation, and buffer size.
 type Options struct {
-	TimeProvider        TimeProvider
+	TimeProvider        func() time.Time
 	TopicValidation     func(string) error
 	ArgumentsValidation func([]any) error
 	BufferSize          int
@@ -54,7 +32,7 @@ type Option func(*Options)
 // Usage:
 //
 //	emitter := NewEventEmitter(WithTimeProvider(myTimeProvider))
-func WithTimeProvider(tp TimeProvider) Option {
+func WithTimeProvider(tp func() time.Time) Option {
 	return func(o *Options) {
 		o.TimeProvider = tp
 	}

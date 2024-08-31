@@ -31,7 +31,7 @@ type EventEmitter struct {
 // Example:
 //
 //	emitter := NewEventEmitter(
-//	    WithTimeProvider(myTimeProvider),
+//	    WithTimeProvider(time.Now),
 //	    WithTopicValidation(myValidator),
 //	    WithArgumentsValidation(myArgValidator),
 //	    WithBufferSize(10),
@@ -84,7 +84,7 @@ func (e *EventEmitter) Emit(topic string, args ...any) error {
 
 	now := time.Now()
 	if e.options.TimeProvider != nil {
-		now = e.options.TimeProvider.Now()
+		now = e.options.TimeProvider()
 	}
 
 	event := Event{topic: topic, args: args, timestamp: now}
