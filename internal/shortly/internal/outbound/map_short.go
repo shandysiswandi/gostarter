@@ -5,17 +5,15 @@ import (
 	"sync"
 
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
 )
 
 type MapShort struct {
-	json codec.Codec
 	data map[string]domain.Short
 	mu   sync.RWMutex
 }
 
-func NewMapShort(json codec.Codec) *MapShort {
-	return &MapShort{json: json, data: make(map[string]domain.Short)}
+func NewMapShort() *MapShort {
+	return &MapShort{data: make(map[string]domain.Short)}
 }
 
 func (ms *MapShort) Get(_ context.Context, key string) (*domain.Short, error) {

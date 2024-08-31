@@ -19,15 +19,22 @@ type Set struct {
 	store     SetStore
 	validator validation.Validator
 	logger    logger.Logger
+	now       func() time.Time
 }
 
 func NewSet(store SetStore, v validation.Validator, l logger.Logger) *Set {
-	return &Set{store: store, validator: v, logger: l}
+	return &Set{
+		store:     store,
+		validator: v,
+		logger:    l,
+		now:       time.Now,
+	}
 }
 
 func (g *Set) Call(ctx context.Context, in domain.SetInput) (*domain.SetOutput, error) {
-	now := time.Now()
-	theKey := base64.URLEncoding.EncodeToString([]byte(strconv.FormatUint(uint64(now.UnixNano()), 10)))
+	now := g.now()
+	theKey := base64.URLEncoding.
+		EncodeToString([]byte(strconv.FormatUint(uint64(now.UnixNano()), 10)))
 
 	err := g.validator.Validate(in)
 	if err != nil {

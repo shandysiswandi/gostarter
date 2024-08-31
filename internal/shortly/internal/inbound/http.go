@@ -3,6 +3,7 @@ package inbound
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -10,12 +11,14 @@ import (
 	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
 )
 
+var ErrDecodeBody = errors.New("failed to decode body")
+
 func RegisterHTTP(router *httprouter.Router, h *Endpoint) {
 	serve := pkghttp.NewServe(
 		pkghttp.WithMiddlewares(pkghttp.Recovery),
 	)
 
-	router.Handler(http.MethodGet, "/shortly/:code", serve.Endpoint(h.Get))
+	router.Handler(http.MethodGet, "/shortly/:key", serve.Endpoint(h.Get))
 	router.Handler(http.MethodPost, "/shortly", serve.Endpoint(h.Set))
 }
 
@@ -26,7 +29,7 @@ type Endpoint struct {
 
 func (e *Endpoint) Get(ctx context.Context, _ *http.Request) (any, error) {
 	params := httprouter.ParamsFromContext(ctx)
-	key := params.ByName("code")
+	key := params.ByName("key")
 
 	resp, err := e.GetUC.Call(ctx, domain.GetInput{Key: key})
 	if err != nil {
@@ -47,7 +50,7 @@ func (e *Endpoint) Set(ctx context.Context, r *http.Request) (any, error) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, err
+		return nil, ErrDecodeBody
 	}
 
 	resp, err := e.SetUC.Call(ctx, domain.SetInput{URL: req.URL, Slug: req.Slug})
