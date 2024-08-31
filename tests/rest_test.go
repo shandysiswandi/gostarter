@@ -22,22 +22,6 @@ func (rs *RESTSuite) SetupSuite() {
 	rs.httpClient = resty.New()
 }
 
-func (rs *RESTSuite) SetupTest() {
-	// Hook 2: Initialize anything specific to each test case, if necessary.
-}
-
-func (rs *RESTSuite) SetupSubTest() {
-	// Hook 3: Prepare resources needed for subtests.
-}
-
-func (rs *RESTSuite) TearDownSubTest() {
-	// Hook 4: Clean up resources used in subtests.
-}
-
-func (rs *RESTSuite) TearDownTest() {
-	// Hook 5: Clean up resources after each test case, if necessary.
-}
-
 func (rs *RESTSuite) TearDownSuite() {
 	// Hook 6: Clean up anything in suite
 
@@ -218,5 +202,57 @@ func (rs *RESTSuite) TestTodos() {
 		rs.Assert().NotNil(resp)
 		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
 		rs.Assert().Equal(id, responseBody.ID)
+	})
+}
+
+func (rs *RESTSuite) TestShortly() {
+	key := ""
+
+	rs.Run("Set", func() {
+		// Arrange
+		requestBody := map[string]any{
+			"url":  "https://www.amazon.com",
+			"slug": "amzn",
+		}
+		responseBody := struct {
+			Key string `json:"key"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetHeader("Content-Type", "application/json").
+			SetBody(requestBody).
+			SetResult(&responseBody).
+			Post(rs.baseURL + "/shortly")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		if ok := rs.Assert().Equal(http.StatusOK, resp.StatusCode()); ok {
+			rs.Assert().NotEmpty(responseBody.Key)
+		} else {
+			rs.T().Log(rs.T().Name(), "response:", resp)
+		}
+
+		key = responseBody.Key
+	})
+
+	rs.Run("Get", func() {
+		// Arrange
+		responseBody := struct {
+			URL string `json:"url"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetPathParam("key", key).
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/shortly/{key}")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("https://www.amazon.com", responseBody.URL)
 	})
 }
