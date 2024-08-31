@@ -13,7 +13,7 @@ lint:
 	@golangci-lint run
 
 test:
-	@go test ./pkg/... ./internal/... -coverprofile=coverage.out -parallel 4
+	@go test $(go list ./pkg/... ./internal/... | grep -vE "/mocker$|/mockz$") -coverprofile=coverage.out -parallel 4
 	@go tool cover -func=coverage.out | grep total
 
 test-integration:
