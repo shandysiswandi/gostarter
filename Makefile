@@ -5,6 +5,7 @@ ifeq ($(DRIVER), postgres)
 	DB_CONN = "postgres://${DB_USR}:${DB_PWD}@localhost:5432/gostarter?sslmode=disable"
 endif
 
+.PHONY: test
 
 run:
 	@reflex -r '\.go$$' -s -- go run main.go
@@ -13,7 +14,8 @@ lint:
 	@golangci-lint run
 
 test:
-	@go test $(go list ./pkg/... ./internal/... | grep -vE "/mocker$|/mockz$") -coverprofile=coverage.out -parallel 4
+	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/app|/region|/todo') \
+	-coverprofile=coverage.out -parallel 4 -race
 	@go tool cover -func=coverage.out | grep total
 
 test-integration:
