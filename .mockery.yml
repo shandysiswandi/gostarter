@@ -11,18 +11,21 @@ packages:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/codec:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/config:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/emitter:
@@ -30,12 +33,14 @@ packages:
       Emitter:
         config:
           filename: "mock_{{ .InterfaceName | snakecase }}.go"
+          outpkg: "mocker"
           dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/logger:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/messaging:
@@ -43,18 +48,21 @@ packages:
       Client:
         config:
           filename: "mock_{{ .InterfaceName | snakecase }}.go"
+          outpkg: "mocker"
           dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/uid:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/validation:
     config:
       all: True
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
   # MODULES
