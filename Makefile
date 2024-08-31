@@ -25,11 +25,14 @@ mock:
 tidy:
 	@go mod tidy
 
+update:
+	@go get -u ./...
+
 proto:
-	@cd api && rm -rf gen-proto && buf mod update && buf build && buf generate && cd ..
+	@cd api && rm -rf gen-proto && buf dep update && buf build && buf generate && cd ..
 
 gql:
-	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.48 generate
+	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.49 generate
 
 check: proto gql mock tidy lint test run
 

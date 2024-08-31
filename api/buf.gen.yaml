@@ -1,21 +1,24 @@
-version: v1
+version: v2
 managed:
   enabled: true
-  go_package_prefix:
-    default: github.com/shandysiswandi/gostarter/api
-    except:
-      - buf.build/googleapis/googleapis
-      - buf.build/bufbuild/protovalidate
+  override:
+    - file_option: go_package_prefix
+      value: github.com/shandysiswandi/gostarter/api
+  disable:
+    - module: buf.build/googleapis/googleapis
+      file_option: go_package_prefix
+    - module: buf.build/bufbuild/protovalidate
+      file_option: go_package_prefix
 plugins:
-  - plugin: buf.build/protocolbuffers/go:v1.34.2
+  - remote: buf.build/protocolbuffers/go:v1.34.2
     out: gen-proto
     opt:
       - paths=source_relative
-  - plugin: buf.build/grpc/go:v1.2.0
+  - remote: buf.build/grpc/go:v1.5.1
     out: gen-proto
     opt:
       - paths=source_relative
-  - plugin: buf.build/grpc-ecosystem/openapiv2:v2.21.0
+  - remote: buf.build/grpc-ecosystem/openapiv2:v2.22.0
     out: gen-proto
     opt:
       - logtostderr=true
