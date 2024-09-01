@@ -6,13 +6,12 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/region/internal/usecase"
-	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
+	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 )
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
-	serve := pkghttp.NewServe(
-		pkghttp.WithMiddlewares(pkghttp.Recovery),
-	)
+	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
 
 	router.Handler(http.MethodGet, "/regions/search", serve.Endpoint(h.Search))
 }

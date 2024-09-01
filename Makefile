@@ -5,8 +5,6 @@ ifeq ($(DRIVER), postgres)
 	DB_CONN = "postgres://${DB_USR}:${DB_PWD}@localhost:5432/gostarter?sslmode=disable"
 endif
 
-.PHONY: test
-
 run:
 	@reflex -r '\.go$$' -s -- go run main.go
 
@@ -48,6 +46,10 @@ migration-up:
 migration-down:
 	@goose -dir migration/$(DRIVER) fix
 	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" down
+
+migration-reset:
+	@goose -dir migration/$(DRIVER) fix
+	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" reset
 
 docker-build:
 	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .

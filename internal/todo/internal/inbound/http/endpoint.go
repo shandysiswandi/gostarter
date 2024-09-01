@@ -9,15 +9,14 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/errs"
-	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
+	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 )
 
 var errfailedParseToUint = errs.NewValidation("failed parse id to uint")
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
-	serve := pkghttp.NewServe(
-		pkghttp.WithMiddlewares(pkghttp.Recovery),
-	)
+	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
 
 	router.Handler(http.MethodGet, "/todos/:id", serve.Endpoint(h.GetByID))
 	router.Handler(http.MethodGet, "/todos", serve.Endpoint(h.GetWithFilter))

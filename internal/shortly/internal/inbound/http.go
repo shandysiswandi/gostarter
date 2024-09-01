@@ -8,15 +8,14 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
-	pkghttp "github.com/shandysiswandi/gostarter/pkg/http"
+	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 )
 
 var ErrDecodeBody = errors.New("failed to decode body")
 
 func RegisterHTTP(router *httprouter.Router, h *Endpoint) {
-	serve := pkghttp.NewServe(
-		pkghttp.WithMiddlewares(pkghttp.Recovery),
-	)
+	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
 
 	router.Handler(http.MethodGet, "/shortly/:key", serve.Endpoint(h.Get))
 	router.Handler(http.MethodPost, "/shortly", serve.Endpoint(h.Set))
