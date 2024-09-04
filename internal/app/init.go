@@ -21,7 +21,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
@@ -223,7 +222,6 @@ func (a *App) initLibraries() {
 
 	a.uidnumber = snow
 	a.pvalidator = pvalidator
-	a.clock = clock.NewClock()
 	a.uuid = uid.NewUUIDString()
 	a.codecJSON = codec.NewJSONCodec()
 	a.codecMsgPack = codec.NewMsgpackCodec()

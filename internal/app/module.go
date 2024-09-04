@@ -21,7 +21,6 @@ func (a *App) initModules() {
 		RedisDB:        a.redisdb,
 		Config:         a.config,
 		UIDNumber:      a.uidnumber,
-		Clock:          a.clock,
 		CodecJSON:      a.codecJSON,
 		Validator:      a.validator,
 		ProtoValidator: a.pvalidator,

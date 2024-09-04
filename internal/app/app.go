@@ -14,7 +14,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
@@ -32,7 +31,6 @@ type App struct {
 	config       config.Config
 	uidnumber    uid.NumberID
 	uuid         uid.StringID
-	clock        clock.Clocker
 	codecJSON    codec.Codec
 	codecMsgPack codec.Codec
 	validator    validation.Validator
