@@ -40,16 +40,16 @@ migration-create:
 	@goose -dir migration create example sql
 
 migration-up:
-	@goose -dir migration/$(DRIVER) fix
-	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" up
+	@goose -dir migrations/$(DRIVER) fix
+	@goose -dir migrations/$(DRIVER) $(DRIVER) "$(DB_CONN)" up
 
 migration-down:
-	@goose -dir migration/$(DRIVER) fix
-	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" down
+	@goose -dir migrations/$(DRIVER) fix
+	@goose -dir migrations/$(DRIVER) $(DRIVER) "$(DB_CONN)" down
 
 migration-reset:
-	@goose -dir migration/$(DRIVER) fix
-	@goose -dir migration/$(DRIVER) $(DRIVER) "$(DB_CONN)" reset
+	@goose -dir migrations/$(DRIVER) fix
+	@goose -dir migrations/$(DRIVER) $(DRIVER) "$(DB_CONN)" reset
 
 docker-build:
 	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
