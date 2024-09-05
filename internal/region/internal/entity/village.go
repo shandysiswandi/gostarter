@@ -7,7 +7,7 @@ type Village struct {
 }
 
 func (v *Village) ScanColumn() []any {
-	return []any{&v.ID, &v.DistrictID, &v.Name}
+	return []any{&v.ID, &v.Name}
 }
 
 func (v *Village) ToRegion() Region {

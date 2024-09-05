@@ -17,7 +17,11 @@ func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 }
 
 type Endpoint struct {
-	SearchUC usecase.Search
+	search usecase.Search
+}
+
+func NewEndpoint(search usecase.Search) *Endpoint {
+	return &Endpoint{search: search}
 }
 
 func (e *Endpoint) Search(ctx context.Context, r *http.Request) (any, error) {
@@ -25,7 +29,7 @@ func (e *Endpoint) Search(ctx context.Context, r *http.Request) (any, error) {
 	pid := r.URL.Query().Get("pid")
 	ids := r.URL.Query().Get("ids")
 
-	resp, err := e.SearchUC.Execute(ctx, usecase.SearchInput{By: by, ParentID: pid, IDs: ids})
+	resp, err := e.search.Execute(ctx, usecase.SearchInput{By: by, ParentID: pid, IDs: ids})
 	if err != nil {
 		return nil, err
 	}

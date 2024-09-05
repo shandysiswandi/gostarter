@@ -5,7 +5,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
-	inboundhttp "github.com/shandysiswandi/gostarter/internal/region/internal/inbound/http"
+	"github.com/shandysiswandi/gostarter/internal/region/internal/inbound/http"
 	"github.com/shandysiswandi/gostarter/internal/region/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/region/internal/service"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
@@ -27,13 +27,11 @@ type Dependency struct {
 }
 
 func New(dep Dependency) (*Expose, error) {
-	mysqlAdministrative := outbound.NewMysqlRegion(dep.Database)
+	sqlRegion := outbound.NewSQLRegion(dep.Database, dep.Config)
 
-	searchUC := service.NewSearch(dep.Validator, mysqlAdministrative)
+	searchService := service.NewSearch(dep.Validator, sqlRegion)
 
-	inboundhttp.RegisterRESTEndpoint(dep.Router, &inboundhttp.Endpoint{
-		SearchUC: searchUC,
-	})
+	http.RegisterRESTEndpoint(dep.Router, http.NewEndpoint(searchService))
 
 	return &Expose{}, nil
 }

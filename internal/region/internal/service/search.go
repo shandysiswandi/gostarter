@@ -7,7 +7,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/region/internal/entity"
 	"github.com/shandysiswandi/gostarter/internal/region/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	gerr "github.com/shandysiswandi/gostarter/pkg/gerr"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -34,7 +34,7 @@ func (s *Search) Execute(ctx context.Context, in usecase.SearchInput) (*usecase.
 	in.By = strings.TrimSpace(strings.ToLower(in.By))
 	in.ParentID = strings.TrimSpace(in.ParentID)
 	if err := s.validate.Validate(in); err != nil {
-		return nil, errs.WrapValidation("validation input fail", err)
+		return nil, gerr.NewValidation("validation input fail", err)
 	}
 
 	ids := s.parseIDs(in.IDs)
@@ -75,7 +75,7 @@ func (s *Search) parseIDs(ids string) []string {
 
 func (s *Search) fromProvinces(ps []entity.Province, err error) (*usecase.SearchOutput, error) {
 	if err != nil {
-		return nil, errs.NewBusiness("failed to search provinces")
+		return nil, gerr.NewServer("failed to search provinces", err)
 	}
 
 	rs := make([]entity.Region, 0)
@@ -88,7 +88,7 @@ func (s *Search) fromProvinces(ps []entity.Province, err error) (*usecase.Search
 
 func (s *Search) fromCities(cs []entity.City, err error) (*usecase.SearchOutput, error) {
 	if err != nil {
-		return nil, errs.NewBusiness("failed to search cities")
+		return nil, gerr.NewServer("failed to search cities", err)
 	}
 
 	rs := make([]entity.Region, 0)
@@ -101,7 +101,7 @@ func (s *Search) fromCities(cs []entity.City, err error) (*usecase.SearchOutput,
 
 func (s *Search) fromDistricts(ds []entity.District, err error) (*usecase.SearchOutput, error) {
 	if err != nil {
-		return nil, errs.NewBusiness("failed to search districts")
+		return nil, gerr.NewServer("failed to search districts", err)
 	}
 
 	rs := make([]entity.Region, 0)
@@ -114,7 +114,7 @@ func (s *Search) fromDistricts(ds []entity.District, err error) (*usecase.Search
 
 func (s *Search) fromVillages(vs []entity.Village, err error) (*usecase.SearchOutput, error) {
 	if err != nil {
-		return nil, errs.NewBusiness("failed to search villages")
+		return nil, gerr.NewServer("failed to search villages", err)
 	}
 
 	rs := make([]entity.Region, 0)
