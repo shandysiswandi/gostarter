@@ -27,8 +27,7 @@ type Endpoint struct {
 }
 
 func (e *Endpoint) Get(ctx context.Context, _ *http.Request) (any, error) {
-	params := httprouter.ParamsFromContext(ctx)
-	key := params.ByName("key")
+	key := httprouter.ParamsFromContext(ctx).ByName("key")
 
 	resp, err := e.GetUC.Call(ctx, domain.GetInput{Key: key})
 	if err != nil {

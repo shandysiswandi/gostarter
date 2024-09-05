@@ -8,7 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
-	codecMock "github.com/shandysiswandi/gostarter/pkg/codec/mocker"
+	cMock "github.com/shandysiswandi/gostarter/pkg/codec/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,7 +88,7 @@ func TestRedisShort_Get(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *RedisShort {
 				cli, rmock := redismock.NewClientMock()
-				mjson := new(codecMock.MockCodec)
+				mjson := new(cMock.MockCodec)
 
 				str := `{}`
 				v := domain.Short{}
@@ -110,7 +110,7 @@ func TestRedisShort_Get(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *RedisShort {
 				cli, rmock := redismock.NewClientMock()
-				mjson := new(codecMock.MockCodec)
+				mjson := new(cMock.MockCodec)
 
 				str := `{"key":"key"}`
 				ds := domain.Short{}
@@ -159,7 +159,7 @@ func TestRedisShort_Set(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *RedisShort {
 				cli, _ := redismock.NewClientMock()
-				mjson := new(codecMock.MockCodec)
+				mjson := new(cMock.MockCodec)
 
 				mjson.EXPECT().Encode(a.value).Return(nil, assert.AnError)
 
@@ -176,7 +176,7 @@ func TestRedisShort_Set(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *RedisShort {
 				cli, rmock := redismock.NewClientMock()
-				mjson := new(codecMock.MockCodec)
+				mjson := new(cMock.MockCodec)
 
 				mjson.EXPECT().Encode(a.value).Return([]byte(`{}`), nil)
 
@@ -195,7 +195,7 @@ func TestRedisShort_Set(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *RedisShort {
 				cli, rmock := redismock.NewClientMock()
-				mjson := new(codecMock.MockCodec)
+				mjson := new(cMock.MockCodec)
 
 				mjson.EXPECT().Encode(a.value).Return([]byte(`{"key":"keyval"}`), nil)
 

@@ -8,9 +8,9 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
-	loggerMock "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	lMock "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
-	validationMock "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	vMock "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,8 +54,8 @@ func TestGet_Call(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Get {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 
 				mv.EXPECT().Validate(a.in).Return(assert.AnError).Once()
 				mlog.EXPECT().Error(a.ctx, "validation failed", assert.AnError).Once()
@@ -73,8 +73,8 @@ func TestGet_Call(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Get {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
@@ -94,8 +94,8 @@ func TestGet_Call(t *testing.T) {
 			want:    &domain.GetOutput{},
 			wantErr: nil,
 			mockFn: func(a args) *Get {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
@@ -115,8 +115,8 @@ func TestGet_Call(t *testing.T) {
 			want:    &domain.GetOutput{URL: "www.google.com"},
 			wantErr: nil,
 			mockFn: func(a args) *Get {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()

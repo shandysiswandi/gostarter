@@ -8,9 +8,9 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
-	loggerMock "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	lMock "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
-	validationMock "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	vMock "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,8 +58,8 @@ func TestSet_Call(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Set {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockSetStore)
 
 				mv.EXPECT().Validate(a.in).Return(assert.AnError).Once()
@@ -82,8 +82,8 @@ func TestSet_Call(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Set {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockSetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
@@ -114,8 +114,8 @@ func TestSet_Call(t *testing.T) {
 			want:    &domain.SetOutput{Key: "MTE2NTEzNzk0OTQ4MzgyMDY0NjQ="},
 			wantErr: nil,
 			mockFn: func(a args) *Set {
-				mv := new(validationMock.MockValidator)
-				mlog := new(loggerMock.MockLogger)
+				mv := new(vMock.MockValidator)
+				mlog := new(lMock.MockLogger)
 				ms := new(mockz.MockSetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
