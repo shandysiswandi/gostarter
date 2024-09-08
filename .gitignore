@@ -30,3 +30,12 @@ config/*
 !config/config.example.yaml
 !config/config.docker.compose.yaml
 *.local
+
+# Ignore IDE/editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
