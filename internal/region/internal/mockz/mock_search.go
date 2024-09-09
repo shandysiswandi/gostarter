@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	usecase "github.com/shandysiswandi/gostarter/internal/region/internal/usecase"
+	domain "github.com/shandysiswandi/gostarter/internal/region/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -22,28 +22,28 @@ func (_m *MockSearch) EXPECT() *MockSearch_Expecter {
 	return &MockSearch_Expecter{mock: &_m.Mock}
 }
 
-// Execute provides a mock function with given fields: ctx, in
-func (_m *MockSearch) Execute(ctx context.Context, in usecase.SearchInput) (*usecase.SearchOutput, error) {
+// Call provides a mock function with given fields: ctx, in
+func (_m *MockSearch) Call(ctx context.Context, in domain.SearchInput) ([]domain.Region, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Execute")
+		panic("no return value specified for Call")
 	}
 
-	var r0 *usecase.SearchOutput
+	var r0 []domain.Region
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.SearchInput) (*usecase.SearchOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.SearchInput) ([]domain.Region, error)); ok {
 		return rf(ctx, in)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.SearchInput) *usecase.SearchOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.SearchInput) []domain.Region); ok {
 		r0 = rf(ctx, in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*usecase.SearchOutput)
+			r0 = ret.Get(0).([]domain.Region)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, usecase.SearchInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.SearchInput) error); ok {
 		r1 = rf(ctx, in)
 	} else {
 		r1 = ret.Error(1)
@@ -52,31 +52,31 @@ func (_m *MockSearch) Execute(ctx context.Context, in usecase.SearchInput) (*use
 	return r0, r1
 }
 
-// MockSearch_Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Execute'
-type MockSearch_Execute_Call struct {
+// MockSearch_Call_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Call'
+type MockSearch_Call_Call struct {
 	*mock.Call
 }
 
-// Execute is a helper method to define mock.On call
+// Call is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in usecase.SearchInput
-func (_e *MockSearch_Expecter) Execute(ctx interface{}, in interface{}) *MockSearch_Execute_Call {
-	return &MockSearch_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
+//   - in domain.SearchInput
+func (_e *MockSearch_Expecter) Call(ctx interface{}, in interface{}) *MockSearch_Call_Call {
+	return &MockSearch_Call_Call{Call: _e.mock.On("Call", ctx, in)}
 }
 
-func (_c *MockSearch_Execute_Call) Run(run func(ctx context.Context, in usecase.SearchInput)) *MockSearch_Execute_Call {
+func (_c *MockSearch_Call_Call) Run(run func(ctx context.Context, in domain.SearchInput)) *MockSearch_Call_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(usecase.SearchInput))
+		run(args[0].(context.Context), args[1].(domain.SearchInput))
 	})
 	return _c
 }
 
-func (_c *MockSearch_Execute_Call) Return(_a0 *usecase.SearchOutput, _a1 error) *MockSearch_Execute_Call {
+func (_c *MockSearch_Call_Call) Return(_a0 []domain.Region, _a1 error) *MockSearch_Call_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockSearch_Execute_Call) RunAndReturn(run func(context.Context, usecase.SearchInput) (*usecase.SearchOutput, error)) *MockSearch_Execute_Call {
+func (_c *MockSearch_Call_Call) RunAndReturn(run func(context.Context, domain.SearchInput) ([]domain.Region, error)) *MockSearch_Call_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/shandysiswandi/gostarter/internal/region/internal/entity"
+	"github.com/shandysiswandi/gostarter/internal/region/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 )
@@ -30,59 +30,70 @@ func NewSQLRegion(db *sql.DB, config config.Config) *SQLRegion {
 	}
 }
 
-func (s *SQLRegion) Provinces(ctx context.Context, ids ...string) ([]entity.Province, error) {
+func (s *SQLRegion) Provinces(ctx context.Context, ids ...string) ([]domain.Province, error) {
 	query := func() (string, []any, error) {
 		ops := s.qu.Select("id", "name").From("provinces").Limit(10)
+
 		if len(ids) > 0 {
-			ops.Where(exp.Ex{"id": ids})
+			ops = ops.Where(goqu.Ex{"id": ids})
 		}
+
 		return ops.Prepared(true).ToSQL()
 	}
 
-	return dbops.SQLGets[entity.Province](ctx, s.db, query)
+	return dbops.SQLGets[domain.Province](ctx, s.db, query)
 }
 
-func (s *SQLRegion) Cities(ctx context.Context, pID string, ids ...string) ([]entity.City, error) {
+func (s *SQLRegion) Cities(ctx context.Context, pID string, ids ...string) ([]domain.City, error) {
 	query := func() (string, []any, error) {
 		ops := s.qu.Select("id", "name").From("cities").Limit(10)
+
 		if len(ids) > 0 {
-			ops.Where(exp.Ex{"id": ids})
+			ops = ops.Where(exp.Ex{"id": ids})
 		}
+
 		if pID != "" {
-			ops.Where(exp.Ex{"province_id": pID})
+			ops = ops.Where(exp.Ex{"province_id": pID})
 		}
+
 		return ops.Prepared(true).ToSQL()
 	}
 
-	return dbops.SQLGets[entity.City](ctx, s.db, query)
+	return dbops.SQLGets[domain.City](ctx, s.db, query)
 }
 
-func (s *SQLRegion) Districts(ctx context.Context, pID string, ids ...string) ([]entity.District, error) {
+func (s *SQLRegion) Districts(ctx context.Context, pID string, ids ...string) ([]domain.District, error) {
 	query := func() (string, []any, error) {
 		ops := s.qu.Select("id", "name").From("districts").Limit(10)
+
 		if len(ids) > 0 {
-			ops.Where(exp.Ex{"id": ids})
+			ops = ops.Where(exp.Ex{"id": ids})
 		}
+
 		if pID != "" {
-			ops.Where(exp.Ex{"city_id": pID})
+			ops = ops.Where(exp.Ex{"city_id": pID})
 		}
+
 		return ops.Prepared(true).ToSQL()
 	}
 
-	return dbops.SQLGets[entity.District](ctx, s.db, query)
+	return dbops.SQLGets[domain.District](ctx, s.db, query)
 }
 
-func (s *SQLRegion) Villages(ctx context.Context, pID string, ids ...string) ([]entity.Village, error) {
+func (s *SQLRegion) Villages(ctx context.Context, pID string, ids ...string) ([]domain.Village, error) {
 	query := func() (string, []any, error) {
 		ops := s.qu.Select("id", "name").From("villages").Limit(10)
+
 		if len(ids) > 0 {
-			ops.Where(exp.Ex{"id": ids})
+			ops = ops.Where(exp.Ex{"id": ids})
 		}
+
 		if pID != "" {
-			ops.Where(exp.Ex{"district_id": pID})
+			ops = ops.Where(exp.Ex{"district_id": pID})
 		}
+
 		return ops.Prepared(true).ToSQL()
 	}
 
-	return dbops.SQLGets[entity.Village](ctx, s.db, query)
+	return dbops.SQLGets[domain.Village](ctx, s.db, query)
 }

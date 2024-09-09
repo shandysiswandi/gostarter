@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/shandysiswandi/gostarter/internal/region/internal/usecase"
+	"github.com/shandysiswandi/gostarter/internal/region/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 )
@@ -17,10 +17,10 @@ func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 }
 
 type Endpoint struct {
-	search usecase.Search
+	search domain.Search
 }
 
-func NewEndpoint(search usecase.Search) *Endpoint {
+func NewEndpoint(search domain.Search) *Endpoint {
 	return &Endpoint{search: search}
 }
 
@@ -29,10 +29,15 @@ func (e *Endpoint) Search(ctx context.Context, r *http.Request) (any, error) {
 	pid := r.URL.Query().Get("pid")
 	ids := r.URL.Query().Get("ids")
 
-	resp, err := e.search.Execute(ctx, usecase.SearchInput{By: by, ParentID: pid, IDs: ids})
+	resp, err := e.search.Call(ctx, domain.SearchInput{By: by, ParentID: pid, IDs: ids})
 	if err != nil {
 		return nil, err
 	}
 
-	return SearchResponse{Type: by, Regions: FromListEntityRegion(resp.Regions)}, nil
+	result := make([]Region, 0)
+	for _, r := range resp {
+		result = append(result, Region{ID: r.ID, Name: r.Name})
+	}
+
+	return SearchResponse{Type: by, Regions: result}, nil
 }

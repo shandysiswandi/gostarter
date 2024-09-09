@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	entity "github.com/shandysiswandi/gostarter/internal/region/internal/entity"
+	domain "github.com/shandysiswandi/gostarter/internal/region/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,7 +23,7 @@ func (_m *MockSearchStore) EXPECT() *MockSearchStore_Expecter {
 }
 
 // Cities provides a mock function with given fields: ctx, parentID, ids
-func (_m *MockSearchStore) Cities(ctx context.Context, parentID string, ids ...string) ([]entity.City, error) {
+func (_m *MockSearchStore) Cities(ctx context.Context, parentID string, ids ...string) ([]domain.City, error) {
 	_va := make([]interface{}, len(ids))
 	for _i := range ids {
 		_va[_i] = ids[_i]
@@ -37,16 +37,16 @@ func (_m *MockSearchStore) Cities(ctx context.Context, parentID string, ids ...s
 		panic("no return value specified for Cities")
 	}
 
-	var r0 []entity.City
+	var r0 []domain.City
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]entity.City, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]domain.City, error)); ok {
 		return rf(ctx, parentID, ids...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []entity.City); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []domain.City); ok {
 		r0 = rf(ctx, parentID, ids...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]entity.City)
+			r0 = ret.Get(0).([]domain.City)
 		}
 	}
 
@@ -86,18 +86,18 @@ func (_c *MockSearchStore_Cities_Call) Run(run func(ctx context.Context, parentI
 	return _c
 }
 
-func (_c *MockSearchStore_Cities_Call) Return(_a0 []entity.City, _a1 error) *MockSearchStore_Cities_Call {
+func (_c *MockSearchStore_Cities_Call) Return(_a0 []domain.City, _a1 error) *MockSearchStore_Cities_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockSearchStore_Cities_Call) RunAndReturn(run func(context.Context, string, ...string) ([]entity.City, error)) *MockSearchStore_Cities_Call {
+func (_c *MockSearchStore_Cities_Call) RunAndReturn(run func(context.Context, string, ...string) ([]domain.City, error)) *MockSearchStore_Cities_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Districts provides a mock function with given fields: ctx, parentID, ids
-func (_m *MockSearchStore) Districts(ctx context.Context, parentID string, ids ...string) ([]entity.District, error) {
+func (_m *MockSearchStore) Districts(ctx context.Context, parentID string, ids ...string) ([]domain.District, error) {
 	_va := make([]interface{}, len(ids))
 	for _i := range ids {
 		_va[_i] = ids[_i]
@@ -111,16 +111,16 @@ func (_m *MockSearchStore) Districts(ctx context.Context, parentID string, ids .
 		panic("no return value specified for Districts")
 	}
 
-	var r0 []entity.District
+	var r0 []domain.District
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]entity.District, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]domain.District, error)); ok {
 		return rf(ctx, parentID, ids...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []entity.District); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []domain.District); ok {
 		r0 = rf(ctx, parentID, ids...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]entity.District)
+			r0 = ret.Get(0).([]domain.District)
 		}
 	}
 
@@ -160,18 +160,18 @@ func (_c *MockSearchStore_Districts_Call) Run(run func(ctx context.Context, pare
 	return _c
 }
 
-func (_c *MockSearchStore_Districts_Call) Return(_a0 []entity.District, _a1 error) *MockSearchStore_Districts_Call {
+func (_c *MockSearchStore_Districts_Call) Return(_a0 []domain.District, _a1 error) *MockSearchStore_Districts_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockSearchStore_Districts_Call) RunAndReturn(run func(context.Context, string, ...string) ([]entity.District, error)) *MockSearchStore_Districts_Call {
+func (_c *MockSearchStore_Districts_Call) RunAndReturn(run func(context.Context, string, ...string) ([]domain.District, error)) *MockSearchStore_Districts_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Provinces provides a mock function with given fields: ctx, ids
-func (_m *MockSearchStore) Provinces(ctx context.Context, ids ...string) ([]entity.Province, error) {
+func (_m *MockSearchStore) Provinces(ctx context.Context, ids ...string) ([]domain.Province, error) {
 	_va := make([]interface{}, len(ids))
 	for _i := range ids {
 		_va[_i] = ids[_i]
@@ -185,16 +185,16 @@ func (_m *MockSearchStore) Provinces(ctx context.Context, ids ...string) ([]enti
 		panic("no return value specified for Provinces")
 	}
 
-	var r0 []entity.Province
+	var r0 []domain.Province
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, ...string) ([]entity.Province, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, ...string) ([]domain.Province, error)); ok {
 		return rf(ctx, ids...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, ...string) []entity.Province); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, ...string) []domain.Province); ok {
 		r0 = rf(ctx, ids...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]entity.Province)
+			r0 = ret.Get(0).([]domain.Province)
 		}
 	}
 
@@ -233,18 +233,18 @@ func (_c *MockSearchStore_Provinces_Call) Run(run func(ctx context.Context, ids 
 	return _c
 }
 
-func (_c *MockSearchStore_Provinces_Call) Return(_a0 []entity.Province, _a1 error) *MockSearchStore_Provinces_Call {
+func (_c *MockSearchStore_Provinces_Call) Return(_a0 []domain.Province, _a1 error) *MockSearchStore_Provinces_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockSearchStore_Provinces_Call) RunAndReturn(run func(context.Context, ...string) ([]entity.Province, error)) *MockSearchStore_Provinces_Call {
+func (_c *MockSearchStore_Provinces_Call) RunAndReturn(run func(context.Context, ...string) ([]domain.Province, error)) *MockSearchStore_Provinces_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Villages provides a mock function with given fields: ctx, parentID, ids
-func (_m *MockSearchStore) Villages(ctx context.Context, parentID string, ids ...string) ([]entity.Village, error) {
+func (_m *MockSearchStore) Villages(ctx context.Context, parentID string, ids ...string) ([]domain.Village, error) {
 	_va := make([]interface{}, len(ids))
 	for _i := range ids {
 		_va[_i] = ids[_i]
@@ -258,16 +258,16 @@ func (_m *MockSearchStore) Villages(ctx context.Context, parentID string, ids ..
 		panic("no return value specified for Villages")
 	}
 
-	var r0 []entity.Village
+	var r0 []domain.Village
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]entity.Village, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) ([]domain.Village, error)); ok {
 		return rf(ctx, parentID, ids...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []entity.Village); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) []domain.Village); ok {
 		r0 = rf(ctx, parentID, ids...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]entity.Village)
+			r0 = ret.Get(0).([]domain.Village)
 		}
 	}
 
@@ -307,12 +307,12 @@ func (_c *MockSearchStore_Villages_Call) Run(run func(ctx context.Context, paren
 	return _c
 }
 
-func (_c *MockSearchStore_Villages_Call) Return(_a0 []entity.Village, _a1 error) *MockSearchStore_Villages_Call {
+func (_c *MockSearchStore_Villages_Call) Return(_a0 []domain.Village, _a1 error) *MockSearchStore_Villages_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockSearchStore_Villages_Call) RunAndReturn(run func(context.Context, string, ...string) ([]entity.Village, error)) *MockSearchStore_Villages_Call {
+func (_c *MockSearchStore_Villages_Call) RunAndReturn(run func(context.Context, string, ...string) ([]domain.Village, error)) *MockSearchStore_Villages_Call {
 	_c.Call.Return(run)
 	return _c
 }

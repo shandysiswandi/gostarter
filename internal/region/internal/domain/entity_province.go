@@ -1,4 +1,4 @@
-package entity
+package domain
 
 type Province struct {
 	ID   string
