@@ -53,8 +53,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetByID       func(childComplexity int, id string) int
-		GetWithFilter func(childComplexity int, in *FilterInput) int
+		Fetch func(childComplexity int, in *FetchInput) int
+		Find  func(childComplexity int, id string) int
 	}
 
 	Todo struct {
@@ -84,8 +84,8 @@ type MutationResolver interface {
 	Update(ctx context.Context, id string, in UpdateInput) (*UpdateResponse, error)
 }
 type QueryResolver interface {
-	GetWithFilter(ctx context.Context, in *FilterInput) ([]Todo, error)
-	GetByID(ctx context.Context, id string) (*Todo, error)
+	Fetch(ctx context.Context, in *FetchInput) ([]Todo, error)
+	Find(ctx context.Context, id string) (*Todo, error)
 }
 
 type executableSchema struct {
@@ -155,29 +155,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateStatus(childComplexity, args["id"].(string), args["status"].(Status)), true
 
-	case "Query.getByID":
-		if e.complexity.Query.GetByID == nil {
+	case "Query.fetch":
+		if e.complexity.Query.Fetch == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getByID_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_fetch_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetByID(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Fetch(childComplexity, args["in"].(*FetchInput)), true
 
-	case "Query.getWithFilter":
-		if e.complexity.Query.GetWithFilter == nil {
+	case "Query.find":
+		if e.complexity.Query.Find == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getWithFilter_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_find_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetWithFilter(childComplexity, args["in"].(*FilterInput)), true
+		return e.complexity.Query.Find(childComplexity, args["id"].(string)), true
 
 	case "Todo.description":
 		if e.complexity.Todo.Description == nil {
@@ -258,7 +258,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateInput,
-		ec.unmarshalInputFilterInput,
+		ec.unmarshalInputFetchInput,
 		ec.unmarshalInputUpdateInput,
 	)
 	first := true
@@ -359,8 +359,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../../todo-gql/todo.gql", Input: `# The query type, represents all of the entry points into our object graph
 type Query {
-  getWithFilter(in: FilterInput): [Todo!]!
-  getByID(id: String!): Todo
+  fetch(in: FetchInput): [Todo!]!
+  find(id: String!): Todo
 }
 
 # The mutation type, represents all updates we can make to our data
@@ -390,7 +390,7 @@ enum Status {
 
 # inputs .........................
 
-input FilterInput {
+input FetchInput {
   id: String
   title: String
   description: String
@@ -522,7 +522,22 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_fetch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *FetchInput
+	if tmp, ok := rawArgs["in"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("in"))
+		arg0, err = ec.unmarshalOFetchInput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFetchInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["in"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_find_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -534,21 +549,6 @@ func (ec *executionContext) field_Query_getByID_args(ctx context.Context, rawArg
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getWithFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *FilterInput
-	if tmp, ok := rawArgs["in"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("in"))
-		arg0, err = ec.unmarshalOFilterInput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFilterInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["in"] = arg0
 	return args, nil
 }
 
@@ -836,8 +836,8 @@ func (ec *executionContext) fieldContext_Mutation_update(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getWithFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getWithFilter(ctx, field)
+func (ec *executionContext) _Query_fetch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_fetch(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -850,7 +850,7 @@ func (ec *executionContext) _Query_getWithFilter(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetWithFilter(rctx, fc.Args["in"].(*FilterInput))
+		return ec.resolvers.Query().Fetch(rctx, fc.Args["in"].(*FetchInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -867,7 +867,7 @@ func (ec *executionContext) _Query_getWithFilter(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚕgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodoᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getWithFilter(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_fetch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -894,15 +894,15 @@ func (ec *executionContext) fieldContext_Query_getWithFilter(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getWithFilter_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_fetch_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getByID(ctx, field)
+func (ec *executionContext) _Query_find(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_find(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -915,7 +915,7 @@ func (ec *executionContext) _Query_getByID(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetByID(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().Find(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -929,7 +929,7 @@ func (ec *executionContext) _Query_getByID(ctx context.Context, field graphql.Co
 	return ec.marshalOTodo2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_find(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -956,7 +956,7 @@ func (ec *executionContext) fieldContext_Query_getByID(ctx context.Context, fiel
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getByID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_find_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3339,8 +3339,8 @@ func (ec *executionContext) unmarshalInputCreateInput(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputFilterInput(ctx context.Context, obj interface{}) (FilterInput, error) {
-	var it FilterInput
+func (ec *executionContext) unmarshalInputFetchInput(ctx context.Context, obj interface{}) (FetchInput, error) {
+	var it FetchInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3525,7 +3525,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getWithFilter":
+		case "fetch":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3534,7 +3534,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getWithFilter(ctx, field)
+				res = ec._Query_fetch(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3547,7 +3547,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getByID":
+		case "find":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3556,7 +3556,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getByID(ctx, field)
+				res = ec._Query_find(ctx, field)
 				return res
 			}
 
@@ -4490,11 +4490,11 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOFilterInput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFilterInput(ctx context.Context, v interface{}) (*FilterInput, error) {
+func (ec *executionContext) unmarshalOFetchInput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFetchInput(ctx context.Context, v interface{}) (*FetchInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputFilterInput(ctx, v)
+	res, err := ec.unmarshalInputFetchInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

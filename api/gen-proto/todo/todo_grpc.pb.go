@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TodoService_Create_FullMethodName        = "/gostarter.TodoService/Create"
-	TodoService_Delete_FullMethodName        = "/gostarter.TodoService/Delete"
-	TodoService_GetByID_FullMethodName       = "/gostarter.TodoService/GetByID"
-	TodoService_GetWithFilter_FullMethodName = "/gostarter.TodoService/GetWithFilter"
-	TodoService_UpdateStatus_FullMethodName  = "/gostarter.TodoService/UpdateStatus"
-	TodoService_Update_FullMethodName        = "/gostarter.TodoService/Update"
+	TodoService_Create_FullMethodName       = "/gostarter.TodoService/Create"
+	TodoService_Delete_FullMethodName       = "/gostarter.TodoService/Delete"
+	TodoService_Find_FullMethodName         = "/gostarter.TodoService/Find"
+	TodoService_Fetch_FullMethodName        = "/gostarter.TodoService/Fetch"
+	TodoService_UpdateStatus_FullMethodName = "/gostarter.TodoService/UpdateStatus"
+	TodoService_Update_FullMethodName       = "/gostarter.TodoService/Update"
 )
 
 // TodoServiceClient is the client API for TodoService service.
@@ -33,8 +33,8 @@ const (
 type TodoServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	GetByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetByIDResponse, error)
-	GetWithFilter(ctx context.Context, in *GetWithFilterRequest, opts ...grpc.CallOption) (*GetWithFilterResponse, error)
+	Find(ctx context.Context, in *FindRequest, opts ...grpc.CallOption) (*FindResponse, error)
+	Fetch(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchResponse, error)
 	UpdateStatus(ctx context.Context, in *UpdateStatusRequest, opts ...grpc.CallOption) (*UpdateStatusResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 }
@@ -67,20 +67,20 @@ func (c *todoServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts 
 	return out, nil
 }
 
-func (c *todoServiceClient) GetByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetByIDResponse, error) {
+func (c *todoServiceClient) Find(ctx context.Context, in *FindRequest, opts ...grpc.CallOption) (*FindResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetByIDResponse)
-	err := c.cc.Invoke(ctx, TodoService_GetByID_FullMethodName, in, out, cOpts...)
+	out := new(FindResponse)
+	err := c.cc.Invoke(ctx, TodoService_Find_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *todoServiceClient) GetWithFilter(ctx context.Context, in *GetWithFilterRequest, opts ...grpc.CallOption) (*GetWithFilterResponse, error) {
+func (c *todoServiceClient) Fetch(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetWithFilterResponse)
-	err := c.cc.Invoke(ctx, TodoService_GetWithFilter_FullMethodName, in, out, cOpts...)
+	out := new(FetchResponse)
+	err := c.cc.Invoke(ctx, TodoService_Fetch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +113,8 @@ func (c *todoServiceClient) Update(ctx context.Context, in *UpdateRequest, opts 
 type TodoServiceServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
-	GetByID(context.Context, *GetByIDRequest) (*GetByIDResponse, error)
-	GetWithFilter(context.Context, *GetWithFilterRequest) (*GetWithFilterResponse, error)
+	Find(context.Context, *FindRequest) (*FindResponse, error)
+	Fetch(context.Context, *FetchRequest) (*FetchResponse, error)
 	UpdateStatus(context.Context, *UpdateStatusRequest) (*UpdateStatusResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	mustEmbedUnimplementedTodoServiceServer()
@@ -133,11 +133,11 @@ func (UnimplementedTodoServiceServer) Create(context.Context, *CreateRequest) (*
 func (UnimplementedTodoServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedTodoServiceServer) GetByID(context.Context, *GetByIDRequest) (*GetByIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
+func (UnimplementedTodoServiceServer) Find(context.Context, *FindRequest) (*FindResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Find not implemented")
 }
-func (UnimplementedTodoServiceServer) GetWithFilter(context.Context, *GetWithFilterRequest) (*GetWithFilterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetWithFilter not implemented")
+func (UnimplementedTodoServiceServer) Fetch(context.Context, *FetchRequest) (*FetchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Fetch not implemented")
 }
 func (UnimplementedTodoServiceServer) UpdateStatus(context.Context, *UpdateStatusRequest) (*UpdateStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateStatus not implemented")
@@ -202,38 +202,38 @@ func _TodoService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TodoService_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetByIDRequest)
+func _TodoService_Find_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServiceServer).GetByID(ctx, in)
+		return srv.(TodoServiceServer).Find(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TodoService_GetByID_FullMethodName,
+		FullMethod: TodoService_Find_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServiceServer).GetByID(ctx, req.(*GetByIDRequest))
+		return srv.(TodoServiceServer).Find(ctx, req.(*FindRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TodoService_GetWithFilter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWithFilterRequest)
+func _TodoService_Fetch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServiceServer).GetWithFilter(ctx, in)
+		return srv.(TodoServiceServer).Fetch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TodoService_GetWithFilter_FullMethodName,
+		FullMethod: TodoService_Fetch_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServiceServer).GetWithFilter(ctx, req.(*GetWithFilterRequest))
+		return srv.(TodoServiceServer).Fetch(ctx, req.(*FetchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -290,12 +290,12 @@ var TodoService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TodoService_Delete_Handler,
 		},
 		{
-			MethodName: "GetByID",
-			Handler:    _TodoService_GetByID_Handler,
+			MethodName: "Find",
+			Handler:    _TodoService_Find_Handler,
 		},
 		{
-			MethodName: "GetWithFilter",
-			Handler:    _TodoService_GetWithFilter_Handler,
+			MethodName: "Fetch",
+			Handler:    _TodoService_Fetch_Handler,
 		},
 		{
 			MethodName: "UpdateStatus",

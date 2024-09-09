@@ -1,7 +1,7 @@
 # The query type, represents all of the entry points into our object graph
 type Query {
-  getWithFilter(in: FilterInput): [Todo!]!
-  getByID(id: String!): Todo
+  fetch(in: FetchInput): [Todo!]!
+  find(id: String!): Todo
 }
 
 # The mutation type, represents all updates we can make to our data
@@ -31,7 +31,7 @@ enum Status {
 
 # inputs .........................
 
-input FilterInput {
+input FetchInput {
   id: String
   title: String
   description: String

@@ -41,25 +41,25 @@ message DeleteResponse {
     uint64 id = 1;
 }
 
-message GetByIDRequest { 
+message FindRequest { 
     uint64 id = 1;
 }
 
-message GetByIDResponse { 
-    uint64 id = 1;
-    string title = 2;
-    string description = 3;
-    Status status = 4;
-}
-
-message GetWithFilterRequest { 
+message FindResponse { 
     uint64 id = 1;
     string title = 2;
     string description = 3;
     Status status = 4;
 }
 
-message GetWithFilterResponse { 
+message FetchRequest { 
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    Status status = 4;
+}
+
+message FetchResponse { 
     repeated Todo todos = 1;
 }
 
@@ -90,8 +90,8 @@ message UpdateResponse {
 service TodoService {
     rpc Create (CreateRequest) returns (CreateResponse);
     rpc Delete (DeleteRequest) returns (DeleteResponse);
-    rpc GetByID (GetByIDRequest) returns (GetByIDResponse);
-    rpc GetWithFilter (GetWithFilterRequest) returns (GetWithFilterResponse);
+    rpc Find (FindRequest) returns (FindResponse);
+    rpc Fetch (FetchRequest) returns (FetchResponse);
     rpc UpdateStatus (UpdateStatusRequest) returns (UpdateStatusResponse);
     rpc Update (UpdateRequest) returns (UpdateResponse);
 }

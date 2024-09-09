@@ -13,7 +13,7 @@ type CreateInput struct {
 	Description string `json:"description"`
 }
 
-type FilterInput struct {
+type FetchInput struct {
 	ID          *string `json:"id,omitempty"`
 	Title       *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`

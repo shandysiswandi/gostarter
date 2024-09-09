@@ -29,14 +29,14 @@ func (r *mutationResolver) Update(ctx context.Context, id string, in UpdateInput
 	panic(fmt.Errorf("not implemented: Update - update"))
 }
 
-// GetWithFilter is the resolver for the getWithFilter field.
-func (r *queryResolver) GetWithFilter(ctx context.Context, in *FilterInput) ([]Todo, error) {
-	panic(fmt.Errorf("not implemented: GetWithFilter - getWithFilter"))
+// Fetch is the resolver for the fetch field.
+func (r *queryResolver) Fetch(ctx context.Context, in *FetchInput) ([]Todo, error) {
+	panic(fmt.Errorf("not implemented: Fetch - fetch"))
 }
 
-// GetByID is the resolver for the getByID field.
-func (r *queryResolver) GetByID(ctx context.Context, id string) (*Todo, error) {
-	panic(fmt.Errorf("not implemented: GetByID - getByID"))
+// Find is the resolver for the find field.
+func (r *queryResolver) Find(ctx context.Context, id string) (*Todo, error) {
+	panic(fmt.Errorf("not implemented: Find - find"))
 }
 
 // Mutation returns MutationResolver implementation.
