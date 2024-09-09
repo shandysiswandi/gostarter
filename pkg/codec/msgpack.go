@@ -7,19 +7,19 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-// MsgpackCodec is a Codec implementation for MessagePack encoding/decoding.
-type MsgpackCodec struct{}
+// MsgPackCodec is a Codec implementation for MessagePack encoding/decoding.
+type MsgPackCodec struct{}
 
-// NewMsgpackCodec creates a new instance of MsgpackCodec.
-func NewMsgpackCodec() *MsgpackCodec {
-	return &MsgpackCodec{}
+// NewMsgPackCodec creates a new instance of MsgpackCodec.
+func NewMsgPackCodec() *MsgPackCodec {
+	return &MsgPackCodec{}
 }
 
 // Encode encodes a value into MessagePack format.
 //
 // v: The value to encode. It can be of any type that is supported by MessagePack encoding.
 // Returns: A byte slice containing the MessagePack-encoded data, and an error if encoding fails.
-func (*MsgpackCodec) Encode(v any) ([]byte, error) {
+func (*MsgPackCodec) Encode(v any) ([]byte, error) {
 	return msgpack.Marshal(v)
 }
 
@@ -28,6 +28,6 @@ func (*MsgpackCodec) Encode(v any) ([]byte, error) {
 // data: The byte slice containing MessagePack-encoded data.
 // v: A pointer to the value where the decoded data will be stored.
 // Returns: An error if decoding fails.
-func (*MsgpackCodec) Decode(data []byte, v any) error {
+func (*MsgPackCodec) Decode(data []byte, v any) error {
 	return msgpack.Unmarshal(data, v)
 }

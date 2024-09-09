@@ -10,17 +10,17 @@ import (
 func TestNewMsgpackCodec(t *testing.T) {
 	tests := []struct {
 		name string
-		want *MsgpackCodec
+		want *MsgPackCodec
 	}{
 		{
 			name: "CreateNewMsgpackCodec",
-			want: &MsgpackCodec{},
+			want: &MsgPackCodec{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewMsgpackCodec()
+			got := NewMsgPackCodec()
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -75,7 +75,7 @@ func TestMsgpackCodec_Encode(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := &MsgpackCodec{}
+			c := &MsgPackCodec{}
 			got, err := c.Encode(tt.v)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -146,7 +146,7 @@ func TestMsgpackCodec_Decode(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := &MsgpackCodec{}
+			c := &MsgPackCodec{}
 			err := c.Decode(tt.data(), tt.v)
 			if tt.wantErr {
 				assert.Error(t, err)
