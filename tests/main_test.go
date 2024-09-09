@@ -20,11 +20,11 @@ func (*Suite) SetupTest() {
 }
 
 func (*Suite) SetupSubTest() {
-	// Hook 3: Prepare resources needed for subtests.
+	// Hook 3: Prepare resources needed for sub tests.
 }
 
 func (*Suite) TearDownSubTest() {
-	// Hook 4: Clean up resources used in subtests.
+	// Hook 4: Clean up resources used in sub tests.
 }
 
 func (*Suite) TearDownTest() {

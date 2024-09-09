@@ -85,17 +85,17 @@ func (gs *GQLSuite) TestTodos() {
 			},
 		},
 		{
-			name: "GET_BY_ID",
+			name: "FIND",
 			query: func(id string) string {
 				return `query{
-					getByID(id: "` + id + `") { id title description status }
+					find(id: "` + id + `") { id title description status }
 				}`
 			},
 		},
 		{
-			name: "GET_ALL",
+			name: "FETCH",
 			query: func(id string) string {
-				return `query{ getWithFilter{ id title description status } }`
+				return `query{ fetch{ id title description status } }`
 			},
 		},
 		{

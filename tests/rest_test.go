@@ -256,3 +256,317 @@ func (rs *RESTSuite) TestShortly() {
 		rs.Assert().Equal("https://www.amazon.com", responseBody.URL)
 	})
 }
+
+func (rs *RESTSuite) TestRegions() {
+	type Region struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+
+	rs.Run("SearchByProvinces", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "provinces").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("provinces", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByCities", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "cities").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("cities", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByDistricts", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "districts").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("districts", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByVillages", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "villages").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("villages", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByCitiesWithParentID11", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "cities").
+			SetQueryParam("pid", "11").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("cities", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByDistrictsWithParentID1111", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "districts").
+			SetQueryParam("pid", "1111").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("districts", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByVillagesWithParentID111111", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "villages").
+			SetQueryParam("pid", "111111").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("villages", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 10)
+	})
+
+	rs.Run("SearchByProvincesWithIDS", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "provinces").
+			SetQueryParam("ids", "11,12").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("provinces", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByCitiesWithIDS", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "cities").
+			SetQueryParam("ids", "1101,1102").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("cities", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByDistrictsWithIDS", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "districts").
+			SetQueryParam("ids", "111101,111102").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("districts", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByVillagesWithIDS", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "villages").
+			SetQueryParam("ids", "1111112001,1111112002").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("villages", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByCitiesWithIDSAndParentID", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "cities").
+			SetQueryParam("pid", "11").
+			SetQueryParam("ids", "1101,1102").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("cities", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByDistrictsWithIDSAndParentID", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "districts").
+			SetQueryParam("pid", "1111").
+			SetQueryParam("ids", "111101,111102").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("districts", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+
+	rs.Run("SearchByVillagesWithIDSAndParentID", func() {
+		// Arrange
+		responseBody := struct {
+			Type    string   `json:"type"`
+			Regions []Region `json:"regions"`
+		}{}
+
+		// Action
+		resp, err := rs.httpClient.R().
+			SetQueryParam("by", "villages").
+			SetQueryParam("pid", "111111").
+			SetQueryParam("ids", "1111112001,1111112002").
+			SetResult(&responseBody).
+			Get(rs.baseURL + "/regions/search")
+
+		// Assert
+		rs.Assert().NoError(err)
+		rs.Assert().NotNil(resp)
+		rs.Assert().Equal(http.StatusOK, resp.StatusCode())
+		rs.Assert().Equal("villages", responseBody.Type)
+		rs.Assert().Len(responseBody.Regions, 2)
+	})
+}
