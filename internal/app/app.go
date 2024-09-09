@@ -41,13 +41,13 @@ type App struct {
 	httpServer   *http.Server
 	grpcServer   *grpc.Server
 	httpRouter   *httprouter.Router
-	runables     []task.Runner
+	runnables    []task.Runner
 	closersFn    []func(context.Context) error
 }
 
 // New creates and returns a new instance of the App structure. This function initializes
 // all the core components of the application, including standard logging, configuration,
-// database connections, Redis client, HTTP router, HTTP server, gRPC Srever and various
+// database connections, Redis client, HTTP router, HTTP server, gRPC Server and various
 // utility libraries. This method is typically called before starting the application to
 // ensure that all components are properly set up.
 func New() *App {

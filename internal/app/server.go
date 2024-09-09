@@ -80,7 +80,7 @@ func (a *App) Start() <-chan struct{} {
 // The ctx parameter is used to control the timeout or cancellation of the stop operations.
 func (a *App) Stop(ctx context.Context) {
 	// close tasks or jobs
-	for _, run := range a.runables {
+	for _, run := range a.runnables {
 		if err := run.Stop(ctx); err != nil {
 			log.Println("failed to close runner", err)
 		}

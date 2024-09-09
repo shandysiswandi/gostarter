@@ -10,6 +10,7 @@ package app
 import (
 	"log"
 
+	"github.com/shandysiswandi/gostarter/internal/gallery"
 	"github.com/shandysiswandi/gostarter/internal/region"
 	"github.com/shandysiswandi/gostarter/internal/shortly"
 	"github.com/shandysiswandi/gostarter/internal/todo"
@@ -57,5 +58,17 @@ func (a *App) initModules() {
 		log.Fatalln("failed to init module shortly", err)
 	}
 
-	a.runables = append(a.runables, expTodo.Tasks...)
+	_, err = gallery.New(gallery.Dependency{
+		RedisDB:   a.redisdb,
+		Config:    a.config,
+		CodecJSON: a.codecJSON,
+		Validator: a.validator,
+		Router:    a.httpRouter,
+		Logger:    a.logger,
+	})
+	if err != nil {
+		log.Fatalln("failed to init module gallery", err)
+	}
+
+	a.runnables = append(a.runnables, expTodo.Tasks...)
 }

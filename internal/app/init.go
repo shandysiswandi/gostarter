@@ -112,7 +112,7 @@ func (a *App) initDatabase() {
 	maxOpen := a.config.GetInt(`database.max.open`)
 	maxIdle := a.config.GetInt(`database.max.idle`)
 	maxLifetime := a.config.GetInt(`database.max.lifetime`)
-	maxIdletime := a.config.GetInt(`database.max.idletime`)
+	maxIdleTime := a.config.GetInt(`database.max.idletime`)
 
 	dsn := a.dsnMySQL()
 	driver := "mysql"
@@ -133,7 +133,7 @@ func (a *App) initDatabase() {
 	database.SetMaxOpenConns(int(maxOpen))
 	database.SetMaxIdleConns(int(maxIdle))
 	database.SetConnMaxLifetime(time.Duration(maxLifetime) * time.Minute)
-	database.SetConnMaxIdleTime(time.Duration(maxIdletime) * time.Minute)
+	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
 	a.database = database
 }
@@ -161,7 +161,7 @@ func (a *App) initHTTPRouter() {
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("content-type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		err := json.NewEncoder(w).Encode(map[string]string{"code": "40400", "message": "Endpoint not found"})
+		err := json.NewEncoder(w).Encode(map[string]string{"message": "endpoint not found"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -170,7 +170,7 @@ func (a *App) initHTTPRouter() {
 	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("content-type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		err := json.NewEncoder(w).Encode(map[string]string{"code": "40500", "message": "Method endpoint not allowed"})
+		err := json.NewEncoder(w).Encode(map[string]string{"message": "method endpoint not allowed"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -224,7 +224,7 @@ func (a *App) initLibraries() {
 	a.pvalidator = pvalidator
 	a.uuid = uid.NewUUIDString()
 	a.codecJSON = codec.NewJSONCodec()
-	a.codecMsgPack = codec.NewMsgpackCodec()
+	a.codecMsgPack = codec.NewMsgPackCodec()
 	a.validator = validation.NewV10Validator()
 	a.logger = logger.NewStdLogger()
 }
@@ -232,7 +232,7 @@ func (a *App) initLibraries() {
 // initTasks starts all background tasks or services registered with the application.
 // If any task fails to start, the application will log a fatal error and terminate.
 func (a *App) initTasks() {
-	for _, runnable := range a.runables {
+	for _, runnable := range a.runnables {
 		if err := runnable.Start(); err != nil {
 			log.Fatalln("failed to init initTasks", err)
 		}
