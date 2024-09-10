@@ -14,3 +14,8 @@ database.max.lifetime: 5
 redis.addr: redis:6379
 
 feature.flag.graphql.playground: false
+
+module.flag.gallery: true
+module.flag.region: true
+module.flag.shortly: true
+module.flag.todo: true
