@@ -3,16 +3,9 @@ with-expecter: True
 disable-version-string: True
 packages:
   # dbops: skip, using github.com/DATA-DOG/go-sqlmock instead
-  # task: skip, because i dont know the usecases yet
+  # task: skip, because i don't know the useases yet
   # errs: skip, because errs does not have interfaces
   # http: skip, using net/http/httptest instead
-
-  github.com/shandysiswandi/gostarter/pkg/clock:
-    config:
-      all: True
-      filename: "mock_{{ .InterfaceName | snakecase }}.go"
-      outpkg: "mocker"
-      dir: "{{ .InterfaceDir }}/mocker"
 
   github.com/shandysiswandi/gostarter/pkg/codec:
     config:
@@ -51,6 +44,13 @@ packages:
           outpkg: "mocker"
           dir: "{{ .InterfaceDir }}/mocker"
 
+  github.com/shandysiswandi/gostarter/pkg/storage:
+    config:
+      all: True
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/uid:
     config:
       all: True
@@ -66,6 +66,14 @@ packages:
       dir: "{{ .InterfaceDir }}/mocker"
 
   # MODULES
+  github.com/shandysiswandi/gostarter/internal/gallery:
+    config:
+      all: True
+      recursive: True
+      outpkg: "mockz"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: internal/gallery/internal/mockz
+
   github.com/shandysiswandi/gostarter/internal/region:
     config:
       all: True
