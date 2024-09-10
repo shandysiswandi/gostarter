@@ -19,12 +19,12 @@ import (
 func (a *App) initModules() {
 	expTodo, err := todo.New(todo.Dependency{
 		Database:       a.database,
-		RedisDB:        a.redisdb,
+		RedisDB:        a.redisDB,
 		Config:         a.config,
-		UIDNumber:      a.uidnumber,
+		UIDNumber:      a.uidNumber,
 		CodecJSON:      a.codecJSON,
 		Validator:      a.validator,
-		ProtoValidator: a.pvalidator,
+		ProtoValidator: a.protoValidator,
 		Router:         a.httpRouter,
 		GRPCServer:     a.grpcServer,
 		Logger:         a.logger,
@@ -35,7 +35,7 @@ func (a *App) initModules() {
 
 	_, err = region.New(region.Dependency{
 		Database:  a.database,
-		RedisDB:   a.redisdb,
+		RedisDB:   a.redisDB,
 		Config:    a.config,
 		CodecJSON: a.codecJSON,
 		Validator: a.validator,
@@ -47,7 +47,7 @@ func (a *App) initModules() {
 	}
 
 	_, err = shortly.New(shortly.Dependency{
-		RedisDB:   a.redisdb,
+		RedisDB:   a.redisDB,
 		Config:    a.config,
 		CodecJSON: a.codecJSON,
 		Validator: a.validator,
@@ -59,7 +59,7 @@ func (a *App) initModules() {
 	}
 
 	_, err = gallery.New(gallery.Dependency{
-		RedisDB:   a.redisdb,
+		RedisDB:   a.redisDB,
 		Config:    a.config,
 		CodecJSON: a.codecJSON,
 		Validator: a.validator,

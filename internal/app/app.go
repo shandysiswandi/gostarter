@@ -28,21 +28,21 @@ import (
 // HTTP router, and tasks. It manages the initialization and graceful shutdown of
 // these components.
 type App struct {
-	config       config.Config
-	uidnumber    uid.NumberID
-	uuid         uid.StringID
-	codecJSON    codec.Codec
-	codecMsgPack codec.Codec
-	validator    validation.Validator
-	pvalidator   validation.Validator
-	logger       logger.Logger
-	database     *sql.DB
-	redisdb      *redis.Client
-	httpServer   *http.Server
-	grpcServer   *grpc.Server
-	httpRouter   *httprouter.Router
-	runnables    []task.Runner
-	closersFn    []func(context.Context) error
+	config         config.Config
+	uidNumber      uid.NumberID
+	uuid           uid.StringID
+	codecJSON      codec.Codec
+	codecMsgPack   codec.Codec
+	validator      validation.Validator
+	protoValidator validation.Validator
+	logger         logger.Logger
+	database       *sql.DB
+	redisDB        *redis.Client
+	httpServer     *http.Server
+	grpcServer     *grpc.Server
+	httpRouter     *httprouter.Router
+	runnables      []task.Runner
+	closersFn      []func(context.Context) error
 }
 
 // New creates and returns a new instance of the App structure. This function initializes
@@ -63,7 +63,7 @@ func New() *App {
 	app.initLibraries()
 	app.initModules()
 	app.initTasks()
-	app.iniClosed()
+	app.initClosers()
 
 	return app
 }

@@ -150,7 +150,7 @@ func (a *App) initRedis() {
 		log.Fatalln("failed to init redis", err)
 	}
 
-	a.redisdb = rdb
+	a.redisDB = rdb
 }
 
 // initHTTPRouter initializes the HTTP router using the httprouter library.
@@ -217,11 +217,11 @@ func (a *App) initLibraries() {
 
 	pvalidator, err := validation.NewProtoValidator()
 	if err != nil {
-		log.Fatalln("failed to init validation protovalidate", err)
+		log.Fatalln("failed to init validation proto validator", err)
 	}
 
-	a.uidnumber = snow
-	a.pvalidator = pvalidator
+	a.uidNumber = snow
+	a.protoValidator = pvalidator
 	a.uuid = uid.NewUUIDString()
 	a.codecJSON = codec.NewJSONCodec()
 	a.codecMsgPack = codec.NewMsgPackCodec()
@@ -239,12 +239,12 @@ func (a *App) initTasks() {
 	}
 }
 
-// iniClosed registers cleanup functions for all core components of the application.
+// initClosers registers cleanup functions for all core components of the application.
 // These functions are responsible for gracefully shutting down the HTTP server,
 // gRPC Server, closing database connections, terminating the Redis client, and
 // cleaning up the configuration. This method is typically called when stopping
 // the application to ensure all resources are released properly.
-func (a *App) iniClosed() {
+func (a *App) initClosers() {
 	a.closersFn = append(a.closersFn, []func(ctx context.Context) error{
 		func(ctx context.Context) error {
 			return a.httpServer.Shutdown(ctx)
@@ -258,7 +258,7 @@ func (a *App) iniClosed() {
 			return a.database.Close()
 		},
 		func(context.Context) error {
-			return a.redisdb.Close()
+			return a.redisDB.Close()
 		},
 		func(context.Context) error {
 			return a.config.Close()
