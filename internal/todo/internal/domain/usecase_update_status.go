@@ -1,9 +1,7 @@
-package usecase
+package domain
 
 import (
 	"context"
-
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
 )
 
 type UpdateStatus interface {
@@ -17,5 +15,5 @@ type UpdateStatusInput struct {
 
 type UpdateStatusOutput struct {
 	ID     uint64
-	Status entity.TodoStatus
+	Status TodoStatus
 }

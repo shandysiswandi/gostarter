@@ -1,4 +1,4 @@
-package entity
+package domain
 
 import (
 	"database/sql/driver"
@@ -13,7 +13,7 @@ type TodoStatus int
 const (
 	TodoStatusUnknown TodoStatus = iota
 	TodoStatusInitiate
-	TodoStatusInprogres
+	TodoStatusInProgress
 	TodoStatusDrop
 	TodoStatusDone
 )
@@ -22,8 +22,8 @@ func ParseTodoStatus(s string) TodoStatus {
 	switch strings.TrimPrefix(s, "STATUS_") {
 	case TodoStatusInitiate.String():
 		return TodoStatusInitiate
-	case TodoStatusInprogres.String():
-		return TodoStatusInprogres
+	case TodoStatusInProgress.String():
+		return TodoStatusInProgress
 	case TodoStatusDrop.String():
 		return TodoStatusDrop
 	case TodoStatusDone.String():
@@ -34,22 +34,30 @@ func ParseTodoStatus(s string) TodoStatus {
 }
 
 func (ts TodoStatus) String() string {
-	return [...]string{
+	statuses := [...]string{
 		"UNKNOWN",
 		"INITIATE",
 		"IN_PROGRESS",
 		"DROP",
 		"DONE",
-	}[ts]
+	}
+
+	if ts < TodoStatusUnknown || int(ts) >= len(statuses) {
+		return "UNKNOWN"
+	}
+
+	return statuses[ts]
 }
 
 func (ts *TodoStatus) Scan(value any) error {
-	col, ok := value.([]byte)
-	if !ok {
+	switch col := value.(type) {
+	case []byte:
+		*ts = ParseTodoStatus(string(col))
+	case string:
+		*ts = ParseTodoStatus(col)
+	default:
 		return ErrScanTodoStatus
 	}
-
-	*ts = ParseTodoStatus(string(col))
 
 	return nil
 }

@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 )
@@ -30,17 +30,16 @@ func NewSQLTodo(db *sql.DB, config config.Config) *SQLTodo {
 	}
 }
 
-func (st *SQLTodo) Create(ctx context.Context, todo entity.Todo) error {
+func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
 	query := func() (string, []any, error) {
-		return st.qu.Insert("todos").
-			Cols("id", "title", "description", "status").
-			Vals([]any{todo.ID, todo.Title, todo.Description, todo.Status.String()}).
-			ToSQL()
+		return st.qu.Insert("todos").Cols("id", "title", "description", "status").
+			Vals([]any{todo.ID, todo.Title, todo.Description, todo.Status}).
+			Prepared(true).ToSQL()
 	}
 
 	err := dbops.Exec(ctx, st.db, query, true)
 	if errors.Is(err, dbops.ErrZeroRowsAffected) {
-		return entity.ErrTodoNotCreated
+		return domain.ErrTodoNotCreated
 	}
 
 	return err
@@ -48,68 +47,46 @@ func (st *SQLTodo) Create(ctx context.Context, todo entity.Todo) error {
 
 func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
 	query := func() (string, []any, error) {
-		return st.qu.Delete("todos").Where(goqu.Ex{"id": id}).ToSQL()
+		return st.qu.Delete("todos").Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
 	}
 
 	return dbops.Exec(ctx, st.db, query)
 }
 
-func (st *SQLTodo) GetByID(ctx context.Context, id uint64) (*entity.Todo, error) {
+func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 	query := func() (string, []any, error) {
-		return st.qu.
-			Select("id", "title", "description", "status").
-			From("todos").
-			Where(goqu.Ex{"id": id}).
-			ToSQL()
+		return st.qu.Select("id", "title", "description", "status").
+			From("todos").Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
 	}
 
-	todo, err := dbops.SQLGet[entity.Todo](ctx, st.db, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return todo, nil
+	return dbops.SQLGet[domain.Todo](ctx, st.db, query)
 }
 
-func (st *SQLTodo) GetWithFilter(ctx context.Context, _ map[string]string) ([]entity.Todo, error) {
+func (st *SQLTodo) Fetch(ctx context.Context, _ map[string]string) ([]domain.Todo, error) {
 	query := func() (string, []any, error) {
-		return st.qu.
-			Select("id", "title", "description", "status").
-			From("todos").
-			ToSQL()
+		return st.qu.Select("id", "title", "description", "status").
+			From("todos").Prepared(true).ToSQL()
 	}
 
-	todos, err := dbops.SQLGets[entity.Todo](ctx, st.db, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return todos, nil
+	return dbops.SQLGets[domain.Todo](ctx, st.db, query)
 }
 
-func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts entity.TodoStatus) error {
+func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts domain.TodoStatus) error {
 	query := func() (string, []any, error) {
-		return st.qu.
-			Update("todos").
-			Set(map[string]any{"status": sts}).
-			Where(goqu.Ex{"id": id}).
-			ToSQL()
+		return st.qu.Update("todos").Set(map[string]any{"status": sts}).
+			Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
 	}
 
 	return dbops.Exec(ctx, st.db, query)
 }
 
-func (st *SQLTodo) Update(ctx context.Context, todo entity.Todo) error {
+func (st *SQLTodo) Update(ctx context.Context, todo domain.Todo) error {
 	query := func() (string, []any, error) {
-		return st.qu.
-			Update("todos").
-			Set(map[string]any{
-				"title":       todo.Title,
-				"description": todo.Description,
-				"status":      todo.Status.String(),
-			}).
-			Where(goqu.Ex{"id": todo.ID}).
-			ToSQL()
+		return st.qu.Update("todos").Set(map[string]any{
+			"title":       todo.Title,
+			"description": todo.Description,
+			"status":      todo.Status,
+		}).Where(goqu.Ex{"id": todo.ID}).Prepared(true).ToSQL()
 	}
 
 	return dbops.Exec(ctx, st.db, query)

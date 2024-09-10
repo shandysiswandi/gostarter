@@ -2,10 +2,10 @@ package gql
 
 import (
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
 )
 
-var errfailedParseToUint = errs.NewValidation("failed parse id to uint")
+var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
 
 func getString(ptr *string) string {
 	if ptr != nil {

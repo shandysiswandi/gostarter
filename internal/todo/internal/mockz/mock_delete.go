@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	usecase "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,27 +23,27 @@ func (_m *MockDelete) EXPECT() *MockDelete_Expecter {
 }
 
 // Execute provides a mock function with given fields: ctx, in
-func (_m *MockDelete) Execute(ctx context.Context, in usecase.DeleteInput) (*usecase.DeleteOutput, error) {
+func (_m *MockDelete) Execute(ctx context.Context, in domain.DeleteInput) (*domain.DeleteOutput, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Execute")
 	}
 
-	var r0 *usecase.DeleteOutput
+	var r0 *domain.DeleteOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.DeleteInput) (*usecase.DeleteOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.DeleteInput) (*domain.DeleteOutput, error)); ok {
 		return rf(ctx, in)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.DeleteInput) *usecase.DeleteOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.DeleteInput) *domain.DeleteOutput); ok {
 		r0 = rf(ctx, in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*usecase.DeleteOutput)
+			r0 = ret.Get(0).(*domain.DeleteOutput)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, usecase.DeleteInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.DeleteInput) error); ok {
 		r1 = rf(ctx, in)
 	} else {
 		r1 = ret.Error(1)
@@ -59,24 +59,24 @@ type MockDelete_Execute_Call struct {
 
 // Execute is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in usecase.DeleteInput
+//   - in domain.DeleteInput
 func (_e *MockDelete_Expecter) Execute(ctx interface{}, in interface{}) *MockDelete_Execute_Call {
 	return &MockDelete_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
 }
 
-func (_c *MockDelete_Execute_Call) Run(run func(ctx context.Context, in usecase.DeleteInput)) *MockDelete_Execute_Call {
+func (_c *MockDelete_Execute_Call) Run(run func(ctx context.Context, in domain.DeleteInput)) *MockDelete_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(usecase.DeleteInput))
+		run(args[0].(context.Context), args[1].(domain.DeleteInput))
 	})
 	return _c
 }
 
-func (_c *MockDelete_Execute_Call) Return(_a0 *usecase.DeleteOutput, _a1 error) *MockDelete_Execute_Call {
+func (_c *MockDelete_Execute_Call) Return(_a0 *domain.DeleteOutput, _a1 error) *MockDelete_Execute_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockDelete_Execute_Call) RunAndReturn(run func(context.Context, usecase.DeleteInput) (*usecase.DeleteOutput, error)) *MockDelete_Execute_Call {
+func (_c *MockDelete_Execute_Call) RunAndReturn(run func(context.Context, domain.DeleteInput) (*domain.DeleteOutput, error)) *MockDelete_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

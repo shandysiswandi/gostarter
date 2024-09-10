@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	entity "github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
+	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,7 +23,7 @@ func (_m *MockCreateStore) EXPECT() *MockCreateStore_Expecter {
 }
 
 // Create provides a mock function with given fields: ctx, in
-func (_m *MockCreateStore) Create(ctx context.Context, in entity.Todo) error {
+func (_m *MockCreateStore) Create(ctx context.Context, in domain.Todo) error {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
@@ -31,7 +31,7 @@ func (_m *MockCreateStore) Create(ctx context.Context, in entity.Todo) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Todo) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Todo) error); ok {
 		r0 = rf(ctx, in)
 	} else {
 		r0 = ret.Error(0)
@@ -47,14 +47,14 @@ type MockCreateStore_Create_Call struct {
 
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in entity.Todo
+//   - in domain.Todo
 func (_e *MockCreateStore_Expecter) Create(ctx interface{}, in interface{}) *MockCreateStore_Create_Call {
 	return &MockCreateStore_Create_Call{Call: _e.mock.On("Create", ctx, in)}
 }
 
-func (_c *MockCreateStore_Create_Call) Run(run func(ctx context.Context, in entity.Todo)) *MockCreateStore_Create_Call {
+func (_c *MockCreateStore_Create_Call) Run(run func(ctx context.Context, in domain.Todo)) *MockCreateStore_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(entity.Todo))
+		run(args[0].(context.Context), args[1].(domain.Todo))
 	})
 	return _c
 }
@@ -64,7 +64,7 @@ func (_c *MockCreateStore_Create_Call) Return(_a0 error) *MockCreateStore_Create
 	return _c
 }
 
-func (_c *MockCreateStore_Create_Call) RunAndReturn(run func(context.Context, entity.Todo) error) *MockCreateStore_Create_Call {
+func (_c *MockCreateStore_Create_Call) RunAndReturn(run func(context.Context, domain.Todo) error) *MockCreateStore_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }

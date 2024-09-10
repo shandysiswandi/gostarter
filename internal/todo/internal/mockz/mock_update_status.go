@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	usecase "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,27 +23,27 @@ func (_m *MockUpdateStatus) EXPECT() *MockUpdateStatus_Expecter {
 }
 
 // Execute provides a mock function with given fields: ctx, in
-func (_m *MockUpdateStatus) Execute(ctx context.Context, in usecase.UpdateStatusInput) (*usecase.UpdateStatusOutput, error) {
+func (_m *MockUpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Execute")
 	}
 
-	var r0 *usecase.UpdateStatusOutput
+	var r0 *domain.UpdateStatusOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.UpdateStatusInput) (*usecase.UpdateStatusOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error)); ok {
 		return rf(ctx, in)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.UpdateStatusInput) *usecase.UpdateStatusOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.UpdateStatusInput) *domain.UpdateStatusOutput); ok {
 		r0 = rf(ctx, in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*usecase.UpdateStatusOutput)
+			r0 = ret.Get(0).(*domain.UpdateStatusOutput)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, usecase.UpdateStatusInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.UpdateStatusInput) error); ok {
 		r1 = rf(ctx, in)
 	} else {
 		r1 = ret.Error(1)
@@ -59,24 +59,24 @@ type MockUpdateStatus_Execute_Call struct {
 
 // Execute is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in usecase.UpdateStatusInput
+//   - in domain.UpdateStatusInput
 func (_e *MockUpdateStatus_Expecter) Execute(ctx interface{}, in interface{}) *MockUpdateStatus_Execute_Call {
 	return &MockUpdateStatus_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
 }
 
-func (_c *MockUpdateStatus_Execute_Call) Run(run func(ctx context.Context, in usecase.UpdateStatusInput)) *MockUpdateStatus_Execute_Call {
+func (_c *MockUpdateStatus_Execute_Call) Run(run func(ctx context.Context, in domain.UpdateStatusInput)) *MockUpdateStatus_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(usecase.UpdateStatusInput))
+		run(args[0].(context.Context), args[1].(domain.UpdateStatusInput))
 	})
 	return _c
 }
 
-func (_c *MockUpdateStatus_Execute_Call) Return(_a0 *usecase.UpdateStatusOutput, _a1 error) *MockUpdateStatus_Execute_Call {
+func (_c *MockUpdateStatus_Execute_Call) Return(_a0 *domain.UpdateStatusOutput, _a1 error) *MockUpdateStatus_Execute_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockUpdateStatus_Execute_Call) RunAndReturn(run func(context.Context, usecase.UpdateStatusInput) (*usecase.UpdateStatusOutput, error)) *MockUpdateStatus_Execute_Call {
+func (_c *MockUpdateStatus_Execute_Call) RunAndReturn(run func(context.Context, domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error)) *MockUpdateStatus_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

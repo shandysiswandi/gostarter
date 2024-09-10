@@ -30,13 +30,13 @@ type (
 	}
 )
 
-// for request and response GetByID.
+// for request and response Find.
 type (
-	GetByIDRequest struct {
+	FindRequest struct {
 		ID uint64 `json:"id"`
 	}
 
-	GetByIDResponse struct {
+	FindResponse struct {
 		ID          uint64 `json:"id"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
@@ -44,16 +44,16 @@ type (
 	}
 )
 
-// for request and response GetWithFilter.
+// for request and response Fetch.
 type (
-	GetWithFilterRequest struct {
+	FetchRequest struct {
 		ID          string `json:"id"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Status      string `json:"status"`
 	}
 
-	GetWithFilterResponse struct {
+	FetchResponse struct {
 		Todos []Todo `json:"todos"`
 	}
 )

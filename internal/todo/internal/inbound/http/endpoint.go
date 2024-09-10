@@ -7,19 +7,19 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 )
 
-var errfailedParseToUint = errs.NewValidation("failed parse id to uint")
+var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
 
-	router.Handler(http.MethodGet, "/todos/:id", serve.Endpoint(h.GetByID))
-	router.Handler(http.MethodGet, "/todos", serve.Endpoint(h.GetWithFilter))
+	router.Handler(http.MethodGet, "/todos/:id", serve.Endpoint(h.Find))
+	router.Handler(http.MethodGet, "/todos", serve.Endpoint(h.Fetch))
 	router.Handler(http.MethodPost, "/todos", serve.Endpoint(h.Create))
 	router.Handler(http.MethodPut, "/todos/:id", serve.Endpoint(h.Update))
 	router.Handler(http.MethodPatch, "/todos/:id/status", serve.Endpoint(h.UpdateStatus))
@@ -27,12 +27,12 @@ func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
 }
 
 type Endpoint struct {
-	GetByIDUC       usecase.GetByID
-	GetWithFilterUC usecase.GetWithFilter
-	CreateUC        usecase.Create
-	DeleteUC        usecase.Delete
-	UpdateUC        usecase.Update
-	UpdateStatusUC  usecase.UpdateStatus
+	FindUC         domain.Find
+	FetchUC        domain.Fetch
+	CreateUC       domain.Create
+	DeleteUC       domain.Delete
+	UpdateUC       domain.Update
+	UpdateStatusUC domain.UpdateStatus
 }
 
 func (e *Endpoint) Create(ctx context.Context, r *http.Request) (any, error) {
@@ -41,7 +41,7 @@ func (e *Endpoint) Create(ctx context.Context, r *http.Request) (any, error) {
 		return nil, err
 	}
 
-	resp, err := e.CreateUC.Execute(ctx, usecase.CreateInput{Title: req.Title, Description: req.Description})
+	resp, err := e.CreateUC.Execute(ctx, domain.CreateInput{Title: req.Title, Description: req.Description})
 	if err != nil {
 		return nil, err
 	}
@@ -50,15 +50,14 @@ func (e *Endpoint) Create(ctx context.Context, r *http.Request) (any, error) {
 }
 
 func (e *Endpoint) Delete(ctx context.Context, _ *http.Request) (any, error) {
-	params := httprouter.ParamsFromContext(ctx)
-	idstr := params.ByName("id")
+	idStr := httprouter.ParamsFromContext(ctx).ByName("id")
 
-	id, err := strconv.ParseUint(idstr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.DeleteUC.Execute(ctx, usecase.DeleteInput{ID: id})
+	resp, err := e.DeleteUC.Execute(ctx, domain.DeleteInput{ID: id})
 	if err != nil {
 		return nil, err
 	}
@@ -66,21 +65,20 @@ func (e *Endpoint) Delete(ctx context.Context, _ *http.Request) (any, error) {
 	return DeleteResponse{ID: resp.ID}, nil
 }
 
-func (e *Endpoint) GetByID(ctx context.Context, _ *http.Request) (any, error) {
-	params := httprouter.ParamsFromContext(ctx)
-	idstr := params.ByName("id")
+func (e *Endpoint) Find(ctx context.Context, _ *http.Request) (any, error) {
+	idStr := httprouter.ParamsFromContext(ctx).ByName("id")
 
-	id, err := strconv.ParseUint(idstr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.GetByIDUC.Execute(ctx, usecase.GetByIDInput{ID: id})
+	resp, err := e.FindUC.Execute(ctx, domain.FindInput{ID: id})
 	if err != nil {
 		return nil, err
 	}
 
-	return GetByIDResponse{
+	return FindResponse{
 		ID:          resp.ID,
 		Title:       resp.Title,
 		Description: resp.Description,
@@ -88,13 +86,13 @@ func (e *Endpoint) GetByID(ctx context.Context, _ *http.Request) (any, error) {
 	}, nil
 }
 
-func (e *Endpoint) GetWithFilter(ctx context.Context, r *http.Request) (any, error) {
+func (e *Endpoint) Fetch(ctx context.Context, r *http.Request) (any, error) {
 	id := r.URL.Query().Get("id")
 	title := r.URL.Query().Get("title")
 	description := r.URL.Query().Get("description")
 	status := r.URL.Query().Get("status")
 
-	resp, err := e.GetWithFilterUC.Execute(ctx, usecase.GetWithFilterInput{
+	resp, err := e.FetchUC.Execute(ctx, domain.FetchInput{
 		ID:          id,
 		Title:       title,
 		Description: description,
@@ -105,7 +103,7 @@ func (e *Endpoint) GetWithFilter(ctx context.Context, r *http.Request) (any, err
 	}
 
 	todos := make([]Todo, 0)
-	for _, todo := range resp.Todos {
+	for _, todo := range resp {
 		todos = append(todos, Todo{
 			ID:          todo.ID,
 			Title:       todo.Title,
@@ -114,9 +112,7 @@ func (e *Endpoint) GetWithFilter(ctx context.Context, r *http.Request) (any, err
 		})
 	}
 
-	return GetWithFilterResponse{
-		Todos: todos,
-	}, nil
+	return FetchResponse{Todos: todos}, nil
 }
 
 func (e *Endpoint) UpdateStatus(ctx context.Context, r *http.Request) (any, error) {
@@ -125,15 +121,14 @@ func (e *Endpoint) UpdateStatus(ctx context.Context, r *http.Request) (any, erro
 		return nil, err
 	}
 
-	params := httprouter.ParamsFromContext(ctx)
-	idstr := params.ByName("id")
+	idStr := httprouter.ParamsFromContext(ctx).ByName("id")
 
-	id, err := strconv.ParseUint(idstr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.UpdateStatusUC.Execute(ctx, usecase.UpdateStatusInput{ID: id, Status: req.Status})
+	resp, err := e.UpdateStatusUC.Execute(ctx, domain.UpdateStatusInput{ID: id, Status: req.Status})
 	if err != nil {
 		return nil, err
 	}
@@ -147,15 +142,14 @@ func (e *Endpoint) Update(ctx context.Context, r *http.Request) (any, error) {
 		return nil, err
 	}
 
-	params := httprouter.ParamsFromContext(ctx)
-	idstr := params.ByName("id")
+	idStr := httprouter.ParamsFromContext(ctx).ByName("id")
 
-	id, err := strconv.ParseUint(idstr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.UpdateUC.Execute(ctx, usecase.UpdateInput{
+	resp, err := e.UpdateUC.Execute(ctx, domain.UpdateInput{
 		ID:          id,
 		Title:       req.Title,
 		Description: req.Description,

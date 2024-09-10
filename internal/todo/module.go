@@ -12,7 +12,6 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/service"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
@@ -31,7 +30,6 @@ type Dependency struct {
 	RedisDB        *redis.Client
 	Config         config.Config
 	UIDNumber      uid.NumberID
-	Clock          clock.Clocker
 	CodecJSON      codec.Codec
 	Validator      validation.Validator
 	ProtoValidator validation.Validator
@@ -44,22 +42,22 @@ func New(dep Dependency) (*Expose, error) {
 	// init outbound | database | http client | grpc client | redis | etc.
 	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.Config)
 
-	// init service | usecase | interactor | logic
-	getByIDUC := service.NewGetByID(sqlTodo, dep.Validator)
-	getWithFilterUC := service.NewGetWithFilter(sqlTodo, dep.Validator)
-	createUC := service.NewCreate(sqlTodo, dep.Validator, dep.UIDNumber)
-	deleteUC := service.NewDelete(sqlTodo, dep.Validator)
-	updateUC := service.NewUpdate(sqlTodo, dep.Validator)
-	updateStatusUC := service.NewUpdateStatus(sqlTodo, dep.Validator)
+	// init services | useCases | business logic
+	findUC := service.NewFind(dep.Logger, sqlTodo, dep.Validator)
+	fetchUC := service.NewFetch(dep.Logger, sqlTodo)
+	createUC := service.NewCreate(dep.Logger, sqlTodo, dep.Validator, dep.UIDNumber)
+	deleteUC := service.NewDelete(dep.Logger, sqlTodo, dep.Validator)
+	updateUC := service.NewUpdate(dep.Logger, sqlTodo, dep.Validator)
+	updateStatusUC := service.NewUpdateStatus(dep.Logger, sqlTodo, dep.Validator)
 
 	// register endpoint REST
 	inboundhttp.RegisterRESTEndpoint(dep.Router, &inboundhttp.Endpoint{
-		GetByIDUC:       getByIDUC,
-		CreateUC:        createUC,
-		DeleteUC:        deleteUC,
-		GetWithFilterUC: getWithFilterUC,
-		UpdateUC:        updateUC,
-		UpdateStatusUC:  updateStatusUC,
+		FindUC:         findUC,
+		CreateUC:       createUC,
+		DeleteUC:       deleteUC,
+		FetchUC:        fetchUC,
+		UpdateUC:       updateUC,
+		UpdateStatusUC: updateStatusUC,
 	})
 
 	inboundhttp.RegisterSSEEndpoint(dep.Router, inboundhttp.NewSSE(
@@ -70,8 +68,8 @@ func New(dep Dependency) (*Expose, error) {
 	// register endpoint GRPC
 	pb.RegisterTodoServiceServer(dep.GRPCServer, inboundgrpc.NewEndpoint(
 		dep.ProtoValidator,
-		getByIDUC,
-		getWithFilterUC,
+		findUC,
+		fetchUC,
 		createUC,
 		deleteUC,
 		updateUC,
@@ -80,12 +78,12 @@ func New(dep Dependency) (*Expose, error) {
 
 	// register endpoint GRAPHQL
 	inboundgql.RegisterGQLEndpoint(dep.Router, dep.Config, &inboundgql.Endpoint{
-		GetByIDUC:       getByIDUC,
-		CreateUC:        createUC,
-		DeleteUC:        deleteUC,
-		GetWithFilterUC: getWithFilterUC,
-		UpdateUC:        updateUC,
-		UpdateStatusUC:  updateStatusUC,
+		FindUC:         findUC,
+		CreateUC:       createUC,
+		DeleteUC:       deleteUC,
+		FetchUC:        fetchUC,
+		UpdateUC:       updateUC,
+		UpdateStatusUC: updateStatusUC,
 	})
 
 	// jobs | background tasks

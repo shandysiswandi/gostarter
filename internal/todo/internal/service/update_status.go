@@ -3,42 +3,45 @@ package service
 import (
 	"context"
 
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	uc "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type UpdateStatusStore interface {
-	UpdateStatus(ctx context.Context, in uint64, status entity.TodoStatus) error
+	UpdateStatus(ctx context.Context, in uint64, status domain.TodoStatus) error
 }
 
 type UpdateStatus struct {
+	log       logger.Logger
 	store     UpdateStatusStore
 	validator validation.Validator
 }
 
-func NewUpdateStatus(store UpdateStatusStore, validator validation.Validator) *UpdateStatus {
+func NewUpdateStatus(l logger.Logger, s UpdateStatusStore, v validation.Validator) *UpdateStatus {
 	return &UpdateStatus{
-		store:     store,
-		validator: validator,
+		log:       l,
+		store:     s,
+		validator: v,
 	}
 }
 
-func (s *UpdateStatus) Execute(ctx context.Context, in uc.UpdateStatusInput) (*uc.UpdateStatusOutput, error) {
+func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
-		return nil, errs.WrapValidation("validation input fail", err)
+		s.log.Warn(ctx, "validation failed")
+
+		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	sts := entity.ParseTodoStatus(in.Status)
+	sts := domain.ParseTodoStatus(in.Status)
 
 	err := s.store.UpdateStatus(ctx, in.ID, sts)
 	if err != nil {
-		return nil, errs.NewServerFrom(err)
+		s.log.Error(ctx, "todo fail to update status", err)
+
+		return nil, goerror.NewServer("failed to update status todo", err)
 	}
 
-	return &uc.UpdateStatusOutput{
-		ID:     in.ID,
-		Status: sts,
-	}, nil
+	return &domain.UpdateStatusOutput{ID: in.ID, Status: sts}, nil
 }

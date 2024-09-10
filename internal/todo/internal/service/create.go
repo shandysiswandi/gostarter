@@ -4,53 +4,59 @@ import (
 	"context"
 	"errors"
 
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type CreateStore interface {
-	Create(ctx context.Context, in entity.Todo) error
+	Create(ctx context.Context, in domain.Todo) error
 }
 
 type Create struct {
+	log       logger.Logger
 	store     CreateStore
 	uidnumber uid.NumberID
 	validator validation.Validator
 }
 
-func NewCreate(store CreateStore, validator validation.Validator, uidnumber uid.NumberID) *Create {
+func NewCreate(l logger.Logger, s CreateStore, v validation.Validator, idgen uid.NumberID) *Create {
 	return &Create{
-		store:     store,
-		uidnumber: uidnumber,
-		validator: validator,
+		log:       l,
+		store:     s,
+		uidnumber: idgen,
+		validator: v,
 	}
 }
 
-func (s *Create) Execute(ctx context.Context, in usecase.CreateInput) (*usecase.CreateOutput, error) {
+func (s *Create) Execute(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
-		return nil, errs.WrapValidation("validation input fail", err)
+		s.log.Warn(ctx, "validation failed")
+
+		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
 	id := s.uidnumber.Generate()
 
-	err := s.store.Create(ctx, entity.Todo{
+	err := s.store.Create(ctx, domain.Todo{
 		ID:          id,
 		Title:       in.Title,
 		Description: in.Description,
-		Status:      entity.TodoStatusInitiate,
+		Status:      domain.TodoStatusInitiate,
 	})
-	if errors.Is(err, entity.ErrTodoNotCreated) {
-		return nil, errs.NewBusiness("failed to create todo")
+	if errors.Is(err, domain.ErrTodoNotCreated) {
+		s.log.Warn(ctx, "todo created but db not affected")
+
+		return nil, goerror.NewBusiness("failed to create todo", goerror.CodeUnknown)
 	}
 
 	if err != nil {
-		return nil, errs.NewServerFrom(err)
+		s.log.Error(ctx, "todo fail to create", err)
+
+		return nil, goerror.NewServer("failed to create todo", err)
 	}
 
-	return &usecase.CreateOutput{
-		ID: id,
-	}, nil
+	return &domain.CreateOutput{ID: id}, nil
 }

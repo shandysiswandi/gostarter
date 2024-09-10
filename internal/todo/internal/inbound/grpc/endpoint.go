@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -14,31 +14,31 @@ type Endpoint struct {
 
 	validator validation.Validator
 
-	getByIDUC       usecase.GetByID
-	getWithFilterUC usecase.GetWithFilter
-	createUC        usecase.Create
-	deleteUC        usecase.Delete
-	updateUC        usecase.Update
-	updateStatusUC  usecase.UpdateStatus
+	findUC         domain.Find
+	fetchUC        domain.Fetch
+	createUC       domain.Create
+	deleteUC       domain.Delete
+	updateUC       domain.Update
+	updateStatusUC domain.UpdateStatus
 }
 
 func NewEndpoint(
 	validator validation.Validator,
-	getByIDUC usecase.GetByID,
-	getWithFilterUC usecase.GetWithFilter,
-	createUC usecase.Create,
-	deleteUC usecase.Delete,
-	updateUC usecase.Update,
-	updateStatusUC usecase.UpdateStatus,
+	FindUC domain.Find,
+	FetchUC domain.Fetch,
+	createUC domain.Create,
+	deleteUC domain.Delete,
+	updateUC domain.Update,
+	updateStatusUC domain.UpdateStatus,
 ) *Endpoint {
 	return &Endpoint{
-		validator:       validator,
-		getByIDUC:       getByIDUC,
-		getWithFilterUC: getWithFilterUC,
-		createUC:        createUC,
-		deleteUC:        deleteUC,
-		updateUC:        updateUC,
-		updateStatusUC:  updateStatusUC,
+		validator:      validator,
+		findUC:         FindUC,
+		fetchUC:        FetchUC,
+		createUC:       createUC,
+		deleteUC:       deleteUC,
+		updateUC:       updateUC,
+		updateStatusUC: updateStatusUC,
 	}
 }
 
@@ -47,7 +47,7 @@ func (e *Endpoint) Create(ctx context.Context, req *pb.CreateRequest) (*pb.Creat
 		return nil, err
 	}
 
-	resp, err := e.createUC.Execute(ctx, usecase.CreateInput{Title: req.GetTitle(), Description: req.GetDescription()})
+	resp, err := e.createUC.Execute(ctx, domain.CreateInput{Title: req.GetTitle(), Description: req.GetDescription()})
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (e *Endpoint) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Delet
 		return nil, err
 	}
 
-	resp, err := e.deleteUC.Execute(ctx, usecase.DeleteInput{ID: req.GetId()})
+	resp, err := e.deleteUC.Execute(ctx, domain.DeleteInput{ID: req.GetId()})
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +68,17 @@ func (e *Endpoint) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Delet
 	return &pb.DeleteResponse{Id: resp.ID}, nil
 }
 
-func (e *Endpoint) GetByID(ctx context.Context, req *pb.GetByIDRequest) (*pb.GetByIDResponse, error) {
+func (e *Endpoint) Find(ctx context.Context, req *pb.FindRequest) (*pb.FindResponse, error) {
 	if err := e.validator.Validate(req); err != nil {
 		return nil, err
 	}
 
-	resp, err := e.getByIDUC.Execute(ctx, usecase.GetByIDInput{ID: req.GetId()})
+	resp, err := e.findUC.Execute(ctx, domain.FindInput{ID: req.GetId()})
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetByIDResponse{
+	return &pb.FindResponse{
 		Id:          req.GetId(),
 		Title:       resp.Title,
 		Description: resp.Description,
@@ -86,14 +86,14 @@ func (e *Endpoint) GetByID(ctx context.Context, req *pb.GetByIDRequest) (*pb.Get
 	}, nil
 }
 
-func (e *Endpoint) GetWithFilter(ctx context.Context, req *pb.GetWithFilterRequest) (
-	*pb.GetWithFilterResponse, error,
+func (e *Endpoint) Fetch(ctx context.Context, req *pb.FetchRequest) (
+	*pb.FetchResponse, error,
 ) {
 	if err := e.validator.Validate(req); err != nil {
 		return nil, err
 	}
 
-	resp, err := e.getWithFilterUC.Execute(ctx, usecase.GetWithFilterInput{
+	resp, err := e.fetchUC.Execute(ctx, domain.FetchInput{
 		ID:          strconv.FormatUint(req.GetId(), 10),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
@@ -104,7 +104,7 @@ func (e *Endpoint) GetWithFilter(ctx context.Context, req *pb.GetWithFilterReque
 	}
 
 	todos := make([]*pb.Todo, 0)
-	for _, todo := range resp.Todos {
+	for _, todo := range resp {
 		todos = append(todos, &pb.Todo{
 			Id:          todo.ID,
 			Title:       todo.Title,
@@ -113,7 +113,7 @@ func (e *Endpoint) GetWithFilter(ctx context.Context, req *pb.GetWithFilterReque
 		})
 	}
 
-	return &pb.GetWithFilterResponse{Todos: todos}, nil
+	return &pb.FetchResponse{Todos: todos}, nil
 }
 
 func (e *Endpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (*pb.UpdateStatusResponse, error) {
@@ -121,7 +121,7 @@ func (e *Endpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest
 		return nil, err
 	}
 
-	resp, err := e.updateStatusUC.Execute(ctx, usecase.UpdateStatusInput{
+	resp, err := e.updateStatusUC.Execute(ctx, domain.UpdateStatusInput{
 		ID:     req.GetId(),
 		Status: req.GetStatus().String(),
 	})
@@ -137,7 +137,7 @@ func (e *Endpoint) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.Updat
 		return nil, err
 	}
 
-	resp, err := e.updateUC.Execute(ctx, usecase.UpdateInput{
+	resp, err := e.updateUC.Execute(ctx, domain.UpdateInput{
 		ID:          req.GetId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),

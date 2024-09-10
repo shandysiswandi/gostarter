@@ -5,14 +5,13 @@ import (
 	"strconv"
 
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 )
 
 type mutation struct{ *Endpoint }
 
 func (m *mutation) Create(ctx context.Context, in ql.CreateInput) (*ql.Todo, error) {
-	resp, err := m.CreateUC.Execute(ctx, usecase.CreateInput{Title: in.Title, Description: in.Description})
+	resp, err := m.CreateUC.Execute(ctx, domain.CreateInput{Title: in.Title, Description: in.Description})
 	if err != nil {
 		return nil, err
 	}
@@ -21,17 +20,17 @@ func (m *mutation) Create(ctx context.Context, in ql.CreateInput) (*ql.Todo, err
 		ID:          strconv.FormatUint(resp.ID, 10),
 		Title:       in.Title,
 		Description: in.Description,
-		Status:      ql.Status(entity.TodoStatusInitiate.String()),
+		Status:      ql.Status(domain.TodoStatusInitiate.String()),
 	}, nil
 }
 
 func (m *mutation) Delete(ctx context.Context, id string) (string, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return "", errfailedParseToUint
+		return "", errFailedParseToUint
 	}
 
-	resp, err := m.DeleteUC.Execute(ctx, usecase.DeleteInput{ID: idu64})
+	resp, err := m.DeleteUC.Execute(ctx, domain.DeleteInput{ID: idu64})
 	if err != nil {
 		return "", err
 	}
@@ -42,10 +41,10 @@ func (m *mutation) Delete(ctx context.Context, id string) (string, error) {
 func (m *mutation) UpdateStatus(ctx context.Context, id string, status ql.Status) (*ql.UpdateStatusResponse, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := m.UpdateStatusUC.Execute(ctx, usecase.UpdateStatusInput{ID: idu64, Status: status.String()})
+	resp, err := m.UpdateStatusUC.Execute(ctx, domain.UpdateStatusInput{ID: idu64, Status: status.String()})
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +55,10 @@ func (m *mutation) UpdateStatus(ctx context.Context, id string, status ql.Status
 func (m *mutation) Update(ctx context.Context, id string, in ql.UpdateInput) (*ql.UpdateResponse, error) {
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return nil, errfailedParseToUint
+		return nil, errFailedParseToUint
 	}
 
-	resp, err := m.UpdateUC.Execute(ctx, usecase.UpdateInput{
+	resp, err := m.UpdateUC.Execute(ctx, domain.UpdateInput{
 		ID:          idu64,
 		Title:       in.Title,
 		Description: in.Description,

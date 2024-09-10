@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	entity "github.com/shandysiswandi/gostarter/internal/todo/internal/entity"
+	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,7 +23,7 @@ func (_m *MockUpdateStore) EXPECT() *MockUpdateStore_Expecter {
 }
 
 // Update provides a mock function with given fields: ctx, in
-func (_m *MockUpdateStore) Update(ctx context.Context, in entity.Todo) error {
+func (_m *MockUpdateStore) Update(ctx context.Context, in domain.Todo) error {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
@@ -31,7 +31,7 @@ func (_m *MockUpdateStore) Update(ctx context.Context, in entity.Todo) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Todo) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Todo) error); ok {
 		r0 = rf(ctx, in)
 	} else {
 		r0 = ret.Error(0)
@@ -47,14 +47,14 @@ type MockUpdateStore_Update_Call struct {
 
 // Update is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in entity.Todo
+//   - in domain.Todo
 func (_e *MockUpdateStore_Expecter) Update(ctx interface{}, in interface{}) *MockUpdateStore_Update_Call {
 	return &MockUpdateStore_Update_Call{Call: _e.mock.On("Update", ctx, in)}
 }
 
-func (_c *MockUpdateStore_Update_Call) Run(run func(ctx context.Context, in entity.Todo)) *MockUpdateStore_Update_Call {
+func (_c *MockUpdateStore_Update_Call) Run(run func(ctx context.Context, in domain.Todo)) *MockUpdateStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(entity.Todo))
+		run(args[0].(context.Context), args[1].(domain.Todo))
 	})
 	return _c
 }
@@ -64,7 +64,7 @@ func (_c *MockUpdateStore_Update_Call) Return(_a0 error) *MockUpdateStore_Update
 	return _c
 }
 
-func (_c *MockUpdateStore_Update_Call) RunAndReturn(run func(context.Context, entity.Todo) error) *MockUpdateStore_Update_Call {
+func (_c *MockUpdateStore_Update_Call) RunAndReturn(run func(context.Context, domain.Todo) error) *MockUpdateStore_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

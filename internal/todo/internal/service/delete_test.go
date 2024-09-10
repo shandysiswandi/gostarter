@@ -1,0 +1,123 @@
+package service
+
+import (
+	"context"
+	"testing"
+
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
+	lm "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/validation"
+	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewDelete(t *testing.T) {
+	type args struct {
+		l logger.Logger
+		s DeleteStore
+		v validation.Validator
+	}
+	tests := []struct {
+		name string
+		args args
+		want *Delete
+	}{
+		{name: "Success", args: args{}, want: &Delete{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := NewDelete(tt.args.l, tt.args.s, tt.args.v)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestDelete_Execute(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		in  domain.DeleteInput
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *domain.DeleteOutput
+		wantErr error
+		mockFn  func(a args) *Delete
+	}{
+		{
+			name:    "ErrorValidation",
+			args:    args{ctx: context.TODO(), in: domain.DeleteInput{}},
+			want:    nil,
+			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			mockFn: func(a args) *Delete {
+				log := lm.NewMockLogger(t)
+				validator := vm.NewMockValidator(t)
+
+				validator.EXPECT().Validate(a.in).Return(assert.AnError)
+				log.EXPECT().Warn(a.ctx, "validation failed").Return()
+
+				return &Delete{
+					log:       log,
+					store:     nil,
+					validator: validator,
+				}
+			},
+		},
+		{
+			name:    "ErrorStore",
+			args:    args{ctx: context.TODO(), in: domain.DeleteInput{}},
+			want:    nil,
+			wantErr: goerror.NewServer("failed to delete todo", assert.AnError),
+			mockFn: func(a args) *Delete {
+				log := lm.NewMockLogger(t)
+				validator := vm.NewMockValidator(t)
+				store := mockz.NewMockDeleteStore(t)
+
+				validator.EXPECT().Validate(a.in).Return(nil)
+
+				store.EXPECT().Delete(a.ctx, a.in.ID).Return(assert.AnError)
+				log.EXPECT().Error(a.ctx, "todo fail to delete", assert.AnError).Return()
+
+				return &Delete{
+					log:       log,
+					store:     store,
+					validator: validator,
+				}
+			},
+		},
+		{
+			name:    "Success",
+			args:    args{ctx: context.TODO(), in: domain.DeleteInput{ID: 111}},
+			want:    &domain.DeleteOutput{ID: 111},
+			wantErr: nil,
+			mockFn: func(a args) *Delete {
+				log := lm.NewMockLogger(t)
+				validator := vm.NewMockValidator(t)
+				store := mockz.NewMockDeleteStore(t)
+
+				validator.EXPECT().Validate(a.in).Return(nil)
+
+				store.EXPECT().Delete(a.ctx, a.in.ID).Return(nil)
+
+				return &Delete{
+					log:       log,
+					store:     store,
+					validator: validator,
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := tt.mockFn(tt.args)
+			got, err := s.Execute(tt.args.ctx, tt.args.in)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

@@ -9,7 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/julienschmidt/httprouter"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -37,12 +37,12 @@ func RegisterGQLEndpoint(router *httprouter.Router, cfg config.Config, h *Endpoi
 type Endpoint struct {
 	ql.Resolver
 
-	GetByIDUC       usecase.GetByID
-	GetWithFilterUC usecase.GetWithFilter
-	CreateUC        usecase.Create
-	DeleteUC        usecase.Delete
-	UpdateUC        usecase.Update
-	UpdateStatusUC  usecase.UpdateStatus
+	FindUC         domain.Find
+	FetchUC        domain.Fetch
+	CreateUC       domain.Create
+	DeleteUC       domain.Delete
+	UpdateUC       domain.Update
+	UpdateStatusUC domain.UpdateStatus
 }
 
 func (e *Endpoint) Mutation() ql.MutationResolver { return &mutation{e} }

@@ -5,7 +5,7 @@ package mockz
 import (
 	context "context"
 
-	usecase "github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
+	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,27 +23,27 @@ func (_m *MockCreate) EXPECT() *MockCreate_Expecter {
 }
 
 // Execute provides a mock function with given fields: ctx, in
-func (_m *MockCreate) Execute(ctx context.Context, in usecase.CreateInput) (*usecase.CreateOutput, error) {
+func (_m *MockCreate) Execute(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Execute")
 	}
 
-	var r0 *usecase.CreateOutput
+	var r0 *domain.CreateOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.CreateInput) (*usecase.CreateOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.CreateInput) (*domain.CreateOutput, error)); ok {
 		return rf(ctx, in)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.CreateInput) *usecase.CreateOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.CreateInput) *domain.CreateOutput); ok {
 		r0 = rf(ctx, in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*usecase.CreateOutput)
+			r0 = ret.Get(0).(*domain.CreateOutput)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, usecase.CreateInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.CreateInput) error); ok {
 		r1 = rf(ctx, in)
 	} else {
 		r1 = ret.Error(1)
@@ -59,24 +59,24 @@ type MockCreate_Execute_Call struct {
 
 // Execute is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in usecase.CreateInput
+//   - in domain.CreateInput
 func (_e *MockCreate_Expecter) Execute(ctx interface{}, in interface{}) *MockCreate_Execute_Call {
 	return &MockCreate_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
 }
 
-func (_c *MockCreate_Execute_Call) Run(run func(ctx context.Context, in usecase.CreateInput)) *MockCreate_Execute_Call {
+func (_c *MockCreate_Execute_Call) Run(run func(ctx context.Context, in domain.CreateInput)) *MockCreate_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(usecase.CreateInput))
+		run(args[0].(context.Context), args[1].(domain.CreateInput))
 	})
 	return _c
 }
 
-func (_c *MockCreate_Execute_Call) Return(_a0 *usecase.CreateOutput, _a1 error) *MockCreate_Execute_Call {
+func (_c *MockCreate_Execute_Call) Return(_a0 *domain.CreateOutput, _a1 error) *MockCreate_Execute_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockCreate_Execute_Call) RunAndReturn(run func(context.Context, usecase.CreateInput) (*usecase.CreateOutput, error)) *MockCreate_Execute_Call {
+func (_c *MockCreate_Execute_Call) RunAndReturn(run func(context.Context, domain.CreateInput) (*domain.CreateOutput, error)) *MockCreate_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

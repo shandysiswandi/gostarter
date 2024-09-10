@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/errs"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -13,28 +14,32 @@ type DeleteStore interface {
 }
 
 type Delete struct {
+	log       logger.Logger
 	store     DeleteStore
 	validator validation.Validator
 }
 
-func NewDelete(store DeleteStore, validator validation.Validator) *Delete {
+func NewDelete(l logger.Logger, s DeleteStore, v validation.Validator) *Delete {
 	return &Delete{
-		store:     store,
-		validator: validator,
+		log:       l,
+		store:     s,
+		validator: v,
 	}
 }
 
-func (s *Delete) Execute(ctx context.Context, in usecase.DeleteInput) (*usecase.DeleteOutput, error) {
+func (s *Delete) Execute(ctx context.Context, in domain.DeleteInput) (*domain.DeleteOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
-		return nil, errs.WrapValidation("validation input fail", err)
+		s.log.Warn(ctx, "validation failed")
+
+		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
 	err := s.store.Delete(ctx, in.ID)
 	if err != nil {
-		return nil, errs.NewServerFrom(err)
+		s.log.Error(ctx, "todo fail to delete", err)
+
+		return nil, goerror.NewServer("failed to delete todo", err)
 	}
 
-	return &usecase.DeleteOutput{
-		ID: in.ID,
-	}, nil
+	return &domain.DeleteOutput{ID: in.ID}, nil
 }
