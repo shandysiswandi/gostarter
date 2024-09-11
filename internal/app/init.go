@@ -15,7 +15,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -34,25 +33,6 @@ import (
 // and file location in log messages. This method is typically called during the initialization
 // phase of the application to ensure consistent logging behavior.
 func (a *App) initSTDLog() {
-	//nolint:errcheck,dupword // no error happened here, it's just banner
-	log.New(os.Stderr, "", log.Lmsgprefix).Output(2, `                        
-        GGGGGGGGGGGGG    OOOOOOOOO     
-     GGG::::::::::::G  OO:::::::::OO   
-   GG:::::::::::::::GOO:::::::::::::OO 
-  G:::::GGGGGGGG::::O:::::::OOO:::::::O
- G:::::G       GGGGGO::::::O   O::::::O
-G:::::G             O:::::O     O:::::O
-G:::::G             O:::::O     O:::::O
-G:::::G    GGGGGGGGGO:::::O     O:::::O
-G:::::G    G::::::::O:::::O     O:::::O
-G:::::G    GGGGG::::O:::::O     O:::::O
-G:::::G        G::::O:::::O     O:::::O
- G:::::G       G::::O::::::O   O::::::O
-  G:::::GGGGGGGG::::O:::::::OOO:::::::O
-   GG:::::::::::::::GOO:::::::::::::OO 
-     GGG::::::GGG:::G  OO:::::::::OO   
-        GGGGGG   GGGG    OOOOOOOOO
-	`)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
