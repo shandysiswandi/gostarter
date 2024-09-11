@@ -13,6 +13,9 @@ database.max.lifetime: 5
 
 redis.addr: localhost:6379
 
+jwt.public.key: base64ofpublickey
+jwt.private.key: base64ofprivatekey
+
 feature.flag.graphql.playground: true
 
 module.flag.gallery: true
