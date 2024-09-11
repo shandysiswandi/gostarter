@@ -1,0 +1,75 @@
+package hash
+
+import (
+	"crypto/rand"
+	"crypto/subtle"
+	"encoding/hex"
+	"strings"
+
+	"golang.org/x/crypto/argon2"
+)
+
+// Argon2HashVerifier implements the HashVerifier interface using Argon2.
+// Argon2 is a modern and secure key derivation function.
+type Argon2HashVerifier struct {
+	// Time is the number of iterations for the Argon2 hashing algorithm.
+	Time uint32
+
+	// Memory is the memory size in KB used by the Argon2 algorithm.
+	Memory uint32
+
+	// Threads is the number of threads used for hashing.
+	Threads uint8
+
+	// KeyLen is the length of the generated key in bytes.
+	KeyLen uint32
+}
+
+// NewArgon2HashVerifier creates a new Argon2HashVerifier with the specified parameters.
+// It configures the Argon2 algorithm with the provided time, memory, threads, and key length.
+func NewArgon2HashVerifier(time, memory uint32, threads uint8, keyLen uint32) *Argon2HashVerifier {
+	return &Argon2HashVerifier{
+		Time:    time,
+		Memory:  memory,
+		Threads: threads,
+		KeyLen:  keyLen,
+	}
+}
+
+// Hash hashes the plaintext string using Argon2 and returns the hashed value.
+// It uses a random salt and encodes the result in a format that includes the salt and hash.
+func (h *Argon2HashVerifier) Hash(str string) ([]byte, error) {
+	salt := make([]byte, 16)
+	if _, err := rand.Read(salt); err != nil {
+		return nil, err
+	}
+
+	hash := argon2.IDKey([]byte(str), salt, h.Time, h.Memory, h.Threads, h.KeyLen)
+
+	return []byte(hex.EncodeToString(salt) + ":" + hex.EncodeToString(hash)), nil
+}
+
+// Verify compares the hashed value with the plaintext string using Argon2.
+// It extracts the salt from the hashed value and verifies if the plaintext string matches the hash.
+func (h *Argon2HashVerifier) Verify(hashed, str string) bool {
+	parts := strings.Split(hashed, ":")
+	if len(parts) != 2 {
+		return false
+	}
+
+	salt, hashHex := parts[0], parts[1]
+
+	saltBytes, err := hex.DecodeString(salt)
+	if err != nil {
+		return false
+	}
+
+	hashBytes, err := hex.DecodeString(hashHex)
+	if err != nil {
+		return false
+	}
+
+	hash := argon2.IDKey([]byte(str), saltBytes, h.Time, h.Memory, h.Threads, uint32(len(hashBytes)))
+
+	return subtle.ConstantTimeCompare(hash, hashBytes) == 1
+}
