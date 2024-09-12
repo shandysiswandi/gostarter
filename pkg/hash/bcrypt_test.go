@@ -5,7 +5,7 @@ import (
 )
 
 func TestBcryptHashVerifier(t *testing.T) {
-	hasher := NewBcryptHashVerifier(4) // Using a minimum cost factor for bcrypt
+	hasher := NewBcryptHash(4) // Using a minimum cost factor for bcrypt
 
 	tests := []struct {
 		name     string

@@ -3,7 +3,7 @@ package hash
 import "testing"
 
 func TestArgon2HashVerifier(t *testing.T) {
-	hasher := NewArgon2HashVerifier(1, 1, 1, 8) // Example parameters for test
+	hasher := NewArgon2Hash(1, 1, 1, 8) // Example parameters for test
 
 	tests := []struct {
 		name     string

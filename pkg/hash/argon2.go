@@ -9,9 +9,9 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// Argon2HashVerifier implements the HashVerifier interface using Argon2.
+// Argon2Hash implements the HashVerifier interface using Argon2.
 // Argon2 is a modern and secure key derivation function.
-type Argon2HashVerifier struct {
+type Argon2Hash struct {
 	// Time is the number of iterations for the Argon2 hashing algorithm.
 	Time uint32
 
@@ -25,10 +25,10 @@ type Argon2HashVerifier struct {
 	KeyLen uint32
 }
 
-// NewArgon2HashVerifier creates a new Argon2HashVerifier with the specified parameters.
+// NewArgon2Hash creates a new Argon2HashVerifier with the specified parameters.
 // It configures the Argon2 algorithm with the provided time, memory, threads, and key length.
-func NewArgon2HashVerifier(time, memory uint32, threads uint8, keyLen uint32) *Argon2HashVerifier {
-	return &Argon2HashVerifier{
+func NewArgon2Hash(time, memory uint32, threads uint8, keyLen uint32) *Argon2Hash {
+	return &Argon2Hash{
 		Time:    time,
 		Memory:  memory,
 		Threads: threads,
@@ -38,7 +38,7 @@ func NewArgon2HashVerifier(time, memory uint32, threads uint8, keyLen uint32) *A
 
 // Hash hashes the plaintext string using Argon2 and returns the hashed value.
 // It uses a random salt and encodes the result in a format that includes the salt and hash.
-func (h *Argon2HashVerifier) Hash(str string) ([]byte, error) {
+func (h *Argon2Hash) Hash(str string) ([]byte, error) {
 	salt := make([]byte, 16)
 	if _, err := rand.Read(salt); err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (h *Argon2HashVerifier) Hash(str string) ([]byte, error) {
 
 // Verify compares the hashed value with the plaintext string using Argon2.
 // It extracts the salt from the hashed value and verifies if the plaintext string matches the hash.
-func (h *Argon2HashVerifier) Verify(hashed, str string) bool {
+func (h *Argon2Hash) Verify(hashed, str string) bool {
 	parts := strings.Split(hashed, ":")
 	if len(parts) != 2 {
 		return false
