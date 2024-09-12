@@ -24,8 +24,8 @@ type Endpoint struct {
 
 func NewEndpoint(
 	validator validation.Validator,
-	FindUC domain.Find,
-	FetchUC domain.Fetch,
+	findUC domain.Find,
+	fetchUC domain.Fetch,
 	createUC domain.Create,
 	deleteUC domain.Delete,
 	updateUC domain.Update,
@@ -33,8 +33,8 @@ func NewEndpoint(
 ) *Endpoint {
 	return &Endpoint{
 		validator:      validator,
-		findUC:         FindUC,
-		fetchUC:        FetchUC,
+		findUC:         findUC,
+		fetchUC:        fetchUC,
 		createUC:       createUC,
 		deleteUC:       deleteUC,
 		updateUC:       updateUC,

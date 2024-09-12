@@ -18,7 +18,7 @@ import (
 func RegisterHTTP(router *httprouter.Router, h *Endpoint) {
 	serve := serve.New(
 		serve.WithMiddlewares(middleware.Recovery),
-		serve.WithErrorCodec(func(ctx context.Context, w http.ResponseWriter, err error) {
+		serve.WithErrorCodec(func(_ context.Context, w http.ResponseWriter, err error) {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 			code := http.StatusInternalServerError

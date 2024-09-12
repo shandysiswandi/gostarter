@@ -16,7 +16,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo"
 )
 
-func (a *App) initModules() {
+func (a *App) moduleGalery() {
 	if a.config.GetBool("module.flag.gallery") {
 		_, err := gallery.New(gallery.Dependency{
 			RedisDB:   a.redisDB,
@@ -30,7 +30,9 @@ func (a *App) initModules() {
 			log.Fatalln("failed to init module gallery", err)
 		}
 	}
+}
 
+func (a *App) moduleShortly() {
 	if a.config.GetBool("module.flag.shortly") {
 		_, err := shortly.New(shortly.Dependency{
 			RedisDB:   a.redisDB,
@@ -44,7 +46,9 @@ func (a *App) initModules() {
 			log.Fatalln("failed to init module shortly", err)
 		}
 	}
+}
 
+func (a *App) moduleRegion() {
 	if a.config.GetBool("module.flag.region") {
 		_, err := region.New(region.Dependency{
 			Database:  a.database,
@@ -59,7 +63,9 @@ func (a *App) initModules() {
 			log.Fatalln("failed to init module region", err)
 		}
 	}
+}
 
+func (a *App) moduleTodo() {
 	if a.config.GetBool("module.flag.todo") {
 		expTodo, err := todo.New(todo.Dependency{
 			Database:       a.database,
@@ -72,6 +78,7 @@ func (a *App) initModules() {
 			Router:         a.httpRouter,
 			GRPCServer:     a.grpcServer,
 			Logger:         a.logger,
+			Goroutine:      a.goroutine,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module todo", err)
@@ -79,4 +86,11 @@ func (a *App) initModules() {
 
 		a.runnables = append(a.runnables, expTodo.Tasks...)
 	}
+}
+
+func (a *App) initModules() {
+	a.moduleGalery()
+	a.moduleShortly()
+	a.moduleRegion()
+	a.moduleTodo()
 }

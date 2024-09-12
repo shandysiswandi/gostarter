@@ -3,6 +3,7 @@ package outbound
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/shandysiswandi/gostarter/internal/gallery/internal/domain"
 )
@@ -16,9 +17,13 @@ func NewSQLGallery(db *sql.DB) *SQLGallery {
 }
 
 func (sg *SQLGallery) Upload(ctx context.Context, in domain.Image) error {
+	log.Println(ctx, in)
+
 	return nil
 }
 
 func (sg *SQLGallery) GetImage(ctx context.Context, id uint64) (*domain.Image, error) {
-	return nil, nil
+	log.Println(ctx, id)
+
+	return &domain.Image{}, nil
 }

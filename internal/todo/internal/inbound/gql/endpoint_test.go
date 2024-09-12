@@ -1,0 +1,63 @@
+package gql
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/julienschmidt/httprouter"
+	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
+	"github.com/shandysiswandi/gostarter/pkg/config"
+)
+
+func TestRegisterGQLEndpoint(t *testing.T) {
+	type args struct {
+		router *httprouter.Router
+		cfg    config.Config
+		h      *Endpoint
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			RegisterGQLEndpoint(tt.args.router, tt.args.cfg, tt.args.h)
+		})
+	}
+}
+
+func TestEndpoint_Mutation(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *Endpoint
+		want ql.MutationResolver
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.e.Mutation(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Endpoint.Mutation() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEndpoint_Query(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *Endpoint
+		want ql.QueryResolver
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.e.Query(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Endpoint.Query() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

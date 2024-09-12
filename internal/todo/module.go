@@ -14,6 +14,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/service"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -36,6 +37,7 @@ type Dependency struct {
 	Router         *httprouter.Router
 	GRPCServer     *grpc.Server
 	Logger         logger.Logger
+	Goroutine      *goroutine.Manager
 }
 
 func New(dep Dependency) (*Expose, error) {
@@ -51,14 +53,9 @@ func New(dep Dependency) (*Expose, error) {
 	updateStatusUC := service.NewUpdateStatus(dep.Logger, sqlTodo, dep.Validator)
 
 	// register endpoint REST
-	inboundhttp.RegisterRESTEndpoint(dep.Router, &inboundhttp.Endpoint{
-		FindUC:         findUC,
-		CreateUC:       createUC,
-		DeleteUC:       deleteUC,
-		FetchUC:        fetchUC,
-		UpdateUC:       updateUC,
-		UpdateStatusUC: updateStatusUC,
-	})
+	inboundhttp.RegisterRESTEndpoint(dep.Router, inboundhttp.NewEndpoint(
+		createUC, deleteUC, findUC, fetchUC, updateStatusUC, updateUC, dep.Goroutine,
+	))
 
 	inboundhttp.RegisterSSEEndpoint(dep.Router, inboundhttp.NewSSE(
 		dep.CodecJSON,

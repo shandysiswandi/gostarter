@@ -22,6 +22,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
@@ -207,6 +208,7 @@ func (a *App) initLibraries() {
 	a.codecMsgPack = codec.NewMsgPackCodec()
 	a.validator = validation.NewV10Validator()
 	a.logger = logger.NewStdLogger()
+	a.goroutine = goroutine.NewManager(1, 10*time.Second)
 }
 
 // initTasks starts all background tasks or services registered with the application.
@@ -225,23 +227,23 @@ func (a *App) initTasks() {
 // cleaning up the configuration. This method is typically called when stopping
 // the application to ensure all resources are released properly.
 func (a *App) initClosers() {
-	a.closersFn = append(a.closersFn, []func(ctx context.Context) error{
-		func(ctx context.Context) error {
+	a.closerFn = map[string]func(context.Context) error{
+		"HTTP Server": func(ctx context.Context) error {
 			return a.httpServer.Shutdown(ctx)
 		},
-		func(_ context.Context) error {
+		"GRPC Server": func(_ context.Context) error { //nolint:unparam // its ok
 			a.grpcServer.GracefulStop()
 
 			return nil
 		},
-		func(context.Context) error {
+		"Database": func(_ context.Context) error {
 			return a.database.Close()
 		},
-		func(context.Context) error {
+		"Redis": func(_ context.Context) error {
 			return a.redisDB.Close()
 		},
-		func(context.Context) error {
+		"Config": func(_ context.Context) error {
 			return a.config.Close()
 		},
-	}...)
+	}
 }

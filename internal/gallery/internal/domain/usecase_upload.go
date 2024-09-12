@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Upload interface {
-	Call(context.Context, UploadInput) (*UploadOutput, error)
+	Call(ctx context.Context, in UploadInput) (*UploadOutput, error)
 }
 
 type UploadInput struct {

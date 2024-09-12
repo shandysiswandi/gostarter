@@ -19,5 +19,6 @@ func NewGetImage(store GetImageStore) *GetImage {
 
 func (u *GetImage) Call(ctx context.Context, in domain.GetImageInput) (*domain.GetImageOutput, error) {
 	log.Println("ctx", ctx, "in", in)
-	return nil, nil
+
+	return &domain.GetImageOutput{}, nil
 }

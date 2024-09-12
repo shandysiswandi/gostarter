@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type GetImage interface {
-	Call(context.Context, GetImageInput) (*GetImageOutput, error)
+	Call(ctx context.Context, in GetImageInput) (*GetImageOutput, error)
 }
 
 type GetImageInput struct {

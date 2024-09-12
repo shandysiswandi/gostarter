@@ -31,9 +31,10 @@ import (
 // The returned channel is closed once a termination signal is received and processed.
 func (a *App) Start() <-chan struct{} {
 	terminateChan := make(chan struct{})
+	ctx := context.Background()
 
 	go func() {
-		a.logger.Info(context.TODO(), "http server listening", logger.String("address", a.httpServer.Addr))
+		a.logger.Info(ctx, "http server listening", logger.String("address", a.httpServer.Addr))
 		err := a.httpServer.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalln("http server:", err)
@@ -47,7 +48,7 @@ func (a *App) Start() <-chan struct{} {
 			log.Fatalln("open tcp listener:", err)
 		}
 
-		a.logger.Info(context.TODO(), "grpc server listening", logger.String("address", grpcPort))
+		a.logger.Info(ctx, "grpc server listening", logger.String("address", grpcPort))
 		if err := a.grpcServer.Serve(listener); err != nil {
 			if !errors.Is(err, grpc.ErrServerStopped) {
 				log.Fatalln("grpc server, err:", err)
@@ -87,9 +88,14 @@ func (a *App) Stop(ctx context.Context) {
 	}
 
 	// close resources
-	for _, closer := range a.closersFn {
+	for name, closer := range a.closerFn {
 		if err := closer(ctx); err != nil {
-			log.Println("failed to close", err)
+			log.Printf("failed to close %s because: %v", name, err)
 		}
+	}
+
+	log.Println("Waiting for all goroutine to finish")
+	if err := a.goroutine.Wait(ctx); err != nil {
+		log.Println("error from goroutine executions:", err)
 	}
 }

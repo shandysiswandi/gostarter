@@ -16,6 +16,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -41,8 +42,9 @@ type App struct {
 	httpServer     *http.Server
 	grpcServer     *grpc.Server
 	httpRouter     *httprouter.Router
+	goroutine      *goroutine.Manager
 	runnables      []task.Runner
-	closersFn      []func(context.Context) error
+	closerFn       map[string]func(context.Context) error
 }
 
 // New creates and returns a new instance of the App structure. This function initializes
