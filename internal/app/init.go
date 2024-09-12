@@ -208,7 +208,7 @@ func (a *App) initLibraries() {
 	a.codecMsgPack = codec.NewMsgPackCodec()
 	a.validator = validation.NewV10Validator()
 	a.logger = logger.NewStdLogger()
-	a.goroutine = goroutine.NewManager(1, 10*time.Second)
+	a.goroutine = goroutine.NewManager(100)
 }
 
 // initTasks starts all background tasks or services registered with the application.
