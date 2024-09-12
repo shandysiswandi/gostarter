@@ -1,0 +1,36 @@
+{
+  "version": "0.2",
+  "language": "en,id-id",
+  "languageSettings": [
+    {
+      "languageId": "go",
+      "allowCompoundWords": false,
+      "includeRegExpList": ["CStyleComment", "string"],
+      "ignoreRegExpList": [
+        // ignore multiline imports
+        "import\\s*\\((.|[\r\n])*?\\)",
+        // ignore single line imports
+        "import\\s*.*\".*?\"",
+        // ignore go generate directive
+        "//\\s*go:generate.*",
+        // ignore no-linter directive
+        "//\\s*nolint:.*"
+      ]
+    }
+  ],
+  "ignorePaths": [
+    "cspell.json",
+    ".dockerignore",
+    ".mockery.yml",
+    ".golangci.yml",
+    "http.postman_collection.json",
+    "api/gqlgen.yaml",
+    "api/buf.yaml",
+    "api/buf.lock",
+    "api/buf.gen.yaml",
+    "api/gen-gql/**",
+    "api/gen-proto/**",
+    "config/**"
+  ],
+  "words": ["gostarter", "shandysiswandi", "todos"]
+}
