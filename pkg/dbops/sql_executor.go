@@ -1,7 +1,6 @@
 // Package dbops provides abstractions and utility functions for database operations.
-//
-// This package defines interfaces for querying and executing SQL commands,
-// and includes helper functions to simplify common database operations.
+// It defines interfaces for querying and executing SQL commands,
+// and includes helper functions for performing common database operations, such as executing queries and scanning rows.
 package dbops
 
 import (
@@ -25,6 +24,12 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 	query, args, err := queryProvider()
 	if err != nil {
 		return err
+	}
+
+	// Check if the context contains an active transaction.
+	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
+	if ok {
+		execer = tx
 	}
 
 	// Execute the query using the provided Execer.
@@ -59,6 +64,12 @@ func SQLGet[T any, PT Row[T]](
 		return nil, err
 	}
 
+	// Check if the context contains an active transaction.
+	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
+	if ok {
+		querier = tx
+	}
+
 	// Initialize a variable of type T.
 	var t T
 	ptr := PT(&t)
@@ -87,6 +98,12 @@ func SQLGets[T any, PT Row[T]](
 	query, args, err := queryProvider()
 	if err != nil {
 		return nil, err
+	}
+
+	// Check if the context contains an active transaction.
+	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
+	if ok {
+		querier = tx
 	}
 
 	// Execute the query and obtain a result set.

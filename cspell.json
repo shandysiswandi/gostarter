@@ -5,7 +5,10 @@
     {
       "languageId": "go",
       "allowCompoundWords": false,
-      "includeRegExpList": ["CStyleComment", "string"],
+      "includeRegExpList": [
+        "CStyleComment",
+        "string"
+      ],
       "ignoreRegExpList": [
         // ignore multiline imports
         "import\\s*\\((.|[\r\n])*?\\)",
@@ -32,5 +35,10 @@
     "api/gen-proto/**",
     "config/**"
   ],
-  "words": ["gostarter", "shandysiswandi", "todos"]
+  "words": [
+    "dbops",
+    "gostarter",
+    "shandysiswandi",
+    "todos"
+  ]
 }
