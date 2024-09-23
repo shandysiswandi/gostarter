@@ -22,6 +22,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -117,6 +118,7 @@ func (a *App) initDatabase() {
 	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
 	a.database = database
+	a.transaction = dbops.NewTransaction(database)
 }
 
 // initRedis initializes a Redis client using settings from the configuration.

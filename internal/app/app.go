@@ -16,6 +16,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
@@ -38,6 +39,7 @@ type App struct {
 	protoValidator validation.Validator
 	logger         logger.Logger
 	database       *sql.DB
+	transaction    dbops.Tx
 	redisDB        *redis.Client
 	httpServer     *http.Server
 	grpcServer     *grpc.Server
