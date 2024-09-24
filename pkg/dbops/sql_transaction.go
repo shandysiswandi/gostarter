@@ -55,15 +55,20 @@ func (t *Transaction) Transaction(ctx context.Context, fn func(ctx context.Conte
 
 			log.Println("recover from panic when execute function")
 
-			// panic(r)
-		} else if err != nil {
+			// panic(r) // is need to re-panic or not
+			return
+		}
+
+		if err != nil {
 			if err := tx.Rollback(); err != nil {
 				log.Println("error when execute function", err)
 			}
-		} else {
-			if err := tx.Commit(); err != nil {
-				log.Println("error when commit transaction", err)
-			}
+
+			return
+		}
+
+		if err := tx.Commit(); err != nil {
+			log.Println("error when commit transaction", err)
 		}
 	}()
 
