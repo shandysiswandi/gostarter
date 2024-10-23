@@ -31,6 +31,8 @@ func NewSnowflakeNumber() (*SnowflakeNumber, error) {
 		return nil, err
 	}
 
+	snowflake.Epoch = 1727197200000 // Fri Sep 25 2024 00:00:00.000 WIB
+
 	node, err := snowflake.NewNode(nodeID)
 	if err != nil {
 		return nil, err
