@@ -39,3 +39,7 @@ config/*
 *.sublime-project
 *.swp
 *.swo
+
+# 
+bench/
+data/

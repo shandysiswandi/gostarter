@@ -24,6 +24,15 @@ run:
 lint:
 	@golangci-lint run
 
+# GHZ_SERVER_PORT=3000 ghz-web
+load:
+	@ghz --insecure --async --call gostarter.TodoService.Create \
+	-n 1000 --rps 200 \
+  	--concurrency-schedule=step --concurrency-start=50 --concurrency-step=-5 \
+  	--concurrency-step-duration=5s --concurrency-max-duration=30s \
+	-d '{"title":"title", "description":"description  is for testing"}' \
+	localhost:50001 -O json | http POST localhost:3000/api/ingest
+
 # ***** *****
 # TESTING 
 # ***** *****
