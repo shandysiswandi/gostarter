@@ -5,7 +5,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -14,14 +14,14 @@ type UpdateStatusStore interface {
 }
 
 type UpdateStatus struct {
-	log       logger.Logger
+	telemetry *telemetry.Telemetry
 	store     UpdateStatusStore
 	validator validation.Validator
 }
 
-func NewUpdateStatus(l logger.Logger, s UpdateStatusStore, v validation.Validator) *UpdateStatus {
+func NewUpdateStatus(t *telemetry.Telemetry, s UpdateStatusStore, v validation.Validator) *UpdateStatus {
 	return &UpdateStatus{
-		log:       l,
+		telemetry: t,
 		store:     s,
 		validator: v,
 	}
@@ -29,7 +29,7 @@ func NewUpdateStatus(l logger.Logger, s UpdateStatusStore, v validation.Validato
 
 func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
-		s.log.Warn(ctx, "validation failed")
+		s.telemetry.Logger().Warn(ctx, "validation failed")
 
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
@@ -38,7 +38,7 @@ func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput)
 
 	err := s.store.UpdateStatus(ctx, in.ID, sts)
 	if err != nil {
-		s.log.Error(ctx, "todo fail to update status", err)
+		s.telemetry.Logger().Error(ctx, "todo fail to update status", err)
 
 		return nil, goerror.NewServer("failed to update status todo", err)
 	}

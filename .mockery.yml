@@ -36,13 +36,6 @@ packages:
       outpkg: "mocker"
       dir: "{{ .InterfaceDir }}/mocker"
 
-  github.com/shandysiswandi/gostarter/pkg/logger:
-    config:
-      all: True
-      filename: "mock_{{ .InterfaceName | snakecase }}.go"
-      outpkg: "mocker"
-      dir: "{{ .InterfaceDir }}/mocker"
-
   github.com/shandysiswandi/gostarter/pkg/messaging:
     interfaces:
       Client:

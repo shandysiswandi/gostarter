@@ -12,7 +12,6 @@ package http
 //    adjusting the WriteTimeout setting for this particular route.
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,14 +21,13 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
 )
 
 // RegisterSSEEndpoint registers the SSE endpoints for handling event streams
 // and triggering events using the provided httprouter.Router.
 func RegisterSSEEndpoint(router *httprouter.Router, h *SSE) {
 	router.Handler(http.MethodGet, "/events", middleware.Recovery(http.HandlerFunc(h.HandleEvent)))
-	router.Handler(http.MethodGet, "/triger-event", middleware.Recovery(http.HandlerFunc(h.TrigerEvent)))
+	router.Handler(http.MethodGet, "/trigger-event", middleware.Recovery(http.HandlerFunc(h.TrigerEvent)))
 }
 
 // Event represents a simple event with a name and value to be sent to clients.
@@ -42,22 +40,20 @@ type Event struct {
 // managing connected clients in a thread-safe manner.
 type SSE struct {
 	CodecJSON codec.Codec              // Codec for encoding event data into JSON
-	Logger    logger.Logger            // Logger for logging information and errors
 	Clients   map[chan []byte]struct{} // Map of clients connected via SSE
 	mu        sync.RWMutex             // Mutex to ensure thread-safe access to Clients map
 }
 
 // NewSSE creates a new SSE handler with the provided codec for encoding JSON
 // and a logger for logging events.
-func NewSSE(codecJSON codec.Codec, logger logger.Logger) *SSE {
+func NewSSE(codecJSON codec.Codec) *SSE {
 	return &SSE{
 		CodecJSON: codecJSON,
-		Logger:    logger,
 		Clients:   make(map[chan []byte]struct{}),
 	}
 }
 
-// TrigerEvent is an HTTP handler that triggers an event to all connected clients.
+// TriggerEvent is an HTTP handler that triggers an event to all connected clients.
 // It simulates a background task that sends a predefined event to the clients.
 func (s *SSE) TrigerEvent(w http.ResponseWriter, r *http.Request) {
 	s.doBackground()
@@ -85,7 +81,7 @@ func (s *SSE) doBackground() {
 	event := Event{Name: "CREATE_TODO", Value: "TODO"}
 	data, err := s.CodecJSON.Encode(event)
 	if err != nil {
-		s.Logger.Error(context.Background(), "Failed to encode event:", err)
+		log.Println("Failed to encode event:", err)
 		return
 	}
 

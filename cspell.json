@@ -38,7 +38,10 @@
   "words": [
     "dbops",
     "gostarter",
+    "httprouter",
+    "idletime",
     "shandysiswandi",
+    "sslmode",
     "todos"
   ]
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/region/internal/service"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -23,7 +23,7 @@ type Dependency struct {
 	CodecJSON codec.Codec
 	Validator validation.Validator
 	Router    *httprouter.Router
-	Logger    logger.Logger
+	Telemetry *telemetry.Telemetry
 }
 
 func New(dep Dependency) (*Expose, error) {

@@ -18,8 +18,8 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	"google.golang.org/grpc"
@@ -37,7 +37,7 @@ type App struct {
 	codecMsgPack   codec.Codec
 	validator      validation.Validator
 	protoValidator validation.Validator
-	logger         logger.Logger
+	telemetry      *telemetry.Telemetry
 	database       *sql.DB
 	transaction    dbops.Tx
 	redisDB        *redis.Client
@@ -57,7 +57,6 @@ type App struct {
 func New() *App {
 	app := &App{}
 
-	app.initSTDLog()
 	app.initConfig()
 	app.initDatabase()
 	app.initRedis()

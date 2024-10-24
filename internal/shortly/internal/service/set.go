@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -18,15 +18,15 @@ type SetStore interface {
 type Set struct {
 	store     SetStore
 	validator validation.Validator
-	logger    logger.Logger
+	telemetry *telemetry.Telemetry
 	now       func() time.Time
 }
 
-func NewSet(store SetStore, v validation.Validator, l logger.Logger) *Set {
+func NewSet(store SetStore, v validation.Validator, t *telemetry.Telemetry) *Set {
 	return &Set{
 		store:     store,
 		validator: v,
-		logger:    l,
+		telemetry: t,
 		now:       time.Now,
 	}
 }
@@ -38,7 +38,7 @@ func (g *Set) Call(ctx context.Context, in domain.SetInput) (*domain.SetOutput, 
 
 	err := g.validator.Validate(in)
 	if err != nil {
-		g.logger.Error(ctx, "validation failed", err)
+		g.telemetry.Logger().Error(ctx, "validation failed", err)
 
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (g *Set) Call(ctx context.Context, in domain.SetInput) (*domain.SetOutput, 
 		Expired: now,
 	})
 	if err != nil {
-		g.logger.Error(ctx, "failed to save", err)
+		g.telemetry.Logger().Error(ctx, "failed to save", err)
 
 		return nil, err
 	}

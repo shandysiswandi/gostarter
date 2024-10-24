@@ -7,8 +7,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
-	lm "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +15,7 @@ import (
 
 func TestNewUpdate(t *testing.T) {
 	type args struct {
-		l logger.Logger
+		t *telemetry.Telemetry
 		s UpdateStore
 		v validation.Validator
 	}
@@ -30,7 +29,7 @@ func TestNewUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewUpdate(tt.args.l, tt.args.s, tt.args.v)
+			got := NewUpdate(tt.args.t, tt.args.s, tt.args.v)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -54,14 +53,13 @@ func TestUpdate_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Update {
-				log := lm.NewMockLogger(t)
+				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
-				log.EXPECT().Warn(a.ctx, "validation failed").Return()
 
 				return &Update{
-					log:       log,
+					telemetry: mtel,
 					store:     nil,
 					validator: validator,
 				}
@@ -73,7 +71,7 @@ func TestUpdate_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewServer("failed to update todo", assert.AnError),
 			mockFn: func(a args) *Update {
-				log := lm.NewMockLogger(t)
+				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStore(t)
 
@@ -86,10 +84,9 @@ func TestUpdate_Execute(t *testing.T) {
 					Description: a.in.Description,
 					Status:      sts,
 				}).Return(assert.AnError)
-				log.EXPECT().Error(a.ctx, "todo fail to update", assert.AnError).Return()
 
 				return &Update{
-					log:       log,
+					telemetry: mtel,
 					store:     store,
 					validator: validator,
 				}
@@ -111,7 +108,7 @@ func TestUpdate_Execute(t *testing.T) {
 			},
 			wantErr: nil,
 			mockFn: func(a args) *Update {
-				log := lm.NewMockLogger(t)
+				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStore(t)
 
@@ -126,7 +123,7 @@ func TestUpdate_Execute(t *testing.T) {
 				}).Return(nil)
 
 				return &Update{
-					log:       log,
+					telemetry: mtel,
 					store:     store,
 					validator: validator,
 				}

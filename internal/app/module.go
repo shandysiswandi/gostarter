@@ -16,6 +16,13 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo"
 )
 
+func (a *App) initModules() {
+	a.moduleGalery()
+	a.moduleShortly()
+	a.moduleRegion()
+	a.moduleTodo()
+}
+
 func (a *App) moduleGalery() {
 	if a.config.GetBool("module.flag.gallery") {
 		_, err := gallery.New(gallery.Dependency{
@@ -24,7 +31,7 @@ func (a *App) moduleGalery() {
 			CodecJSON: a.codecJSON,
 			Validator: a.validator,
 			Router:    a.httpRouter,
-			Logger:    a.logger,
+			Telemetry: a.telemetry,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module gallery", err)
@@ -40,7 +47,7 @@ func (a *App) moduleShortly() {
 			CodecJSON: a.codecJSON,
 			Validator: a.validator,
 			Router:    a.httpRouter,
-			Logger:    a.logger,
+			Telemetry: a.telemetry,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module shortly", err)
@@ -57,7 +64,7 @@ func (a *App) moduleRegion() {
 			CodecJSON: a.codecJSON,
 			Validator: a.validator,
 			Router:    a.httpRouter,
-			Logger:    a.logger,
+			Telemetry: a.telemetry,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module region", err)
@@ -77,7 +84,7 @@ func (a *App) moduleTodo() {
 			ProtoValidator: a.protoValidator,
 			Router:         a.httpRouter,
 			GRPCServer:     a.grpcServer,
-			Logger:         a.logger,
+			Telemetry:      a.telemetry,
 			Goroutine:      a.goroutine,
 		})
 		if err != nil {
@@ -86,11 +93,4 @@ func (a *App) moduleTodo() {
 
 		a.runnables = append(a.runnables, expTodo.Tasks...)
 	}
-}
-
-func (a *App) initModules() {
-	a.moduleGalery()
-	a.moduleShortly()
-	a.moduleRegion()
-	a.moduleTodo()
 }

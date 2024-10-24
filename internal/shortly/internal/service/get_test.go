@@ -7,8 +7,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
-	lMock "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	vMock "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +17,7 @@ func TestNewGet(t *testing.T) {
 	type args struct {
 		store GetStore
 		v     validation.Validator
-		l     logger.Logger
+		t     *telemetry.Telemetry
 	}
 	tests := []struct {
 		name string
@@ -30,7 +29,7 @@ func TestNewGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewGet(tt.args.store, tt.args.v, tt.args.l)
+			got := NewGet(tt.args.store, tt.args.v, tt.args.t)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -55,15 +54,14 @@ func TestGet_Call(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Get {
 				mv := new(vMock.MockValidator)
-				mlog := new(lMock.MockLogger)
+				mtel := telemetry.NewTelemetry()
 
 				mv.EXPECT().Validate(a.in).Return(assert.AnError).Once()
-				mlog.EXPECT().Error(a.ctx, "validation failed", assert.AnError).Once()
 
 				return &Get{
 					store:     nil,
 					validator: mv,
-					logger:    mlog,
+					telemetry: mtel, // TODO
 				}
 			},
 		},
@@ -74,17 +72,16 @@ func TestGet_Call(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *Get {
 				mv := new(vMock.MockValidator)
-				mlog := new(lMock.MockLogger)
+				mtel := telemetry.NewTelemetry()
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
 				ms.EXPECT().Get(a.ctx, a.in.Key).Return(nil, assert.AnError).Once()
-				mlog.EXPECT().Error(a.ctx, "failed to get", assert.AnError).Once()
 
 				return &Get{
 					store:     ms,
 					validator: mv,
-					logger:    mlog,
+					telemetry: mtel,
 				}
 			},
 		},
@@ -95,17 +92,17 @@ func TestGet_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *Get {
 				mv := new(vMock.MockValidator)
-				mlog := new(lMock.MockLogger)
+				mtel := telemetry.NewTelemetry()
+
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
 				ms.EXPECT().Get(a.ctx, a.in.Key).Return(nil, nil).Once()
-				mlog.EXPECT().Warn(a.ctx, "data not found").Once()
 
 				return &Get{
 					store:     ms,
 					validator: mv,
-					logger:    mlog,
+					telemetry: mtel,
 				}
 			},
 		},
@@ -116,7 +113,7 @@ func TestGet_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *Get {
 				mv := new(vMock.MockValidator)
-				mlog := new(lMock.MockLogger)
+				mtel := telemetry.NewTelemetry()
 				ms := new(mockz.MockGetStore)
 
 				mv.EXPECT().Validate(a.in).Return(nil).Once()
@@ -131,7 +128,7 @@ func TestGet_Call(t *testing.T) {
 				return &Get{
 					store:     ms,
 					validator: mv,
-					logger:    mlog,
+					telemetry: mtel,
 				}
 			},
 		},

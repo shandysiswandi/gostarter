@@ -109,19 +109,9 @@ func (g *Manager) Go(ctx context.Context, f func(c context.Context) error) {
 	}
 }
 
-// Wait waits for all goroutines to complete or for the provided context to be canceled.
-// It returns an aggregated error if any goroutines failed or context is timeout/canceled.
-func (g *Manager) Wait(ctx context.Context) error {
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		g.wg.Wait()
-	}()
+// Wait waits for all goroutines to complete. sIt returns an aggregated error if any goroutines failed.
+func (g *Manager) Wait() error {
+	g.wg.Wait()
 
-	select {
-	case <-done:
-		return errors.Join(g.errs...)
-	case <-ctx.Done():
-		return ctx.Err()
-	}
+	return errors.Join(g.errs...)
 }

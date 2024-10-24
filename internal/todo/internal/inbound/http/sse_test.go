@@ -11,7 +11,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
 )
 
 func TestRegisterSSEEndpoint(t *testing.T) {
@@ -35,7 +34,6 @@ func TestRegisterSSEEndpoint(t *testing.T) {
 func TestNewSSE(t *testing.T) {
 	type args struct {
 		codecJSON codec.Codec
-		logger    logger.Logger
 	}
 	tests := []struct {
 		name string
@@ -46,7 +44,7 @@ func TestNewSSE(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewSSE(tt.args.codecJSON, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
+			if got := NewSSE(tt.args.codecJSON); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewSSE() = %v, want %v", got, tt.want)
 			}
 		})

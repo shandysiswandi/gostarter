@@ -17,7 +17,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"google.golang.org/grpc"
 )
 
@@ -31,10 +30,9 @@ import (
 // The returned channel is closed once a termination signal is received and processed.
 func (a *App) Start() <-chan struct{} {
 	terminateChan := make(chan struct{})
-	ctx := context.Background()
 
 	go func() {
-		a.logger.Info(ctx, "http server listening", logger.String("address", a.httpServer.Addr))
+		log.Println("http server listening", "address", a.httpServer.Addr)
 		err := a.httpServer.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalln("http server:", err)
@@ -48,7 +46,7 @@ func (a *App) Start() <-chan struct{} {
 			log.Fatalln("open tcp listener:", err)
 		}
 
-		a.logger.Info(ctx, "grpc server listening", logger.String("address", grpcPort))
+		log.Println("grpc server listening", "address", grpcPort)
 		if err := a.grpcServer.Serve(listener); err != nil {
 			if !errors.Is(err, grpc.ErrServerStopped) {
 				log.Fatalln("grpc server, err:", err)
@@ -95,7 +93,8 @@ func (a *App) Stop(ctx context.Context) {
 	}
 
 	log.Println("Waiting for all goroutine to finish")
-	if err := a.goroutine.Wait(ctx); err != nil {
+	if err := a.goroutine.Wait(); err != nil {
 		log.Println("error from goroutine executions:", err)
 	}
+	log.Println("All goroutines have finished successfully")
 }

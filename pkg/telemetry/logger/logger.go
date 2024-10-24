@@ -1,11 +1,8 @@
-// Package logger provides an abstraction for structured logging.
-//
-// It defines a `Logger` interface for logging messages at different levels with optional fields.
-// Additionally, it provides functions to create `Field` instances with various types of values.
 package logger
 
 import "context"
 
+// Logger Interface. All methods SHOULD be safe for concurrent use.
 type Logger interface {
 	// Debug logs a message at the Debug level with optional structured fields.
 	//
@@ -65,6 +62,23 @@ type Logger interface {
 	// newLogger.Info(ctx, "User logged in")
 	WithFields(fields ...Field) Logger
 }
+
+type Level int8
+
+const (
+	// DebugLevel logs are typically voluminous, and are usually disabled in
+	// production.
+	DebugLevel Level = iota - 1
+	// InfoLevel is the default logging priority.
+	InfoLevel
+	// WarnLevel logs are more important than Info, but don't need individual
+	// human review.
+	WarnLevel
+	// ErrorLevel logs are high-priority. If an application is running smoothly,
+	// it shouldn't generate any error-level logs.
+	ErrorLevel
+)
+
 type Field struct {
 	Key   string
 	Value any
@@ -146,6 +160,6 @@ func Bytes(key string, value []byte) Field {
 }
 
 // Any creates a Field for any value.
-func Any(key string, value interface{}) Field {
+func Any(key string, value any) Field {
 	return Field{Key: key, Value: value}
 }

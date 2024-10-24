@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/shortly/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -15,30 +15,30 @@ type GetStore interface {
 type Get struct {
 	store     GetStore
 	validator validation.Validator
-	logger    logger.Logger
+	telemetry *telemetry.Telemetry
 }
 
-func NewGet(store GetStore, v validation.Validator, l logger.Logger) *Get {
-	return &Get{store: store, validator: v, logger: l}
+func NewGet(store GetStore, v validation.Validator, t *telemetry.Telemetry) *Get {
+	return &Get{store: store, validator: v, telemetry: t}
 }
 
 func (g *Get) Call(ctx context.Context, in domain.GetInput) (*domain.GetOutput, error) {
 	err := g.validator.Validate(in)
 	if err != nil {
-		g.logger.Error(ctx, "validation failed", err)
+		g.telemetry.Logger().Error(ctx, "validation failed", err)
 
 		return nil, err
 	}
 
 	resp, err := g.store.Get(ctx, in.Key)
 	if err != nil {
-		g.logger.Error(ctx, "failed to get", err)
+		g.telemetry.Logger().Error(ctx, "failed to get", err)
 
 		return nil, err
 	}
 
 	if resp == nil {
-		g.logger.Warn(ctx, "data not found")
+		g.telemetry.Logger().Warn(ctx, "data not found")
 
 		return &domain.GetOutput{URL: ""}, nil
 	}

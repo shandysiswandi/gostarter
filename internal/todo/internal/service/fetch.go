@@ -5,7 +5,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type FetchStore interface {
@@ -13,14 +13,14 @@ type FetchStore interface {
 }
 
 type Fetch struct {
-	log   logger.Logger
-	store FetchStore
+	telemetry *telemetry.Telemetry
+	store     FetchStore
 }
 
-func NewFetch(l logger.Logger, s FetchStore) *Fetch {
+func NewFetch(t *telemetry.Telemetry, s FetchStore) *Fetch {
 	return &Fetch{
-		log:   l,
-		store: s,
+		telemetry: t,
+		store:     s,
 	}
 }
 
@@ -34,7 +34,7 @@ func (s *Fetch) Execute(ctx context.Context, in domain.FetchInput) ([]domain.Tod
 
 	todos, err := s.store.Fetch(ctx, filter)
 	if err != nil {
-		s.log.Error(ctx, "todo fail to fetch", err)
+		s.telemetry.Logger().Error(ctx, "todo fail to fetch", err)
 
 		return nil, goerror.NewServer("failed to fetch todo", err)
 	}

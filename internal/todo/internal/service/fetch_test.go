@@ -7,14 +7,13 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
-	lm "github.com/shandysiswandi/gostarter/pkg/logger/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewFetch(t *testing.T) {
 	type args struct {
-		l logger.Logger
+		t *telemetry.Telemetry
 		s FetchStore
 	}
 	tests := []struct {
@@ -27,7 +26,7 @@ func TestNewFetch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewFetch(tt.args.l, tt.args.s)
+			got := NewFetch(tt.args.t, tt.args.s)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -51,7 +50,7 @@ func TestFetch_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewServer("failed to fetch todo", assert.AnError),
 			mockFn: func(a args) *Fetch {
-				log := lm.NewMockLogger(t)
+				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
 				filter := map[string]string{
@@ -61,11 +60,10 @@ func TestFetch_Execute(t *testing.T) {
 					"status":      a.in.Status,
 				}
 				store.EXPECT().Fetch(a.ctx, filter).Return(nil, assert.AnError)
-				log.EXPECT().Error(a.ctx, "todo fail to fetch", assert.AnError).Return()
 
 				return &Fetch{
-					log:   log,
-					store: store,
+					telemetry: mtel,
+					store:     store,
 				}
 			},
 		},
@@ -80,7 +78,7 @@ func TestFetch_Execute(t *testing.T) {
 			}},
 			wantErr: nil,
 			mockFn: func(a args) *Fetch {
-				log := lm.NewMockLogger(t)
+				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
 				filter := map[string]string{
@@ -97,8 +95,8 @@ func TestFetch_Execute(t *testing.T) {
 				}}, nil)
 
 				return &Fetch{
-					log:   log,
-					store: store,
+					telemetry: mtel,
+					store:     store,
 				}
 			},
 		},

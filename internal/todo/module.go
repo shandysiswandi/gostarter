@@ -15,8 +15,8 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
 	"github.com/shandysiswandi/gostarter/pkg/task"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ type Dependency struct {
 	ProtoValidator validation.Validator
 	Router         *httprouter.Router
 	GRPCServer     *grpc.Server
-	Logger         logger.Logger
+	Telemetry      *telemetry.Telemetry
 	Goroutine      *goroutine.Manager
 }
 
@@ -45,12 +45,12 @@ func New(dep Dependency) (*Expose, error) {
 	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.Config)
 
 	// init services | useCases | business logic
-	findUC := service.NewFind(dep.Logger, sqlTodo, dep.Validator)
-	fetchUC := service.NewFetch(dep.Logger, sqlTodo)
-	createUC := service.NewCreate(dep.Logger, sqlTodo, dep.Validator, dep.UIDNumber)
-	deleteUC := service.NewDelete(dep.Logger, sqlTodo, dep.Validator)
-	updateUC := service.NewUpdate(dep.Logger, sqlTodo, dep.Validator)
-	updateStatusUC := service.NewUpdateStatus(dep.Logger, sqlTodo, dep.Validator)
+	findUC := service.NewFind(dep.Telemetry, sqlTodo, dep.Validator)
+	fetchUC := service.NewFetch(dep.Telemetry, sqlTodo)
+	createUC := service.NewCreate(dep.Telemetry, sqlTodo, dep.Validator, dep.UIDNumber)
+	deleteUC := service.NewDelete(dep.Telemetry, sqlTodo, dep.Validator)
+	updateUC := service.NewUpdate(dep.Telemetry, sqlTodo, dep.Validator)
+	updateStatusUC := service.NewUpdateStatus(dep.Telemetry, sqlTodo, dep.Validator)
 
 	// register endpoint REST
 	inboundhttp.RegisterRESTEndpoint(dep.Router, inboundhttp.NewEndpoint(
@@ -59,7 +59,6 @@ func New(dep Dependency) (*Expose, error) {
 
 	inboundhttp.RegisterSSEEndpoint(dep.Router, inboundhttp.NewSSE(
 		dep.CodecJSON,
-		dep.Logger,
 	))
 
 	// register endpoint GRPC

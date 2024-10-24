@@ -24,19 +24,13 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/logger"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
-
-// initSTDLog initializes the standard logger with specific flags to include the date, time,
-// and file location in log messages. This method is typically called during the initialization
-// phase of the application to ensure consistent logging behavior.
-func (a *App) initSTDLog() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-}
 
 // initConfig initializes the application's configuration by loading settings from a specified
 // YAML file using the Viper library. If the configuration cannot be loaded, the application
@@ -203,13 +197,16 @@ func (a *App) initLibraries() {
 		log.Fatalln("failed to init validation proto validator", err)
 	}
 
+	a.telemetry = telemetry.NewTelemetry(
+		telemetry.WithZapLogger(logger.InfoLevel),
+	)
+
 	a.uidNumber = snow
 	a.protoValidator = pvalidator
 	a.uuid = uid.NewUUIDString()
 	a.codecJSON = codec.NewJSONCodec()
 	a.codecMsgPack = codec.NewMsgPackCodec()
 	a.validator = validation.NewV10Validator()
-	a.logger = logger.NewStdLogger()
 	a.goroutine = goroutine.NewManager(100)
 }
 
@@ -246,6 +243,9 @@ func (a *App) initClosers() {
 		},
 		"Config": func(_ context.Context) error {
 			return a.config.Close()
+		},
+		"Telemetry": func(_ context.Context) error {
+			return a.telemetry.Close()
 		},
 	}
 }
