@@ -30,27 +30,32 @@ func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint, jwte jwt.JWT) 
 					authHeader := r.Header.Get("Authorization")
 					if authHeader == "" {
 						http.Error(w, "authorization header missing", http.StatusUnauthorized)
+
 						return
 					}
 
 					if !strings.HasPrefix(authHeader, "Bearer ") {
 						http.Error(w, "invalid format", http.StatusUnauthorized)
+
 						return
 					}
 
 					clm, err := jwte.Verify(strings.TrimPrefix(authHeader, "Bearer "))
 					if errors.Is(err, jwt.ErrTokenExpired) {
 						http.Error(w, "expired token", http.StatusUnauthorized)
+
 						return
 					}
 
 					if err != nil {
 						http.Error(w, "invalid token", http.StatusUnauthorized)
+
 						return
 					}
 
 					if !clm.VerifyAudience("gostarter.access.token", true) {
 						http.Error(w, "invalid token audience", http.StatusUnauthorized)
+
 						return
 					}
 

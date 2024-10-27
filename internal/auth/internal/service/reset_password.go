@@ -26,20 +26,20 @@ type ResetPassword struct {
 }
 
 func NewResetPassword(t *telemetry.Telemetry, v validation.Validator, h hash.Hash,
-	s ResetPasswordStore) *ResetPassword {
+	s ResetPasswordStore,
+) *ResetPassword {
 	return &ResetPassword{
 		telemetry: t,
 		validator: v,
 		hash:      h,
 		store:     s,
-		now: func() time.Time {
-			return time.Now()
-		},
+		now:       time.Now,
 	}
 }
 
 func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) (
-	*domain.ResetPasswordOutput, error) {
+	*domain.ResetPasswordOutput, error,
+) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

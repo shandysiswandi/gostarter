@@ -20,8 +20,8 @@ type generateAndSaveTokenOutput struct {
 
 func generateAndSaveToken(ctx context.Context, log logger.Logger, jwte jwt.JWT, secHash hash.Hash,
 	store func(context.Context, domain.Token) error, tid, uid uint64, email string) (
-	*generateAndSaveTokenOutput, error) {
-
+	*generateAndSaveTokenOutput, error,
+) {
 	acClaim := jwt.NewClaim(email, time.Hour, []string{"gostarter.access.token"})
 	accToken, err := jwte.Generate(acClaim)
 	if err != nil {

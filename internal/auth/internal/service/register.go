@@ -26,7 +26,8 @@ type Register struct {
 }
 
 func NewRegister(t *telemetry.Telemetry, v validation.Validator,
-	idnum uid.NumberID, hash hash.Hash, s RegisterStore) *Register {
+	idnum uid.NumberID, hash hash.Hash, s RegisterStore,
+) *Register {
 	return &Register{
 		telemetry: t,
 		validator: v,

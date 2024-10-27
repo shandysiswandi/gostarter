@@ -30,7 +30,8 @@ type Login struct {
 }
 
 func NewLogin(t *telemetry.Telemetry, v validation.Validator, idnum uid.NumberID, hash, secHash hash.Hash,
-	j jwt.JWT, s LoginStore) *Login {
+	j jwt.JWT, s LoginStore,
+) *Login {
 	return &Login{
 		telemetry: t,
 		validator: v,

@@ -1,7 +1,7 @@
 // Package http provides the HTTP handlers and routes for handling
 // Server-Sent Events (SSE) and triggering events in a concurrent-safe manner.
 //
-//nolint:errcheck,revive,contextcheck,contextcheck,nlreturn // it will be ignored
+//nolint:errcheck,revive,nlreturn // it will be ignored
 package http
 
 // Known Issue:

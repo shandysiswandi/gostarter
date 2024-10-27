@@ -71,8 +71,9 @@ func WithZapLogger(level logger.Level, filters []string) func(*Telemetry) {
 			logger.ZapWithVerbose(true),
 			logger.ZapWithFilteredKeys(filters),
 		)
-		if err != nil && err != os.ErrInvalid {
+		if err != nil && errors.Is(err, os.ErrInvalid) {
 			log.Printf("error while initialize zap logger %v", err)
+
 			return
 		}
 

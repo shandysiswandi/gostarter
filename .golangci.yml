@@ -52,6 +52,11 @@ linters-settings:
   gosec:
     excludes:
       - G115
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake
 
 linters:
   # disable-all: true

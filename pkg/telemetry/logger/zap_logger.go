@@ -109,6 +109,7 @@ func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
 	for i, field := range fields {
 		if ok := slices.Contains(z.option.filteredKeys, strings.ToLower(field.Key)); ok {
 			zapFields[i] = zap.String(field.Key, "***")
+
 			continue
 		}
 		zapFields[i] = zap.Any(field.Key, field.Value)

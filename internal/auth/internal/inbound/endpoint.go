@@ -18,11 +18,11 @@ func RegisterRESTEndpoint(router *httprouter.Router, log logger.Logger, h *Endpo
 			middleware.Recovery,
 			func(h http.Handler) http.Handler {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					log.Info(context.TODO(), "http request information",
+					log.Info(r.Context(), "http request information",
 						logger.String("http.method", r.Method),
 						logger.String("http.path", r.URL.Path),
 						logger.Any("http.header", map[string]string{
-							"user-agent": r.Header.Get("user-agent"),
+							"user-agent": r.Header.Get("User-Agent"),
 						}),
 					)
 
@@ -136,7 +136,8 @@ func (e *Endpoint) ResetPassword(ctx context.Context, r *http.Request) (any, err
 	}
 
 	_, err := e.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
-		Token: req.Token, Password: req.Password})
+		Token: req.Token, Password: req.Password,
+	})
 	if err != nil {
 		return nil, err
 	}

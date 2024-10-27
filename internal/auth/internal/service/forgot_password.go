@@ -31,20 +31,21 @@ type ForgotPassword struct {
 }
 
 func NewForgotPassword(t *telemetry.Telemetry, v validation.Validator, idnum uid.NumberID,
-	secHash hash.Hash, s ForgotPasswordStore) *ForgotPassword {
+	secHash hash.Hash, s ForgotPasswordStore,
+) *ForgotPassword {
 	return &ForgotPassword{
 		telemetry: t,
 		validator: v,
 		idnum:     idnum,
 		secHash:   secHash,
 		store:     s,
-		now: func() time.Time {
-			return time.Now()
-		},
+		now:       time.Now,
 	}
 }
 
-func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput) (*domain.ForgotPasswordOutput, error) {
+func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput) (
+	*domain.ForgotPasswordOutput, error,
+) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
@@ -71,9 +72,14 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 		return nil, goerror.NewServer("internal server error", err)
 	}
 
+	return s.doBest(ctx, in, user, ps)
+}
+
+func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInput, user *domain.User,
+	ps *domain.PasswordReset,
+) (*domain.ForgotPasswordOutput, error) {
 	now := s.now()
 	if ps != nil {
-
 		if !ps.ExpiresAt.Before(now) {
 			return &domain.ForgotPasswordOutput{}, nil
 		}

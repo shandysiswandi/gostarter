@@ -29,7 +29,8 @@ type RefreshToken struct {
 }
 
 func NewRefreshToken(t *telemetry.Telemetry, v validation.Validator,
-	idnum uid.NumberID, secHash hash.Hash, j jwt.JWT, s RefreshTokenStore) *RefreshToken {
+	idnum uid.NumberID, secHash hash.Hash, j jwt.JWT, s RefreshTokenStore,
+) *RefreshToken {
 	return &RefreshToken{
 		telemetry: t,
 		validator: v,
@@ -41,7 +42,8 @@ func NewRefreshToken(t *telemetry.Telemetry, v validation.Validator,
 }
 
 func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
-	*domain.RefreshTokenOutput, error) {
+	*domain.RefreshTokenOutput, error,
+) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
