@@ -58,14 +58,6 @@ func (s *Storage) List(_ context.Context, prefix string) ([]string, error) {
 	var files []string
 	path := filepath.Join(s.basePath, prefix)
 
-	// err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-	// 	if !info.IsDir() {
-	// 		files = append(files, path)
-	// 	}
-
-	// 	return nil
-	// })
-
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() {
 			files = append(files, path)
