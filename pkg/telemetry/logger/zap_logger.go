@@ -2,33 +2,66 @@ package logger
 
 import (
 	"context"
+	"slices"
+	"strings"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type ZapLogger struct {
-	logger *zap.Logger
+type ZapOption struct {
+	level        zapcore.Level
+	filteredKeys []string
+	isVerbose    bool
 }
 
-func NewZapLogger(level Level) (*ZapLogger, error) {
-	var lvl zapcore.Level
-	switch level {
-	case DebugLevel:
-		lvl = zap.DebugLevel
-	case InfoLevel:
-		lvl = zap.InfoLevel
-	case WarnLevel:
-		lvl = zap.WarnLevel
-	case ErrorLevel:
-		lvl = zap.ErrorLevel
-	default:
-		lvl = zap.InfoLevel
+type ZapLogger struct {
+	logger *zap.Logger
+	option *ZapOption
+}
+
+func ZapWithVerbose(isVerbose bool) func(*ZapOption) {
+	return func(zo *ZapOption) {
+		zo.isVerbose = isVerbose
+	}
+}
+
+func ZapWithFilteredKeys(keys []string) func(*ZapOption) {
+	return func(zo *ZapOption) {
+		zo.filteredKeys = append(zo.filteredKeys, keys...)
+	}
+}
+
+func ZapWithLevel(lvl Level) func(*ZapOption) {
+	return func(zo *ZapOption) {
+		var level zapcore.Level
+		switch lvl {
+		case DebugLevel:
+			level = zap.DebugLevel
+		case InfoLevel:
+			level = zap.InfoLevel
+		case WarnLevel:
+			level = zap.WarnLevel
+		case ErrorLevel:
+			level = zap.ErrorLevel
+		default:
+			level = zap.InfoLevel
+		}
+
+		zo.level = level
+	}
+}
+
+func NewZapLogger(opts ...func(*ZapOption)) (*ZapLogger, error) {
+	zopt := &ZapOption{level: zap.InfoLevel, isVerbose: true, filteredKeys: make([]string, 0)}
+
+	for _, opt := range opts {
+		opt(zopt)
 	}
 
 	z := zap.NewProductionConfig()
 	z.DisableCaller = true
-	z.Level = zap.NewAtomicLevelAt(lvl)
+	z.Level = zap.NewAtomicLevelAt(zopt.level)
 	z.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	z.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	z.EncoderConfig.LevelKey = "severity"
@@ -40,7 +73,7 @@ func NewZapLogger(level Level) (*ZapLogger, error) {
 
 	logger = zap.New(logger.Core(), zap.AddCaller(), zap.AddCallerSkip(1))
 
-	return &ZapLogger{logger: logger}, nil
+	return &ZapLogger{logger: logger, option: zopt}, nil
 }
 
 func (z *ZapLogger) Debug(_ context.Context, message string, fields ...Field) {
@@ -74,6 +107,10 @@ func (z *ZapLogger) Close() error {
 func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
 	zapFields := make([]zapcore.Field, len(fields))
 	for i, field := range fields {
+		if ok := slices.Contains(z.option.filteredKeys, strings.ToLower(field.Key)); ok {
+			zapFields[i] = zap.String(field.Key, "***")
+			continue
+		}
 		zapFields[i] = zap.Any(field.Key, field.Value)
 	}
 

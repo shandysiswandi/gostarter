@@ -3,9 +3,11 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -14,12 +16,51 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/http/serve"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
 var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
 
-func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint) {
-	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
+func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint, jwte jwt.JWT) {
+	serve := serve.New(
+		serve.WithMiddlewares(
+			middleware.Recovery,
+			func(h http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					authHeader := r.Header.Get("Authorization")
+					if authHeader == "" {
+						http.Error(w, "authorization header missing", http.StatusUnauthorized)
+						return
+					}
+
+					if !strings.HasPrefix(authHeader, "Bearer ") {
+						http.Error(w, "invalid format", http.StatusUnauthorized)
+						return
+					}
+
+					clm, err := jwte.Verify(strings.TrimPrefix(authHeader, "Bearer "))
+					if errors.Is(err, jwt.ErrTokenExpired) {
+						http.Error(w, "expired token", http.StatusUnauthorized)
+						return
+					}
+
+					if err != nil {
+						http.Error(w, "invalid token", http.StatusUnauthorized)
+						return
+					}
+
+					if !clm.VerifyAudience("gostarter.access.token", true) {
+						http.Error(w, "invalid token audience", http.StatusUnauthorized)
+						return
+					}
+
+					r = r.WithContext(jwt.SetClaimToContext(r.Context(), clm))
+
+					h.ServeHTTP(w, r)
+				})
+			},
+		),
+	)
 
 	router.GET("/test", h.Test)
 

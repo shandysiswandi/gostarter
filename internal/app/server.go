@@ -92,9 +92,9 @@ func (a *App) Stop(ctx context.Context) {
 		}
 	}
 
-	log.Println("Waiting for all goroutine to finish")
+	log.Println("waiting for all goroutine to finish")
 	if err := a.goroutine.Wait(); err != nil {
-		log.Println("error from goroutine executions:", err)
+		log.Println("error from goroutines executions:", err)
 	}
-	log.Println("All goroutines have finished successfully")
+	log.Println("all goroutines have finished successfully")
 }

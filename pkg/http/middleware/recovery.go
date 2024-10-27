@@ -33,7 +33,8 @@ func Recovery(h http.Handler) http.Handler {
 			// Recover from any panics and handle them appropriately.
 			if err := recover(); err != nil && err != http.ErrAbortHandler {
 				// Log the panic message.
-				log.Printf("panic from: %v\n", err)
+				log.Printf("panic because: %v\n", err)
+				w.Header().Set("content-type", "application/json; charset=utf-8")
 
 				// If the connection is not being upgraded, write a 500 status code.
 				if r.Header.Get("Connection") != "Upgrade" {

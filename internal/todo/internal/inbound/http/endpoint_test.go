@@ -7,12 +7,14 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
 func TestRegisterRESTEndpoint(t *testing.T) {
 	type args struct {
 		router *httprouter.Router
 		h      *Endpoint
+		jwte   jwt.JWT
 	}
 	tests := []struct {
 		name string
@@ -22,7 +24,7 @@ func TestRegisterRESTEndpoint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			RegisterRESTEndpoint(tt.args.router, tt.args.h)
+			RegisterRESTEndpoint(tt.args.router, tt.args.h, tt.args.jwte)
 		})
 	}
 }

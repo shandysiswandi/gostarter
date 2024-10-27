@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -24,6 +25,8 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
+	"github.com/shandysiswandi/gostarter/pkg/hash"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -45,6 +48,20 @@ func (a *App) initConfig() {
 	a.config = cfg
 }
 
+// initTelemetry sets up telemetry for the application, configuring it to use a Zap logger
+// with the specified logging level. This enables logging and monitoring capabilities
+// across the application, allowing tracking of application metrics and logs for observability.
+func (a *App) initTelemetry() {
+	a.telemetry = telemetry.NewTelemetry(
+		telemetry.WithZapLogger(
+			logger.InfoLevel,
+			[]string{"authorization", "password", "access_token", "refresh_token"},
+		),
+	)
+
+	os.Setenv("TZ", a.config.GetString(`tz`))
+}
+
 // dsnMySQL constructs a Data Source Name (DSN) for connecting to a MySQL database
 // using the application's configuration. It includes connection options such as
 // time zone and parseTime settings.
@@ -58,7 +75,7 @@ func (a *App) dsnMySQL() string {
 	)
 	val := url.Values{}
 	val.Add("parseTime", "1")
-	val.Add("loc", "Asia/Jakarta")
+	val.Add("loc", a.config.GetString(`tz`))
 	val.Encode()
 
 	return fmt.Sprintf("%s?%s", dsn, val.Encode())
@@ -197,17 +214,25 @@ func (a *App) initLibraries() {
 		log.Fatalln("failed to init validation proto validator", err)
 	}
 
-	a.telemetry = telemetry.NewTelemetry(
-		telemetry.WithZapLogger(logger.InfoLevel),
+	jewete, err := jwt.NewJSONWebToken(
+		a.config.GetString("jwt.private.key"),
+		a.config.GetString("jwt.public.key"),
 	)
+	if err != nil {
+		log.Fatalln("failed to init json web token (jwt)", err)
+	}
 
+	a.jwt = jewete
 	a.uidNumber = snow
 	a.protoValidator = pvalidator
+
 	a.uuid = uid.NewUUIDString()
+	a.hash = hash.NewBcryptHash(10)
+	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("jwt.hash.secret"))
 	a.codecJSON = codec.NewJSONCodec()
+	a.goroutine = goroutine.NewManager(100)
 	a.codecMsgPack = codec.NewMsgPackCodec()
 	a.validator = validation.NewV10Validator()
-	a.goroutine = goroutine.NewManager(100)
 }
 
 // initTasks starts all background tasks or services registered with the application.

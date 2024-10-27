@@ -6,20 +6,20 @@ import (
 
 // BcryptHash implements the HashVerifier interface using bcrypt.
 type BcryptHash struct {
-	// Cost specifies the bcrypt cost factor. Higher values are more secure but slower.
-	Cost int
+	// cost specifies the bcrypt cost factor. Higher values are more secure but slower.
+	cost int
 }
 
 // NewBcryptHash creates a new BcryptHashVerifier with the specified cost factor.
 // The cost factor determines the computational complexity of the hashing process.
 func NewBcryptHash(cost int) *BcryptHash {
-	return &BcryptHash{Cost: cost}
+	return &BcryptHash{cost: cost}
 }
 
 // Hash hashes the plaintext string using bcrypt and returns the hashed value.
 // It returns an error if the hashing process fails.
 func (h *BcryptHash) Hash(str string) ([]byte, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(str), h.Cost)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(str), h.cost)
 
 	return hashed, err
 }

@@ -4,6 +4,7 @@ package uid
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"time"
 
 	"github.com/bwmarrin/snowflake"
 )
@@ -31,7 +32,8 @@ func NewSnowflakeNumber() (*SnowflakeNumber, error) {
 		return nil, err
 	}
 
-	snowflake.Epoch = 1727197200000 // Fri Sep 25 2024 00:00:00.000 WIB
+	// snowflake.Epoch = 1727197200000 // Fri Sep 25 2024 00:00:00.000 WIB
+	snowflake.Epoch = time.Now().Truncate(time.Hour).UnixMilli()
 
 	node, err := snowflake.NewNode(nodeID)
 	if err != nil {

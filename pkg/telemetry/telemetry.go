@@ -64,15 +64,19 @@ func (t *Telemetry) Meter() metric.Meter {
 	return nil
 }
 
-func WithZapLogger(level logger.Level) func(*Telemetry) {
+func WithZapLogger(level logger.Level, filters []string) func(*Telemetry) {
 	return func(t *Telemetry) {
-		l, err := logger.NewZapLogger(level)
+		lo, err := logger.NewZapLogger(
+			logger.ZapWithLevel(level),
+			logger.ZapWithVerbose(true),
+			logger.ZapWithFilteredKeys(filters),
+		)
 		if err != nil && err != os.ErrInvalid {
 			log.Printf("error while initialize zap logger %v", err)
 			return
 		}
 
-		t.logger = l
-		t.flushers = append(t.flushers, l.Close)
+		t.logger = lo
+		t.flushers = append(t.flushers, lo.Close)
 	}
 }

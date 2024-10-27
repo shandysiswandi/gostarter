@@ -10,6 +10,7 @@ package app
 import (
 	"log"
 
+	"github.com/shandysiswandi/gostarter/internal/auth"
 	"github.com/shandysiswandi/gostarter/internal/gallery"
 	"github.com/shandysiswandi/gostarter/internal/region"
 	"github.com/shandysiswandi/gostarter/internal/shortly"
@@ -17,10 +18,30 @@ import (
 )
 
 func (a *App) initModules() {
+	a.moduleAuth()
 	a.moduleGalery()
 	a.moduleShortly()
 	a.moduleRegion()
 	a.moduleTodo()
+}
+
+func (a *App) moduleAuth() {
+	if a.config.GetBool("module.flag.auth") {
+		_, err := auth.New(auth.Dependency{
+			Config:    a.config,
+			Database:  a.database,
+			Telemetry: a.telemetry,
+			Router:    a.httpRouter,
+			Validator: a.validator,
+			UIDNumber: a.uidNumber,
+			Hash:      a.hash,
+			SecHash:   a.secHash,
+			JWT:       a.jwt,
+		})
+		if err != nil {
+			log.Fatalln("failed to init module auth", err)
+		}
+	}
 }
 
 func (a *App) moduleGalery() {
@@ -86,6 +107,7 @@ func (a *App) moduleTodo() {
 			GRPCServer:     a.grpcServer,
 			Telemetry:      a.telemetry,
 			Goroutine:      a.goroutine,
+			JWT:            a.jwt,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module todo", err)

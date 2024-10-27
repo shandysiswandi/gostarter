@@ -18,6 +18,8 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
+	"github.com/shandysiswandi/gostarter/pkg/hash"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -45,6 +47,9 @@ type App struct {
 	grpcServer     *grpc.Server
 	httpRouter     *httprouter.Router
 	goroutine      *goroutine.Manager
+	hash           hash.Hash
+	secHash        hash.Hash
+	jwt            jwt.JWT
 	runnables      []task.Runner
 	closerFn       map[string]func(context.Context) error
 }
@@ -58,6 +63,7 @@ func New() *App {
 	app := &App{}
 
 	app.initConfig()
+	app.initTelemetry()
 	app.initDatabase()
 	app.initRedis()
 	app.initHTTPRouter()
