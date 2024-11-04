@@ -61,7 +61,7 @@ func generateAndSaveToken(ctx context.Context, log logger.Logger, jwte jwt.JWT, 
 		RefreshExpiredAt: refClaim.ExpiresAt.Time,
 	}
 	if err := store(ctx, token); err != nil {
-		log.Error(ctx, "failed to save tokens", err, logger.String("email", email))
+		log.Error(ctx, "failed to save tokens", err, logger.KeyVal("email", email))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}

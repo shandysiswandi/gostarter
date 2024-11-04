@@ -46,13 +46,13 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 
 	user, err := s.store.FindUserByEmail(ctx, in.Email)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.String("email", in.Email))
+		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}
 
 	if user != nil {
-		s.telemetry.Logger().Warn(ctx, "user already exists", logger.String("email", in.Email))
+		s.telemetry.Logger().Warn(ctx, "user already exists", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("email already registered", goerror.CodeConflict)
 	}
@@ -70,7 +70,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 		Password: string(passHash),
 	}
 	if err := s.store.SaveUser(ctx, userData); err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to save user", err, logger.String("email", in.Email))
+		s.telemetry.Logger().Error(ctx, "failed to save user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}

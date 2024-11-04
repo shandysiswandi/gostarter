@@ -80,86 +80,11 @@ const (
 )
 
 type Field struct {
-	Key   string
-	Value any
+	key   string
+	value any
 }
 
-// String creates a Field for a string value.
-func String(key, value string) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Bool creates a Field for a bool value.
-func Bool(key string, value bool) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Int creates a Field for an int value.
-func Int(key string, value int) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Int8 creates a Field for an int8 value.
-func Int8(key string, value int8) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Int16 creates a Field for an int16 value.
-func Int16(key string, value int16) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Int32 creates a Field for an int32 value.
-func Int32(key string, value int32) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Int64 creates a Field for an int64 value.
-func Int64(key string, value int64) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Uint creates a Field for a uint value.
-func Uint(key string, value uint) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Uint8 creates a Field for a uint8 value.
-func Uint8(key string, value uint8) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Uint16 creates a Field for a uint16 value.
-func Uint16(key string, value uint16) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Uint32 creates a Field for a uint32 value.
-func Uint32(key string, value uint32) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Uint64 creates a Field for a uint64 value.
-func Uint64(key string, value uint64) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Float32 creates a Field for a float32 value.
-func Float32(key string, value float32) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Float64 creates a Field for a float64 value.
-func Float64(key string, value float64) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Bytes creates a Field for a []byte value.
-func Bytes(key string, value []byte) Field {
-	return Field{Key: key, Value: value}
-}
-
-// Any creates a Field for any value.
-func Any(key string, value any) Field {
-	return Field{Key: key, Value: value}
+// KeyVal creates a Field for any value.
+func KeyVal(key string, value any) Field {
+	return Field{key: key, value: value}
 }

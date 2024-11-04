@@ -19,9 +19,9 @@ func RegisterRESTEndpoint(router *httprouter.Router, log logger.Logger, h *Endpo
 			func(h http.Handler) http.Handler {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					log.Info(r.Context(), "http request information",
-						logger.String("http.method", r.Method),
-						logger.String("http.path", r.URL.Path),
-						logger.Any("http.header", map[string]string{
+						logger.KeyVal("http.method", r.Method),
+						logger.KeyVal("http.path", r.URL.Path),
+						logger.KeyVal("http.header", map[string]string{
 							"user-agent": r.Header.Get("User-Agent"),
 						}),
 					)

@@ -107,12 +107,13 @@ func (z *ZapLogger) Close() error {
 func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
 	zapFields := make([]zapcore.Field, len(fields))
 	for i, field := range fields {
-		if ok := slices.Contains(z.option.filteredKeys, strings.ToLower(field.Key)); ok {
-			zapFields[i] = zap.String(field.Key, "***")
+		if ok := slices.Contains(z.option.filteredKeys, strings.ToLower(field.key)); ok {
+			zapFields[i] = zap.String(field.key, "***")
 
 			continue
 		}
-		zapFields[i] = zap.Any(field.Key, field.Value)
+
+		zapFields[i] = zap.Any(field.key, field.value)
 	}
 
 	return zapFields

@@ -52,26 +52,26 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 
 	user, err := s.store.FindUserByEmail(ctx, in.Email)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.String("email", in.Email))
+		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}
 
 	if user == nil {
-		s.telemetry.Logger().Warn(ctx, "user not found", logger.String("email", in.Email))
+		s.telemetry.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	if !s.hash.Verify(user.Password, in.Password) {
-		s.telemetry.Logger().Warn(ctx, "password not match", logger.String("email", in.Email))
+		s.telemetry.Logger().Warn(ctx, "password not match", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	token, err := s.store.FindTokenByUserID(ctx, user.ID)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get token", err, logger.String("email", user.Email))
+		s.telemetry.Logger().Error(ctx, "failed to get token", err, logger.KeyVal("email", user.Email))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}

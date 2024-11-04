@@ -60,21 +60,21 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	refToken, err := s.store.FindTokenByRefresh(ctx, string(refHash))
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get token", err,
-			logger.String("refresh_token_hash", string(refHash)))
+			logger.KeyVal("refresh_token_hash", string(refHash)))
 
 		return nil, goerror.NewServer("internal server error", err)
 	}
 
 	if refToken == nil {
 		s.telemetry.Logger().Warn(ctx, "token not found",
-			logger.String("refresh_token_hash", string(refHash)))
+			logger.KeyVal("refresh_token_hash", string(refHash)))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	if refToken.RefreshExpiredAt.Before(time.Now()) {
 		s.telemetry.Logger().Warn(ctx, "token has expired",
-			logger.String("refresh_token_hash", string(refHash)))
+			logger.KeyVal("refresh_token_hash", string(refHash)))
 
 		return nil, goerror.NewBusiness("token has expired", goerror.CodeUnauthorized)
 	}
@@ -82,7 +82,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	clm := jwt.ExtractClaimFromToken(in.RefreshToken)
 	if clm == nil {
 		s.telemetry.Logger().Warn(ctx, "token is malformed",
-			logger.String("refresh_token_hash", string(refHash)))
+			logger.KeyVal("refresh_token_hash", string(refHash)))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
