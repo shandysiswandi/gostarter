@@ -9,28 +9,34 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type SQLAuth struct {
-	db     *sql.DB
-	qu     goqu.DialectWrapper
-	config config.Config
+	db        *sql.DB
+	qu        goqu.DialectWrapper
+	config    config.Config
+	telemetry *telemetry.Telemetry
 }
 
-func NewSQLAuth(db *sql.DB, config config.Config) *SQLAuth {
+func NewSQLAuth(db *sql.DB, config config.Config, tel *telemetry.Telemetry) *SQLAuth {
 	qu := goqu.Dialect("mysql")
 	if config.GetString("database.driver") == "postgres" {
 		qu = goqu.Dialect("postgres")
 	}
 
 	return &SQLAuth{
-		db:     db,
-		qu:     qu,
-		config: config,
+		db:        db,
+		qu:        qu,
+		config:    config,
+		telemetry: tel,
 	}
 }
 
 func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "FindUserByEmail")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "email", "password").
 			From("users").Where(goqu.Ex{"email": email}).Prepared(true).ToSQL()
@@ -40,6 +46,9 @@ func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.U
 }
 
 func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "SaveUser")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Insert("users").
 			Cols("id", "email", "password").
@@ -56,6 +65,9 @@ func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
 }
 
 func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass string) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "UpdateUserPassword")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Update("users").Set(map[string]any{"password": pass}).
 			Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
@@ -65,6 +77,9 @@ func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass strin
 }
 
 func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.Token, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "FindTokenByUserID")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "access_token",
 			"refresh_token", "access_expires_at", "refresh_expires_at").
@@ -76,6 +91,9 @@ func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.T
 }
 
 func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "FindTokenByRefresh")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "access_token",
 			"refresh_token", "access_expires_at", "refresh_expires_at").
@@ -87,6 +105,9 @@ func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.
 }
 
 func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "SaveToken")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Insert("tokens").
 			Cols("id", "user_id", "access_token", "refresh_token", "access_expires_at", "refresh_expires_at").
@@ -109,6 +130,9 @@ func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
 }
 
 func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "FindPasswordResetByUserID")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "token", "expires_at").
 			From("password_resets").Where(goqu.Ex{"user_id": uid}).
@@ -119,6 +143,9 @@ func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*
 }
 
 func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "FindPasswordResetByToken")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "token", "expires_at").
 			From("password_resets").Where(goqu.Ex{"token": t}).
@@ -129,6 +156,9 @@ func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*dom
 }
 
 func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "SavePasswordReset")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Insert("password_resets").
 			Cols("id", "user_id", "token", "expires_at").
@@ -145,6 +175,9 @@ func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordRese
 }
 
 func (st *SQLAuth) DeletePasswordReset(ctx context.Context, id uint64) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "DeletePasswordReset")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Delete("password_resets").Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
 	}

@@ -31,7 +31,7 @@ type Dependency struct {
 
 func New(dep Dependency) (*Expose, error) {
 	// init outbound | database | http client | grpc client | redis | etc.
-	sqlAuth := outbound.NewSQLAuth(dep.Database, dep.Config)
+	sqlAuth := outbound.NewSQLAuth(dep.Database, dep.Config, dep.Telemetry)
 
 	// init services | useCases | business logic
 	loginUC := service.NewLogin(dep.Telemetry, dep.Validator, dep.UIDNumber,

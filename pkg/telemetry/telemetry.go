@@ -8,6 +8,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 type Collector int
@@ -18,9 +19,11 @@ const (
 )
 
 type Telemetry struct {
-	name     string
-	logger   logger.Logger
-	flushers []func() error
+	name            string
+	logger          logger.Logger
+	tracer          trace.TracerProvider
+	tracerCollector Collector
+	flushers        []func() error
 }
 
 func NewTelemetry(opts ...func(*Telemetry)) *Telemetry {
@@ -28,9 +31,11 @@ func NewTelemetry(opts ...func(*Telemetry)) *Telemetry {
 	log.SetOutput(os.Stdout)
 
 	tel := &Telemetry{
-		name:     "telemetry",
-		logger:   logger.NewNoopLogger(),
-		flushers: make([]func() error, 0),
+		name:            "telemetry",
+		logger:          logger.NewNoopLogger(),
+		tracer:          noop.NewTracerProvider(),
+		tracerCollector: NOOP,
+		flushers:        make([]func() error, 0),
 	}
 
 	for _, opt := range opts {
@@ -57,27 +62,9 @@ func (t *Telemetry) Logger() logger.Logger {
 }
 
 func (t *Telemetry) Tracer() trace.Tracer {
-	return nil
+	return t.tracer.Tracer(t.name)
 }
 
 func (t *Telemetry) Meter() metric.Meter {
 	return nil
-}
-
-func WithZapLogger(level logger.Level, filters []string) func(*Telemetry) {
-	return func(t *Telemetry) {
-		lo, err := logger.NewZapLogger(
-			logger.ZapWithLevel(level),
-			logger.ZapWithVerbose(true),
-			logger.ZapWithFilteredKeys(filters),
-		)
-		if err != nil && errors.Is(err, os.ErrInvalid) {
-			log.Printf("error while initialize zap logger %v", err)
-
-			return
-		}
-
-		t.logger = lo
-		t.flushers = append(t.flushers, lo.Close)
-	}
 }

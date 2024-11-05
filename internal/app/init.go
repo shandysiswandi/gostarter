@@ -45,6 +45,8 @@ func (a *App) initConfig() {
 		log.Fatalln("failed to init config", err)
 	}
 
+	os.Setenv("TZ", cfg.GetString(`tz`))
+
 	a.config = cfg
 }
 
@@ -57,9 +59,12 @@ func (a *App) initTelemetry() {
 			logger.InfoLevel,
 			[]string{"authorization", "password", "access_token", "refresh_token"},
 		),
+		// telemetry.WithConsoleTracer(a.config.GetString("telemetry.name")),
+		telemetry.WithJaegerTracer(
+			a.config.GetString("telemetry.jaeger.address"),
+			a.config.GetString("telemetry.name"),
+		),
 	)
-
-	os.Setenv("TZ", a.config.GetString(`tz`))
 }
 
 // dsnMySQL constructs a Data Source Name (DSN) for connecting to a MySQL database

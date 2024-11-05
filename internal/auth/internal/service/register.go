@@ -38,6 +38,9 @@ func NewRegister(t *telemetry.Telemetry, v validation.Validator,
 }
 
 func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.RegisterOutput, error) {
+	ctx, span := s.telemetry.Tracer().Start(ctx, "Register")
+	defer span.End()
+
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

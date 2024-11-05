@@ -1,6 +1,9 @@
 server.address.http: :8081
 server.address.grpc: :50001
 
+telemetry.name: gostarter
+telemetry.jaeger.address: localhost:4318
+
 tz: "Asia/Jakarta"
 
 database.driver: mysql
