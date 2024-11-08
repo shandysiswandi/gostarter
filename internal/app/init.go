@@ -60,8 +60,8 @@ func (a *App) initTelemetry() {
 			[]string{"authorization", "password", "access_token", "refresh_token"},
 		),
 		// telemetry.WithConsoleTracer(a.config.GetString("telemetry.name")),
-		telemetry.WithJaegerTracer(
-			a.config.GetString("telemetry.jaeger.address"),
+		telemetry.WithOTLPTracer(
+			a.config.GetString("telemetry.otpl.address"),
 			a.config.GetString("telemetry.name"),
 		),
 	)

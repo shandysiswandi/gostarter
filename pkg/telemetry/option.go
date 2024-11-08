@@ -61,7 +61,7 @@ func WithConsoleTracer(serviceName string) func(*Telemetry) {
 	}
 }
 
-func WithJaegerTracer(address, serviceName string) func(*Telemetry) {
+func WithOTLPTracer(address, serviceName string) func(*Telemetry) {
 	return func(t *Telemetry) {
 		ctx := context.Background()
 
@@ -72,7 +72,7 @@ func WithJaegerTracer(address, serviceName string) func(*Telemetry) {
 		)
 
 		if err != nil {
-			log.Printf("error while initialize jaeger tracer %v", err)
+			log.Printf("error while initialize otpl tracer %v", err)
 
 			return
 		}
@@ -80,7 +80,8 @@ func WithJaegerTracer(address, serviceName string) func(*Telemetry) {
 		tp := trace.NewTracerProvider(
 			trace.WithBatcher(exporter),
 			trace.WithResource(
-				resource.NewSchemaless(
+				resource.NewWithAttributes(
+					semconv.SchemaURL,
 					semconv.ServiceNameKey.String(serviceName),
 				),
 			),

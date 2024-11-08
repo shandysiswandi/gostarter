@@ -2,7 +2,7 @@ server.address.http: localhost:8080
 server.address.grpc: localhost:50000
 
 telemetry.name: gostarter
-telemetry.jaeger.address: localhost:4318
+telemetry.otpl.address: localhost:4318
 
 tz: "Asia/Jakarta"
 
