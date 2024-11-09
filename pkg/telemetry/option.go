@@ -70,7 +70,6 @@ func WithOTLPTracer(address, serviceName string) func(*Telemetry) {
 			otlptracehttp.WithEndpoint(address),
 			otlptracehttp.WithInsecure(),
 		)
-
 		if err != nil {
 			log.Printf("error while initialize open telemetry tracer %v", err)
 
