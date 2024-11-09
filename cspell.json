@@ -5,10 +5,7 @@
     {
       "languageId": "go",
       "allowCompoundWords": false,
-      "includeRegExpList": [
-        "CStyleComment",
-        "string"
-      ],
+      "includeRegExpList": ["CStyleComment", "string"],
       "ignoreRegExpList": [
         // ignore multiline imports
         "import\\s*\\((.|[\r\n])*?\\)",
@@ -41,7 +38,7 @@
     "HMACSHA",
     "httprouter",
     "idletime",
-    "otpl",
+    "otlp",
     "shandysiswandi",
     "sslmode",
     "todos"

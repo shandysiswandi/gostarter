@@ -72,7 +72,7 @@ func WithOTLPTracer(address, serviceName string) func(*Telemetry) {
 		)
 
 		if err != nil {
-			log.Printf("error while initialize otpl tracer %v", err)
+			log.Printf("error while initialize open telemetry tracer %v", err)
 
 			return
 		}
