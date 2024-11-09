@@ -11,6 +11,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/config/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,28 +40,28 @@ func TestNewSQLTodo(t *testing.T) {
 			args: func() args {
 				cfg := mocker.NewMockConfig(t)
 
-				cfg.EXPECT().GetString("database.driver").Return("mysql")
+				cfg.EXPECT().GetString("database.driver").Return(dbops.MySQLDriver)
 
 				return args{
 					db:     &sql.DB{},
 					config: cfg,
 				}
 			},
-			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect("mysql"), config: &mocker.MockConfig{}},
+			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.MySQLDriver), config: &mocker.MockConfig{}},
 		},
 		{
 			name: "SuccessPostgres",
 			args: func() args {
 				cfg := mocker.NewMockConfig(t)
 
-				cfg.EXPECT().GetString("database.driver").Return("postgres")
+				cfg.EXPECT().GetString("database.driver").Return(dbops.PostgresDriver)
 
 				return args{
 					db:     &sql.DB{},
 					config: cfg,
 				}
 			},
-			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect("postgres"), config: &mocker.MockConfig{}},
+			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.PostgresDriver), config: &mocker.MockConfig{}},
 		},
 	}
 	for _, tt := range tests {
@@ -92,14 +93,14 @@ func TestSQLTodo_Create(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Insert("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
 					Cols("id", "title", "description", "status").
 					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -109,7 +110,7 @@ func TestSQLTodo_Create(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Insert("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
 					Cols("id", "title", "description", "status").
 					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
@@ -117,7 +118,7 @@ func TestSQLTodo_Create(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -127,7 +128,7 @@ func TestSQLTodo_Create(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Insert("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
 					Cols("id", "title", "description", "status").
 					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
@@ -135,7 +136,7 @@ func TestSQLTodo_Create(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}
@@ -168,13 +169,13 @@ func TestSQLTodo_Delete(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Delete("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Delete("todos").
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -184,13 +185,13 @@ func TestSQLTodo_Delete(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Delete("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Delete("todos").
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}
@@ -225,13 +226,13 @@ func TestSQLTodo_Find(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
 					From("todos").Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -247,7 +248,7 @@ func TestSQLTodo_Find(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
 					From("todos").Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				row := sqlmock.NewRows([]string{"id", "title", "description", "status"}).
@@ -256,7 +257,7 @@ func TestSQLTodo_Find(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(row)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}
@@ -292,13 +293,13 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
 					From("todos").Prepared(true).ToSQL()
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -321,7 +322,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
 					From("todos").Prepared(true).ToSQL()
 
 				rows := sqlmock.NewRows([]string{"id", "title", "description", "status"}).
@@ -331,7 +332,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(rows)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}
@@ -366,14 +367,14 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Update("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").
 					Set(map[string]any{"status": a.sts}).
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -383,14 +384,14 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Update("todos").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").
 					Set(map[string]any{"status": a.sts}).
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}
@@ -423,7 +424,7 @@ func TestSQLTodo_Update(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Update("todos").Set(map[string]any{
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").Set(map[string]any{
 					"title":       a.todo.Title,
 					"description": a.todo.Description,
 					"status":      a.todo.Status,
@@ -432,7 +433,7 @@ func TestSQLTodo_Update(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 		{
@@ -442,7 +443,7 @@ func TestSQLTodo_Update(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect("postgres").Update("todos").Set(map[string]any{
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").Set(map[string]any{
 					"title":       a.todo.Title,
 					"description": a.todo.Description,
 					"status":      a.todo.Status,
@@ -451,7 +452,7 @@ func TestSQLTodo_Update(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect("postgres")}, db.Close
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
 	}

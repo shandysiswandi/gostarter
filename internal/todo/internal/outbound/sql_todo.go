@@ -18,9 +18,9 @@ type SQLTodo struct {
 }
 
 func NewSQLTodo(db *sql.DB, config config.Config) *SQLTodo {
-	qu := goqu.Dialect("mysql")
-	if config.GetString("database.driver") == "postgres" {
-		qu = goqu.Dialect("postgres")
+	qu := goqu.Dialect(dbops.MySQLDriver)
+	if config.GetString("database.driver") == dbops.PostgresDriver {
+		qu = goqu.Dialect(dbops.PostgresDriver)
 	}
 
 	return &SQLTodo{
