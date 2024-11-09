@@ -23,6 +23,10 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
+		}
+
 		return err
 	}
 
@@ -35,16 +39,28 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 	// Execute the query using the provided Execer.
 	res, err := execer.ExecContext(ctx, query, args...)
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:ExecContext result: %v, query: %s, err: %v \n", res, query, err)
+		}
+
 		return err
 	}
 
 	// Check the number of rows affected if feedback is requested.
 	aff, err := res.RowsAffected()
-	if err != nil && len(feedback) > 0 && feedback[0] {
+	if err != nil {
+		if verbose {
+			log.Printf("Exec:RowsAffected rows: %d, query: %s, err: %v \n", aff, query, err)
+		}
+
 		return err
 	}
 
 	if aff == 0 && len(feedback) > 0 && feedback[0] {
+		if verbose {
+			log.Printf("Exec: query: %s, data not affected or not found \n", query)
+		}
+
 		return ErrZeroRowsAffected
 	}
 
@@ -61,6 +77,10 @@ func SQLGet[T any, PT Row[T]](
 	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
+		}
+
 		return nil, err
 	}
 
@@ -77,10 +97,18 @@ func SQLGet[T any, PT Row[T]](
 	// Execute the query and scan the result into the variable.
 	err = querier.QueryRowContext(ctx, query, args...).Scan(ptr.ScanColumn()...)
 	if errors.Is(err, sql.ErrNoRows) {
+		if verbose {
+			log.Printf("Exec: query: %s, data not found \n", query)
+		}
+
 		return nil, nil //nolint:nilnil // no rows is not an error, just a nil result
 	}
 
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:QueryRowContext query: %s, err: %v \n", query, err)
+		}
+
 		return nil, err
 	}
 
@@ -97,6 +125,10 @@ func SQLGets[T any, PT Row[T]](
 	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
+		}
+
 		return nil, err
 	}
 
@@ -109,6 +141,10 @@ func SQLGets[T any, PT Row[T]](
 	// Execute the query and obtain a result set.
 	rows, err := querier.QueryContext(ctx, query, args...)
 	if err != nil {
+		if verbose {
+			log.Printf("Exec:QueryRowContext query: %s, err: %v \n", query, err)
+		}
+
 		return nil, err
 	}
 
@@ -125,6 +161,10 @@ func SQLGets[T any, PT Row[T]](
 		ptr := PT(&t)
 
 		if err := rows.Scan(ptr.ScanColumn()...); err != nil {
+			if verbose {
+				log.Printf("Exec:ScanColumn query: %s, err: %v \n", query, err)
+			}
+
 			return nil, ErrScanRow
 		}
 
@@ -132,6 +172,10 @@ func SQLGets[T any, PT Row[T]](
 	}
 
 	if err := rows.Err(); err != nil {
+		if verbose {
+			log.Printf("Exec:rows.Err query: %s, err: %v \n", query, err)
+		}
+
 		return nil, err
 	}
 

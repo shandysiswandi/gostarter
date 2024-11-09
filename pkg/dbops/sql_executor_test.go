@@ -21,6 +21,9 @@ func (r *testStruct) ScanColumn() []any {
 }
 
 func TestExec(t *testing.T) {
+	SetVerbose(true)
+	// defer SetVerbose(false)
+
 	type args struct {
 		ctx           context.Context
 		execer        func() *sql.DB
@@ -79,6 +82,24 @@ func TestExec(t *testing.T) {
 			wantErr: assert.AnError,
 		},
 		{
+			name: "ErrorGetRowsAffectedWithoutFeedback",
+			args: args{
+				ctx: context.Background(),
+				execer: func() *sql.DB {
+					db, mock, _ := sqlmock.New()
+
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
+
+					return db
+				},
+				queryProvider: func() (string, []any, error) {
+					return "DELETE FROM test WHERE id = ?", []any{1}, nil
+				},
+				feedback: nil,
+			},
+			wantErr: assert.AnError,
+		},
+		{
 			name: "ErrorZeroRowsAffected",
 			args: args{
 				ctx: context.Background(),
@@ -118,6 +139,7 @@ func TestExec(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			db := tt.args.execer()
 			err := Exec(tt.args.ctx, db, tt.args.queryProvider, tt.args.feedback...)
 			assert.Equal(t, tt.wantErr, err)
