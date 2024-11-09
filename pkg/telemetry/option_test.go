@@ -70,6 +70,7 @@ func TestWithConsoleTracer(t *testing.T) {
 			t.Parallel()
 
 			tel := tt.mockFn(tt.args)
+			defer tel.Close()
 
 			assert.Len(t, tel.flushers, 1)
 			assert.NotNil(t, tel.Tracer())
@@ -104,6 +105,7 @@ func TestWithOTLPTracer(t *testing.T) {
 			t.Parallel()
 
 			tel := tt.mockFn(tt.args)
+			defer tel.Close()
 
 			assert.Len(t, tel.flushers, 1)
 			assert.NotNil(t, tel.Tracer())

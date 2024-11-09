@@ -33,13 +33,7 @@ func WithZapLogger(level logger.Level, filters []string) func(*Telemetry) {
 
 func WithConsoleTracer(serviceName string) func(*Telemetry) {
 	return func(t *Telemetry) {
-		traceExporter, err := stdouttrace.New()
-		if err != nil {
-			log.Printf("error while initialize console tracer %v", err)
-
-			return
-		}
-
+		traceExporter, _ := stdouttrace.New() //nolint:errcheck // it will never error
 		tp := trace.NewTracerProvider(
 			trace.WithBatcher(
 				traceExporter,
