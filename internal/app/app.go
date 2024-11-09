@@ -12,6 +12,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/doug-martin/goqu/v9"
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
@@ -42,6 +43,7 @@ type App struct {
 	telemetry      *telemetry.Telemetry
 	database       *sql.DB
 	transaction    dbops.Tx
+	queryBuilder   goqu.DialectWrapper
 	redisDB        *redis.Client
 	httpServer     *http.Server
 	grpcServer     *grpc.Server

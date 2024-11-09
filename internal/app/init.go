@@ -18,6 +18,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/doug-martin/goqu/v9"
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
@@ -113,10 +114,12 @@ func (a *App) initDatabase() {
 	maxIdleTime := a.config.GetInt(`database.max.idletime`)
 
 	dsn := a.dsnMySQL()
-	driver := "mysql"
-	if a.config.GetString(`database.driver`) == "postgres" {
+	driver := dbops.MySQLDriver
+	queryBuilder := goqu.Dialect(dbops.MySQLDriver)
+	if a.config.GetString(`database.driver`) == dbops.PostgresDriver {
 		dsn = a.dsnPostgreSQL()
-		driver = "postgres"
+		driver = dbops.PostgresDriver
+		queryBuilder = goqu.Dialect(dbops.PostgresDriver)
 	}
 
 	database, err := sql.Open(driver, dsn)
@@ -134,6 +137,7 @@ func (a *App) initDatabase() {
 	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
 	a.database = database
+	a.queryBuilder = queryBuilder
 	a.transaction = dbops.NewTransaction(database)
 }
 
