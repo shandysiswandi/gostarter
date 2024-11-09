@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: goerror/error.proto
 
-package goerror
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

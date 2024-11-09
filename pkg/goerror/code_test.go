@@ -44,11 +44,6 @@ func TestCode_String(t *testing.T) {
 			want: "ERROR_CODE_FORBIDDEN",
 		},
 		{
-			name: "CodeContentTooLarge",
-			c:    CodeContentTooLarge,
-			want: "ERROR_CODE_CONTENT_TOO_LARGE",
-		},
-		{
 			name: "CodeTimeout",
 			c:    CodeTimeout,
 			want: "ERROR_CODE_UNKNOWN",

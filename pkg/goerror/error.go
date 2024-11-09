@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/shandysiswandi/gostarter/pkg/goerror/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -44,9 +45,14 @@ func (e *GoError) Error() string {
 	return "Unknown error"
 }
 
+// String returns a formatted string with details about the error.
 func (e *GoError) String() string {
-	return fmt.Sprintf("Error Type: %s, Code: %s, Message: %s, Underlying Error: %v",
-		e.errType.String(), e.code.String(), e.msg, e.err,
+	return fmt.Sprintf(
+		"Error Type: %s, Code: %s, Message: %s, Underlying Error: %v",
+		e.errType.String(),
+		e.code.String(),
+		e.msg,
+		e.err,
 	)
 }
 
@@ -78,8 +84,10 @@ func (e *GoError) GRPCStatus() *status.Status {
 	var sts *status.Status
 
 	switch e.code {
-	case CodeInvalidFormat, CodeInvalidInput:
+	case CodeInvalidFormat:
 		sts = status.New(codes.InvalidArgument, e.msg)
+	case CodeInvalidInput:
+		sts = status.New(codes.FailedPrecondition, e.msg)
 	case CodeNotFound:
 		sts = status.New(codes.NotFound, e.msg)
 	case CodeUnauthorized:
@@ -98,7 +106,7 @@ func (e *GoError) GRPCStatus() *status.Status {
 		sts = status.New(codes.Unknown, e.msg)
 	}
 
-	ge := &Error{
+	ge := &pb.Error{
 		Code:       e.code.String(),
 		Type:       e.errType.String(),
 		Message:    e.msg,
@@ -129,8 +137,6 @@ func (e *GoError) StatusCode() int {
 		return http.StatusRequestTimeout
 	case CodeConflict:
 		return http.StatusConflict
-	case CodeContentTooLarge:
-		return http.StatusRequestEntityTooLarge
 	case CodeInternal, CodeUnknown:
 		return http.StatusInternalServerError
 	default:
@@ -148,18 +154,22 @@ func New(err error, msg string, et Type, code Code) error {
 	}
 }
 
+// NewServer creates a server-type error with the provided message and error.
 func NewServer(msg string, err error) error {
 	return New(err, msg, TypeServer, CodeInternal)
 }
 
+// NewBusiness creates a business-type error with the specified message and code.
 func NewBusiness(msg string, code Code) error {
 	return New(nil, msg, TypeBusiness, code)
 }
 
+// NewInvalidInput creates a validation error for invalid input with a message and underlying error.
 func NewInvalidInput(msg string, err error) error {
 	return New(err, msg, TypeValidation, CodeInvalidInput)
 }
 
+// NewInvalidFormat creates a validation error for invalid format with a message and underlying error.
 func NewInvalidFormat(msg string, err error) error {
 	return New(err, msg, TypeValidation, CodeInvalidFormat)
 }
