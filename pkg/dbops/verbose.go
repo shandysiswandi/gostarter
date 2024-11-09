@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals // it will investigate later
 package dbops
 
 var verbose bool

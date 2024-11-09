@@ -20,7 +20,6 @@ var (
 
 // Exec executes a query and handles the result.
 func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []any, error), feedback ...bool) error {
-	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
 		if verbose {
@@ -30,13 +29,11 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 		return err
 	}
 
-	// Check if the context contains an active transaction.
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
 		execer = tx
 	}
 
-	// Execute the query using the provided Execer.
 	res, err := execer.ExecContext(ctx, query, args...)
 	if err != nil {
 		if verbose {
@@ -46,7 +43,6 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 		return err
 	}
 
-	// Check the number of rows affected if feedback is requested.
 	aff, err := res.RowsAffected()
 	if err != nil {
 		if verbose {
@@ -74,7 +70,6 @@ func SQLGet[T any, PT Row[T]](
 	querier Queryer,
 	queryProvider func() (string, []any, error),
 ) (*T, error) {
-	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
 		if verbose {
@@ -84,17 +79,14 @@ func SQLGet[T any, PT Row[T]](
 		return nil, err
 	}
 
-	// Check if the context contains an active transaction.
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
 		querier = tx
 	}
 
-	// Initialize a variable of type T.
 	var t T
 	ptr := PT(&t)
 
-	// Execute the query and scan the result into the variable.
 	err = querier.QueryRowContext(ctx, query, args...).Scan(ptr.ScanColumn()...)
 	if errors.Is(err, sql.ErrNoRows) {
 		if verbose {
@@ -122,7 +114,6 @@ func SQLGets[T any, PT Row[T]](
 	querier Queryer,
 	queryProvider func() (string, []any, error),
 ) ([]T, error) {
-	// Generate the query and arguments from the queryProvider function.
 	query, args, err := queryProvider()
 	if err != nil {
 		if verbose {
@@ -132,13 +123,11 @@ func SQLGets[T any, PT Row[T]](
 		return nil, err
 	}
 
-	// Check if the context contains an active transaction.
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
 		querier = tx
 	}
 
-	// Execute the query and obtain a result set.
 	rows, err := querier.QueryContext(ctx, query, args...)
 	if err != nil {
 		if verbose {
@@ -154,7 +143,6 @@ func SQLGets[T any, PT Row[T]](
 		}
 	}()
 
-	// Iterate through the rows and scan each row into a slice of type T.
 	var entities []T
 	for rows.Next() {
 		var t T
