@@ -8,8 +8,7 @@ import (
 )
 
 // Storage represents a file storage system.
-// It embeds the Uploader, Downloader, Deleter, Lister, and io.Closer interfaces,
-// providing a comprehensive API for managing files in various storage systems.
+// It providing a comprehensive API for managing files in various storage systems.
 type Storage interface {
 	// Close releases any resources held by the storage system.
 	// It is intended to be called when the storage system is no longer needed.
