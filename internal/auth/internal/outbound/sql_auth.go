@@ -7,7 +7,6 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
@@ -15,20 +14,13 @@ import (
 type SQLAuth struct {
 	db        *sql.DB
 	qu        goqu.DialectWrapper
-	config    config.Config
 	telemetry *telemetry.Telemetry
 }
 
-func NewSQLAuth(db *sql.DB, config config.Config, tel *telemetry.Telemetry) *SQLAuth {
-	qu := goqu.Dialect("mysql")
-	if config.GetString("database.driver") == "postgres" {
-		qu = goqu.Dialect("postgres")
-	}
-
+func NewSQLAuth(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *SQLAuth {
 	return &SQLAuth{
 		db:        db,
 		qu:        qu,
-		config:    config,
 		telemetry: tel,
 	}
 }
@@ -39,10 +31,15 @@ func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.U
 
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "email", "password").
-			From("users").Where(goqu.Ex{"email": email}).Prepared(true).ToSQL()
+			From("users").
+			Where(goqu.Ex{"email": email}).
+			Prepared(true).
+			ToSQL()
 	}
 
-	return dbops.SQLGet[domain.User](ctx, st.db, query)
+	dao, err := dbops.SQLGet[user](ctx, st.db, query)
+
+	return dao.toEntity(), err
 }
 
 func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
@@ -53,7 +50,8 @@ func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
 		return st.qu.Insert("users").
 			Cols("id", "email", "password").
 			Vals([]any{u.ID, u.Email, u.Password}).
-			Prepared(true).ToSQL()
+			Prepared(true).
+			ToSQL()
 	}
 
 	err := dbops.Exec(ctx, st.db, query, true)
@@ -69,8 +67,11 @@ func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass strin
 	defer span.End()
 
 	query := func() (string, []any, error) {
-		return st.qu.Update("users").Set(map[string]any{"password": pass}).
-			Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
+		return st.qu.Update("users").
+			Set(map[string]any{"password": pass}).
+			Where(goqu.Ex{"id": id}).
+			Prepared(true).
+			ToSQL()
 	}
 
 	return dbops.Exec(ctx, st.db, query)
@@ -81,13 +82,23 @@ func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.T
 	defer span.End()
 
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "user_id", "access_token",
-			"refresh_token", "access_expires_at", "refresh_expires_at").
-			From("tokens").Where(goqu.Ex{"user_id": uid}).
-			Prepared(true).ToSQL()
+		return st.qu.Select(
+			"id",
+			"user_id",
+			"access_token",
+			"refresh_token",
+			"access_expires_at",
+			"refresh_expires_at",
+		).
+			From("tokens").
+			Where(goqu.Ex{"user_id": uid}).
+			Prepared(true).
+			ToSQL()
 	}
 
-	return dbops.SQLGet[domain.Token](ctx, st.db, query)
+	dao, err := dbops.SQLGet[token](ctx, st.db, query)
+
+	return dao.toEntity(), err
 }
 
 func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
@@ -95,13 +106,23 @@ func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.
 	defer span.End()
 
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "user_id", "access_token",
-			"refresh_token", "access_expires_at", "refresh_expires_at").
-			From("tokens").Where(goqu.Ex{"refresh_token": ref}).
-			Prepared(true).ToSQL()
+		return st.qu.Select(
+			"id",
+			"user_id",
+			"access_token",
+			"refresh_token",
+			"access_expires_at",
+			"refresh_expires_at",
+		).
+			From("tokens").
+			Where(goqu.Ex{"refresh_token": ref}).
+			Prepared(true).
+			ToSQL()
 	}
 
-	return dbops.SQLGet[domain.Token](ctx, st.db, query)
+	dao, err := dbops.SQLGet[token](ctx, st.db, query)
+
+	return dao.toEntity(), err
 }
 
 func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
@@ -110,15 +131,32 @@ func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
 
 	query := func() (string, []any, error) {
 		return st.qu.Insert("tokens").
-			Cols("id", "user_id", "access_token", "refresh_token", "access_expires_at", "refresh_expires_at").
-			Vals([]any{t.ID, t.UserID, t.AccessToken, t.RefreshToken, t.AccessExpiredAt, t.RefreshExpiredAt}).
-			OnConflict(goqu.DoUpdate("user_id", goqu.Record{
-				"access_token":       t.AccessToken,
-				"refresh_token":      t.RefreshToken,
-				"access_expires_at":  t.AccessExpiredAt,
-				"refresh_expires_at": t.RefreshExpiredAt,
-			})).
-			Prepared(true).ToSQL()
+			Cols(
+				"id",
+				"user_id",
+				"access_token",
+				"refresh_token",
+				"access_expires_at",
+				"refresh_expires_at",
+			).
+			Vals([]any{
+				t.ID,
+				t.UserID,
+				t.AccessToken,
+				t.RefreshToken,
+				t.AccessExpiredAt,
+				t.RefreshExpiredAt,
+			}).
+			OnConflict(
+				goqu.DoUpdate("user_id", goqu.Record{
+					"access_token":       t.AccessToken,
+					"refresh_token":      t.RefreshToken,
+					"access_expires_at":  t.AccessExpiredAt,
+					"refresh_expires_at": t.RefreshExpiredAt,
+				}),
+			).
+			Prepared(true).
+			ToSQL()
 	}
 
 	err := dbops.Exec(ctx, st.db, query, true)
@@ -135,11 +173,15 @@ func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*
 
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "token", "expires_at").
-			From("password_resets").Where(goqu.Ex{"user_id": uid}).
-			Prepared(true).ToSQL()
+			From("password_resets").
+			Where(goqu.Ex{"user_id": uid}).
+			Prepared(true).
+			ToSQL()
 	}
 
-	return dbops.SQLGet[domain.PasswordReset](ctx, st.db, query)
+	dao, err := dbops.SQLGet[passwordReset](ctx, st.db, query)
+
+	return dao.toEntity(), err
 }
 
 func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
@@ -148,11 +190,15 @@ func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*dom
 
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "token", "expires_at").
-			From("password_resets").Where(goqu.Ex{"token": t}).
-			Prepared(true).ToSQL()
+			From("password_resets").
+			Where(goqu.Ex{"token": t}).
+			Prepared(true).
+			ToSQL()
 	}
 
-	return dbops.SQLGet[domain.PasswordReset](ctx, st.db, query)
+	dao, err := dbops.SQLGet[passwordReset](ctx, st.db, query)
+
+	return dao.toEntity(), err
 }
 
 func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error {
@@ -163,7 +209,8 @@ func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordRese
 		return st.qu.Insert("password_resets").
 			Cols("id", "user_id", "token", "expires_at").
 			Vals([]any{ps.ID, ps.UserID, ps.Token, ps.ExpiresAt}).
-			Prepared(true).ToSQL()
+			Prepared(true).
+			ToSQL()
 	}
 
 	err := dbops.Exec(ctx, st.db, query, true)
@@ -179,7 +226,10 @@ func (st *SQLAuth) DeletePasswordReset(ctx context.Context, id uint64) error {
 	defer span.End()
 
 	query := func() (string, []any, error) {
-		return st.qu.Delete("password_resets").Where(goqu.Ex{"id": id}).Prepared(true).ToSQL()
+		return st.qu.Delete("password_resets").
+			Where(goqu.Ex{"id": id}).
+			Prepared(true).
+			ToSQL()
 	}
 
 	return dbops.Exec(ctx, st.db, query)
