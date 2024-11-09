@@ -4,34 +4,33 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func TestNewBcryptHash(t *testing.T) {
+func TestNewHMACSHA256Hash(t *testing.T) {
 	type args struct {
-		cost int
+		secret string
 	}
 	tests := []struct {
 		name string
 		args args
-		want *BcryptHash
+		want *HMACSHA256Hash
 	}{
 		{
 			name: "Success",
 			args: args{},
-			want: &BcryptHash{},
+			want: &HMACSHA256Hash{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewBcryptHash(tt.args.cost)
+			got := NewHMACSHA256Hash(tt.args.secret)
 			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func TestBcryptHash_Hash(t *testing.T) {
+func TestHMACSHA256Hash_Hash(t *testing.T) {
 	type args struct {
 		str string
 	}
@@ -40,21 +39,14 @@ func TestBcryptHash_Hash(t *testing.T) {
 		args    args
 		want    []byte
 		wantErr error
-		h       *BcryptHash
+		h       *HMACSHA256Hash
 	}{
 		{
 			name:    "Success",
 			args:    args{str: "hash"},
-			want:    []byte("$2a$10$IWswZQf54RI4d08qs80OrOZovvu8HuqwBmy4swqAfy67kzLgqhAHW"),
+			want:    []byte("c835893d96769822abb85d90f16c4b1e54a88e573d11a660030a282a02daa3b4"),
 			wantErr: nil,
-			h:       &BcryptHash{},
-		},
-		{
-			name:    "Error",
-			args:    args{str: "$2a$10$IWswZQf54RI4d08qs80OrOZovvu8HuqwBmy4swqAfy67kzLgqhAHW1111111111111"},
-			want:    nil,
-			wantErr: bcrypt.ErrPasswordTooLong,
-			h:       &BcryptHash{},
+			h:       &HMACSHA256Hash{secret: "hash"},
 		},
 	}
 	for _, tt := range tests {
@@ -67,33 +59,40 @@ func TestBcryptHash_Hash(t *testing.T) {
 	}
 }
 
-func TestBcryptHash_Verify(t *testing.T) {
+func TestHMACSHA256Hash_Verify(t *testing.T) {
 	type args struct {
-		hashed string
-		str    string
+		hashedHex string
+		str       string
 	}
 	tests := []struct {
 		name string
 		args args
 		want bool
-		h    *BcryptHash
+		h    *HMACSHA256Hash
 	}{
 		{
 			name: "Success",
-			args: args{hashed: "$2a$10$IWswZQf54RI4d08qs80OrOZovvu8HuqwBmy4swqAfy67kzLgqhAHW", str: "hash"},
+			args: args{
+				hashedHex: "c835893d96769822abb85d90f16c4b1e54a88e573d11a660030a282a02daa3b4",
+				str:       "hash",
+			},
 			want: true,
-			h:    &BcryptHash{},
+			h:    &HMACSHA256Hash{secret: "hash"},
 		},
 		{
 			name: "Error",
-			args: args{hashed: "$2a$10$", str: "hash"},
+			args: args{
+				hashedHex: "hash",
+				str:       "hash",
+			},
 			want: false,
-			h:    &BcryptHash{},
+			h:    &HMACSHA256Hash{secret: "hash"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.h.Verify(tt.args.hashed, tt.args.str)
+			t.Parallel()
+			got := tt.h.Verify(tt.args.hashedHex, tt.args.str)
 			assert.Equal(t, tt.want, got)
 		})
 	}

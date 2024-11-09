@@ -19,9 +19,7 @@ func NewBcryptHash(cost int) *BcryptHash {
 // Hash hashes the plaintext string using bcrypt and returns the hashed value.
 // It returns an error if the hashing process fails.
 func (h *BcryptHash) Hash(str string) ([]byte, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(str), h.cost)
-
-	return hashed, err
+	return bcrypt.GenerateFromPassword([]byte(str), h.cost)
 }
 
 // Verify compares the hashed value with the plaintext string using bcrypt.

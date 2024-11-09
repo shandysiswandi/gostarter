@@ -12,27 +12,27 @@ import (
 // Argon2Hash implements the HashVerifier interface using Argon2.
 // Argon2 is a modern and secure key derivation function.
 type Argon2Hash struct {
-	// Time is the number of iterations for the Argon2 hashing algorithm.
-	Time uint32
+	// time is the number of iterations for the Argon2 hashing algorithm.
+	time uint32
 
-	// Memory is the memory size in KB used by the Argon2 algorithm.
-	Memory uint32
+	// memory is the memory size in KB used by the Argon2 algorithm.
+	memory uint32
 
-	// Threads is the number of threads used for hashing.
-	Threads uint8
+	// threads is the number of threads used for hashing.
+	threads uint8
 
-	// KeyLen is the length of the generated key in bytes.
-	KeyLen uint32
+	// keyLen is the length of the generated key in bytes.
+	keyLen uint32
 }
 
 // NewArgon2Hash creates a new Argon2HashVerifier with the specified parameters.
 // It configures the Argon2 algorithm with the provided time, memory, threads, and key length.
 func NewArgon2Hash(time, memory uint32, threads uint8, keyLen uint32) *Argon2Hash {
 	return &Argon2Hash{
-		Time:    time,
-		Memory:  memory,
-		Threads: threads,
-		KeyLen:  keyLen,
+		time:    time,
+		memory:  memory,
+		threads: threads,
+		keyLen:  keyLen,
 	}
 }
 
@@ -44,7 +44,7 @@ func (h *Argon2Hash) Hash(str string) ([]byte, error) {
 		return nil, err
 	}
 
-	hash := argon2.IDKey([]byte(str), salt, h.Time, h.Memory, h.Threads, h.KeyLen)
+	hash := argon2.IDKey([]byte(str), salt, h.time, h.memory, h.threads, h.keyLen)
 
 	return []byte(hex.EncodeToString(salt) + ":" + hex.EncodeToString(hash)), nil
 }
@@ -69,7 +69,7 @@ func (h *Argon2Hash) Verify(hashed, str string) bool {
 		return false
 	}
 
-	hash := argon2.IDKey([]byte(str), saltBytes, h.Time, h.Memory, h.Threads, uint32(len(hashBytes)))
+	hash := argon2.IDKey([]byte(str), saltBytes, h.time, h.memory, h.threads, uint32(len(hashBytes)))
 
 	return subtle.ConstantTimeCompare(hash, hashBytes) == 1
 }
