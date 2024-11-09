@@ -97,6 +97,7 @@ func (z *ZapLogger) Error(_ context.Context, message string, err error, fields .
 func (z *ZapLogger) WithFields(fields ...Field) Logger {
 	return &ZapLogger{
 		logger: z.logger.With(z.convertFields(fields)...),
+		option: z.option,
 	}
 }
 
