@@ -46,7 +46,7 @@ load:
 # ***** *****
 # test-unit: Runs unit tests excluding directories like mocker, mockz, and app. Produces a coverage report and detects concurrency issues.
 test-unit:
-	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/app') \
+	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
 	-coverprofile=coverage.out -parallel 4 -race
 	@go tool cover -func=coverage.out | grep total
 
