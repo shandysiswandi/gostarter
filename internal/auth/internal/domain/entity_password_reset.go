@@ -13,3 +13,7 @@ type PasswordReset struct {
 	Token     string
 	ExpiresAt time.Time
 }
+
+func (p *PasswordReset) ScanColumn() []any {
+	return []any{&p.ID, &p.UserID, &p.Token, &p.ExpiresAt}
+}

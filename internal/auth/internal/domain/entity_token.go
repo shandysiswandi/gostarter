@@ -15,3 +15,14 @@ type Token struct {
 	AccessExpiredAt  time.Time
 	RefreshExpiredAt time.Time
 }
+
+func (t *Token) ScanColumn() []any {
+	return []any{
+		&t.ID,
+		&t.UserID,
+		&t.AccessToken,
+		&t.RefreshToken,
+		&t.AccessExpiredAt,
+		&t.RefreshExpiredAt,
+	}
+}

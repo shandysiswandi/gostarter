@@ -37,9 +37,7 @@ func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.U
 			ToSQL()
 	}
 
-	dao, err := dbops.SQLGet[user](ctx, st.db, query)
-
-	return dao.toEntity(), err
+	return dbops.SQLGet[domain.User](ctx, st.db, query)
 }
 
 func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
@@ -96,9 +94,7 @@ func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.T
 			ToSQL()
 	}
 
-	dao, err := dbops.SQLGet[token](ctx, st.db, query)
-
-	return dao.toEntity(), err
+	return dbops.SQLGet[domain.Token](ctx, st.db, query)
 }
 
 func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
@@ -120,9 +116,7 @@ func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.
 			ToSQL()
 	}
 
-	dao, err := dbops.SQLGet[token](ctx, st.db, query)
-
-	return dao.toEntity(), err
+	return dbops.SQLGet[domain.Token](ctx, st.db, query)
 }
 
 func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
@@ -179,9 +173,7 @@ func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*
 			ToSQL()
 	}
 
-	dao, err := dbops.SQLGet[passwordReset](ctx, st.db, query)
-
-	return dao.toEntity(), err
+	return dbops.SQLGet[domain.PasswordReset](ctx, st.db, query)
 }
 
 func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
@@ -196,9 +188,7 @@ func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*dom
 			ToSQL()
 	}
 
-	dao, err := dbops.SQLGet[passwordReset](ctx, st.db, query)
-
-	return dao.toEntity(), err
+	return dbops.SQLGet[domain.PasswordReset](ctx, st.db, query)
 }
 
 func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error {
