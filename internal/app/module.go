@@ -79,6 +79,7 @@ func (a *App) moduleTodo() {
 	if a.config.GetBool("module.flag.todo") {
 		expTodo, err := todo.New(todo.Dependency{
 			Database:       a.database,
+			QueryBuilder:   a.queryBuilder,
 			RedisDB:        a.redisDB,
 			Config:         a.config,
 			UIDNumber:      a.uidNumber,

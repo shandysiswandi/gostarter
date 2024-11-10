@@ -9,8 +9,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/config/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,48 +25,35 @@ func testconvertArgs(args []any) []driver.Value {
 
 func TestNewSQLTodo(t *testing.T) {
 	type args struct {
-		db     *sql.DB
-		config config.Config
+		db *sql.DB
+		qu goqu.DialectWrapper
 	}
 	tests := []struct {
 		name string
-		args func() args
+		args args
 		want *SQLTodo
 	}{
 		{
 			name: "SuccessMySQL",
-			args: func() args {
-				cfg := mocker.NewMockConfig(t)
-
-				cfg.EXPECT().GetString("database.driver").Return(dbops.MySQLDriver)
-
-				return args{
-					db:     &sql.DB{},
-					config: cfg,
-				}
+			args: args{
+				db: &sql.DB{},
+				qu: goqu.Dialect(dbops.MySQLDriver),
 			},
-			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.MySQLDriver), config: &mocker.MockConfig{}},
+			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.MySQLDriver)},
 		},
 		{
 			name: "SuccessPostgres",
-			args: func() args {
-				cfg := mocker.NewMockConfig(t)
-
-				cfg.EXPECT().GetString("database.driver").Return(dbops.PostgresDriver)
-
-				return args{
-					db:     &sql.DB{},
-					config: cfg,
-				}
+			args: args{
+				db: &sql.DB{},
+				qu: goqu.Dialect(dbops.PostgresDriver),
 			},
-			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.PostgresDriver), config: &mocker.MockConfig{}},
+			want: &SQLTodo{db: &sql.DB{}, qu: goqu.Dialect(dbops.PostgresDriver)},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			arg := tt.args()
-			got := NewSQLTodo(arg.db, arg.config)
+			got := NewSQLTodo(tt.args.db, tt.args.qu)
 			assert.Equal(t, tt.want.db, got.db)
 			assert.Equal(t, tt.want.qu, got.qu)
 		})

@@ -3,6 +3,7 @@ package todo
 import (
 	"database/sql"
 
+	"github.com/doug-martin/goqu/v9"
 	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
@@ -29,6 +30,7 @@ type Expose struct {
 
 type Dependency struct {
 	Database       *sql.DB
+	QueryBuilder   goqu.DialectWrapper
 	RedisDB        *redis.Client
 	Config         config.Config
 	UIDNumber      uid.NumberID
@@ -43,10 +45,13 @@ type Dependency struct {
 }
 
 func New(dep Dependency) (*Expose, error) {
-	// init outbound | database | http client | grpc client | redis | etc.
-	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.Config)
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes outbound dependencies for core services.
+	// This includes setups for outbound services: Database, HTTP client, gRPC client, Redis, etc.
+	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.QueryBuilder)
 
-	// init services | useCases | business logic
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes core business logic or use cases to handle user interaction
 	findUC := service.NewFind(dep.Telemetry, sqlTodo, dep.Validator)
 	fetchUC := service.NewFetch(dep.Telemetry, sqlTodo)
 	createUC := service.NewCreate(dep.Telemetry, sqlTodo, dep.Validator, dep.UIDNumber)
@@ -54,7 +59,8 @@ func New(dep Dependency) (*Expose, error) {
 	updateUC := service.NewUpdate(dep.Telemetry, sqlTodo, dep.Validator)
 	updateStatusUC := service.NewUpdateStatus(dep.Telemetry, sqlTodo, dep.Validator)
 
-	// register endpoint REST
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes REST API endpoints to handle core user workflows:
 	endpoint := inboundhttp.NewEndpoint(
 		createUC,
 		deleteUC,
@@ -69,7 +75,8 @@ func New(dep Dependency) (*Expose, error) {
 		dep.CodecJSON,
 	))
 
-	// register endpoint GRPC
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes gRPC API endpoints to handle core user workflows:
 	pb.RegisterTodoServiceServer(dep.GRPCServer, inboundgrpc.NewEndpoint(
 		dep.ProtoValidator,
 		findUC,
@@ -80,7 +87,8 @@ func New(dep Dependency) (*Expose, error) {
 		updateStatusUC,
 	))
 
-	// register endpoint GRAPHQL
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes graphQL API endpoints to handle core user workflows:
 	inboundgql.RegisterGQLEndpoint(dep.Router, dep.Config, &inboundgql.Endpoint{
 		FindUC:         findUC,
 		CreateUC:       createUC,
@@ -90,7 +98,8 @@ func New(dep Dependency) (*Expose, error) {
 		UpdateStatusUC: updateStatusUC,
 	})
 
-	// jobs | background tasks
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes runner job to handle background workflows:
 	exampleJob := &job.ExampleJob{}
 
 	return &Expose{
