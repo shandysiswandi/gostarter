@@ -49,6 +49,10 @@ test-unit:
 	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
 	-coverprofile=coverage.out -parallel 4 -race
 	@go tool cover -func=coverage.out | grep total
+	@if [ "$(HTML)" = "true" ]; then \
+		go tool cover -html=coverage.out -o=cover.html; \
+		open cover.html; \
+	fi
 
 # test-integration: Runs integration tests located in the './tests/...' directory using up to 4 parallel tests.
 test-integration:
