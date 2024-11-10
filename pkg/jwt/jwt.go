@@ -77,9 +77,7 @@ func NewJSONWebToken(private, public string) (*JSONWebToken, error) {
 }
 
 func (m *JSONWebToken) Generate(c *Claim) (string, error) {
-	t := jwt.NewWithClaims(jwt.SigningMethodRS256, c)
-
-	return t.SignedString(m.privateKey)
+	return jwt.NewWithClaims(jwt.SigningMethodRS256, c).SignedString(m.privateKey)
 }
 
 func (m *JSONWebToken) Verify(token string) (*Claim, error) {

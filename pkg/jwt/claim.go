@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"strings"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 )
+
+type contextKey struct{}
 
 type Claim struct {
 	now   time.Time
@@ -53,4 +56,17 @@ func ExtractClaimFromToken(token string) *Claim {
 	}
 
 	return &claim
+}
+
+func SetClaimToContext(ctx context.Context, clm *Claim) context.Context {
+	return context.WithValue(ctx, contextKey{}, clm)
+}
+
+func GetClaimFromContext(ctx context.Context) *Claim {
+	token, ok := ctx.Value(contextKey{}).(*Claim)
+	if !ok {
+		return nil
+	}
+
+	return token
 }
