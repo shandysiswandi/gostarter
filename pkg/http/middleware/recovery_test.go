@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestRecoveryMiddleware(t *testing.T) {
+func TestRecovery(t *testing.T) {
 	tests := []struct {
 		name            string
 		handlerFunc     http.HandlerFunc
