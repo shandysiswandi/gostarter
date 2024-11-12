@@ -18,7 +18,7 @@ func (_m *MockValidator) EXPECT() *MockValidator_Expecter {
 }
 
 // Validate provides a mock function with given fields: data
-func (_m *MockValidator) Validate(data interface{}) error {
+func (_m *MockValidator) Validate(data any) error {
 	ret := _m.Called(data)
 
 	if len(ret) == 0 {
@@ -26,7 +26,7 @@ func (_m *MockValidator) Validate(data interface{}) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(any) error); ok {
 		r0 = rf(data)
 	} else {
 		r0 = ret.Error(0)
@@ -41,14 +41,14 @@ type MockValidator_Validate_Call struct {
 }
 
 // Validate is a helper method to define mock.On call
-//   - data interface{}
+//   - data any
 func (_e *MockValidator_Expecter) Validate(data interface{}) *MockValidator_Validate_Call {
 	return &MockValidator_Validate_Call{Call: _e.mock.On("Validate", data)}
 }
 
-func (_c *MockValidator_Validate_Call) Run(run func(data interface{})) *MockValidator_Validate_Call {
+func (_c *MockValidator_Validate_Call) Run(run func(data any)) *MockValidator_Validate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		run(args[0].(any))
 	})
 	return _c
 }
@@ -58,7 +58,7 @@ func (_c *MockValidator_Validate_Call) Return(_a0 error) *MockValidator_Validate
 	return _c
 }
 
-func (_c *MockValidator_Validate_Call) RunAndReturn(run func(interface{}) error) *MockValidator_Validate_Call {
+func (_c *MockValidator_Validate_Call) RunAndReturn(run func(any) error) *MockValidator_Validate_Call {
 	_c.Call.Return(run)
 	return _c
 }
