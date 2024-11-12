@@ -2,7 +2,7 @@ server.address.http: localhost:8080
 server.address.grpc: localhost:50000
 
 telemetry.name: gostarter
-telemetry.otpl.address: localhost:4318
+telemetry.otlp.address: localhost:4318
 
 tz: "Asia/Jakarta"
 
@@ -25,7 +25,5 @@ jwt.hash.secret: secret
 feature.flag.graphql.playground: true
 
 module.flag.auth: true
-module.flag.gallery: true
-module.flag.region: true
-module.flag.shortly: true
+module.flag.user: true
 module.flag.todo: true
