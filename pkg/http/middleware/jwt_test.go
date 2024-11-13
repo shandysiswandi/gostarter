@@ -118,7 +118,7 @@ func TestJWT(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			handler := JWT(tt.jwte())(tt.handlerFunc)
+			handler := JWT(tt.jwte(), "gostarter.access.token")(tt.handlerFunc)
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 

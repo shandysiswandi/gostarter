@@ -9,7 +9,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
-func JWT(jwte jwt.JWT) func(http.Handler) http.Handler {
+func JWT(jwte jwt.JWT, audience string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -38,7 +38,7 @@ func JWT(jwte jwt.JWT) func(http.Handler) http.Handler {
 				return
 			}
 
-			if !clm.VerifyAudience("gostarter.access.token", true) {
+			if !clm.VerifyAudience(audience, true) {
 				jsonResponse(w, "invalid token audience")
 
 				return
