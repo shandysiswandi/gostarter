@@ -16,22 +16,26 @@
     </section>
 
     <script>
-      const URL = "http://localhost:8000";
+      const URL = "http://localhost:8081";
       const params = new Proxy(new URLSearchParams(window.location.search), {
         get: (searchParams, prop) => searchParams.get(prop),
       });
     </script>
-    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
       axios
-        .get(`${URL}/todos`)
+        .get(`${URL}/todos`, {
+          headers: {
+            authorization: "Bearer ay",
+          },
+        })
         .then(function (response) {
           console.log("Todos response:", response.data);
         })
         .catch(function (error) {
           console.error("Error fetching todos:", error);
         });
-    </script> -->
+    </script>
     <script>
       const evtSource = new EventSource(`${URL}/events?room=${params.room}`);
       const eventList = document.getElementById("sse-data");
