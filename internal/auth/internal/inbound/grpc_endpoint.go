@@ -5,16 +5,13 @@ import (
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type GrpcEndpoint struct {
 	pb.UnimplementedAuthServiceServer
 
 	telemetry *telemetry.Telemetry
-	validator validation.Validator
 
 	loginUC          domain.Login
 	registerUC       domain.Register
@@ -25,7 +22,6 @@ type GrpcEndpoint struct {
 
 func NewGrpcEndpoint(
 	telemetry *telemetry.Telemetry,
-	validator validation.Validator,
 	loginUC domain.Login,
 	registerUC domain.Register,
 	refreshTokenUC domain.RefreshToken,
@@ -34,7 +30,6 @@ func NewGrpcEndpoint(
 ) *GrpcEndpoint {
 	return &GrpcEndpoint{
 		telemetry:        telemetry,
-		validator:        validator,
 		loginUC:          loginUC,
 		registerUC:       registerUC,
 		refreshTokenUC:   refreshTokenUC,
@@ -44,10 +39,6 @@ func NewGrpcEndpoint(
 }
 
 func (g *GrpcEndpoint) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	if err := g.validator.Validate(req); err != nil {
-		return nil, goerror.NewInvalidInput("validation failed", err)
-	}
-
 	resp, err := g.loginUC.Call(ctx, domain.LoginInput{Email: req.GetEmail(), Password: req.GetPassword()})
 	if err != nil {
 		return nil, err
@@ -64,10 +55,6 @@ func (g *GrpcEndpoint) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Log
 func (g *GrpcEndpoint) Register(ctx context.Context, req *pb.RegisterRequest) (
 	*pb.RegisterResponse, error,
 ) {
-	if err := g.validator.Validate(req); err != nil {
-		return nil, goerror.NewInvalidInput("validation failed", err)
-	}
-
 	_, err := g.registerUC.Call(ctx, domain.RegisterInput{Email: req.GetEmail(), Password: req.GetPassword()})
 	if err != nil {
 		return nil, err
@@ -79,10 +66,6 @@ func (g *GrpcEndpoint) Register(ctx context.Context, req *pb.RegisterRequest) (
 func (g *GrpcEndpoint) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (
 	*pb.RefreshTokenResponse, error,
 ) {
-	if err := g.validator.Validate(req); err != nil {
-		return nil, goerror.NewInvalidInput("validation failed", err)
-	}
-
 	resp, err := g.refreshTokenUC.Call(ctx, domain.RefreshTokenInput{RefreshToken: req.GetRefreshToken()})
 	if err != nil {
 		return nil, err
@@ -99,10 +82,6 @@ func (g *GrpcEndpoint) RefreshToken(ctx context.Context, req *pb.RefreshTokenReq
 func (g *GrpcEndpoint) ForgotPassword(ctx context.Context, req *pb.ForgotPasswordRequest) (
 	*pb.ForgotPasswordResponse, error,
 ) {
-	if err := g.validator.Validate(req); err != nil {
-		return nil, goerror.NewInvalidInput("validation failed", err)
-	}
-
 	_, err := g.forgotPasswordUC.Call(ctx, domain.ForgotPasswordInput{Email: req.GetEmail()})
 	if err != nil {
 		return nil, err
@@ -117,10 +96,6 @@ func (g *GrpcEndpoint) ForgotPassword(ctx context.Context, req *pb.ForgotPasswor
 func (g *GrpcEndpoint) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) (
 	*pb.ResetPasswordResponse, error,
 ) {
-	if err := g.validator.Validate(req); err != nil {
-		return nil, goerror.NewInvalidInput("validation failed", err)
-	}
-
 	_, err := g.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
 		Token: req.GetToken(), Password: req.GetPassword(),
 	})

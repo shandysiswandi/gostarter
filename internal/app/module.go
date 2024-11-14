@@ -22,17 +22,16 @@ func (a *App) initModules() {
 func (a *App) moduleAuth() {
 	if a.config.GetBool("module.flag.auth") {
 		_, err := auth.New(auth.Dependency{
-			Database:       a.database,
-			QueryBuilder:   a.queryBuilder,
-			Telemetry:      a.telemetry,
-			Router:         a.httpRouter,
-			GRPCServer:     a.grpcServer,
-			ProtoValidator: a.protoValidator,
-			Validator:      a.validator,
-			UIDNumber:      a.uidNumber,
-			Hash:           a.hash,
-			SecHash:        a.secHash,
-			JWT:            a.jwt,
+			Database:     a.database,
+			QueryBuilder: a.queryBuilder,
+			Telemetry:    a.telemetry,
+			Router:       a.httpRouter,
+			GRPCServer:   a.grpcServer,
+			Validator:    a.validator,
+			UIDNumber:    a.uidNumber,
+			Hash:         a.hash,
+			SecHash:      a.secHash,
+			JWT:          a.jwt,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module auth", err)

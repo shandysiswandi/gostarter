@@ -20,17 +20,16 @@ import (
 type Expose struct{}
 
 type Dependency struct {
-	Database       *sql.DB
-	QueryBuilder   goqu.DialectWrapper
-	Telemetry      *telemetry.Telemetry
-	Router         *httprouter.Router
-	GRPCServer     *grpc.Server
-	Validator      validation.Validator
-	ProtoValidator validation.Validator
-	UIDNumber      uid.NumberID
-	Hash           hash.Hash
-	SecHash        hash.Hash
-	JWT            jwt.JWT
+	Database     *sql.DB
+	QueryBuilder goqu.DialectWrapper
+	Telemetry    *telemetry.Telemetry
+	Router       *httprouter.Router
+	GRPCServer   *grpc.Server
+	Validator    validation.Validator
+	UIDNumber    uid.NumberID
+	Hash         hash.Hash
+	SecHash      hash.Hash
+	JWT          jwt.JWT
 }
 
 //nolint:funlen // it's long line because it format param dependency
@@ -99,7 +98,6 @@ func New(dep Dependency) (*Expose, error) {
 	// This block initializes gRPC API endpoints to handle core user workflows:
 	gEndpoint := inbound.NewGrpcEndpoint(
 		dep.Telemetry,
-		dep.ProtoValidator,
 		loginUC,
 		registerUC,
 		refreshTokenUC,

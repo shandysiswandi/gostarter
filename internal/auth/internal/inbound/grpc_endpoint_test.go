@@ -8,13 +8,12 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewGrpcEndpoint(t *testing.T) {
 	type args struct {
 		telemetry        *telemetry.Telemetry
-		validator        validation.Validator
 		loginUC          domain.Login
 		registerUC       domain.Register
 		refreshTokenUC   domain.RefreshToken
@@ -30,9 +29,16 @@ func TestNewGrpcEndpoint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewGrpcEndpoint(tt.args.telemetry, tt.args.validator, tt.args.loginUC, tt.args.registerUC, tt.args.refreshTokenUC, tt.args.forgotPasswordUC, tt.args.resetPasswordUC); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewGrpcEndpoint() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			got := NewGrpcEndpoint(
+				tt.args.telemetry,
+				tt.args.loginUC,
+				tt.args.registerUC,
+				tt.args.refreshTokenUC,
+				tt.args.forgotPasswordUC,
+				tt.args.resetPasswordUC,
+			)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -44,23 +50,20 @@ func TestGrpcEndpoint_Login(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		g       *GrpcEndpoint
 		args    args
 		want    *pb.LoginResponse
-		wantErr bool
+		wantErr error
+		mockFn  func(a args) *GrpcEndpoint
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.g.Login(tt.args.ctx, tt.args.req)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GrpcEndpoint.Login() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GrpcEndpoint.Login() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			g := tt.mockFn(tt.args)
+			got, err := g.Login(tt.args.ctx, tt.args.req)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
