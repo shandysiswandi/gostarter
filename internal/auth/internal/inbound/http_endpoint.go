@@ -9,28 +9,10 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/http/serve"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 )
 
-func RegisterRESTEndpoint(router *httprouter.Router, log logger.Logger, h *Endpoint) {
-	serve := serve.New(
-		serve.WithMiddlewares(
-			middleware.Recovery,
-			func(h http.Handler) http.Handler {
-				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					log.Info(r.Context(), "http request information",
-						logger.KeyVal("http.method", r.Method),
-						logger.KeyVal("http.path", r.URL.Path),
-						logger.KeyVal("http.header", map[string]string{
-							"user-agent": r.Header.Get("User-Agent"),
-						}),
-					)
-
-					h.ServeHTTP(w, r)
-				})
-			},
-		),
-	)
+func RegisterAuthServiceServer(router *httprouter.Router, h *Endpoint) {
+	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
 
 	router.Handler(http.MethodPost, "/auth/login", serve.Endpoint(h.Login))
 	router.Handler(http.MethodPost, "/auth/register", serve.Endpoint(h.Register))
@@ -47,7 +29,7 @@ type Endpoint struct {
 	resetPasswordUC  domain.ResetPassword
 }
 
-func NewEndpoint(loginUC domain.Login, registerUC domain.Register,
+func NewHTTPEndpoint(loginUC domain.Login, registerUC domain.Register,
 	refreshTokenUC domain.RefreshToken, forgotPasswordUC domain.ForgotPassword,
 	resetPasswordUC domain.ResetPassword,
 ) *Endpoint {

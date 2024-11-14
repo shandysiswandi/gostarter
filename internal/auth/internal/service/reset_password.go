@@ -40,7 +40,7 @@ func NewResetPassword(t *telemetry.Telemetry, v validation.Validator, h hash.Has
 func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) (
 	*domain.ResetPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "ResetPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "service.ResetPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

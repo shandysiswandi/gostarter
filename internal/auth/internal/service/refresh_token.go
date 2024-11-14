@@ -44,7 +44,7 @@ func NewRefreshToken(t *telemetry.Telemetry, v validation.Validator,
 func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	*domain.RefreshTokenOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "RefreshToken")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "service.RefreshToken")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

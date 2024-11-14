@@ -46,7 +46,7 @@ func NewForgotPassword(t *telemetry.Telemetry, v validation.Validator, idnum uid
 func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput) (
 	*domain.ForgotPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "ForgotPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "service.ForgotPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

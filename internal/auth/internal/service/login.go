@@ -44,7 +44,7 @@ func NewLogin(t *telemetry.Telemetry, v validation.Validator, idnum uid.NumberID
 }
 
 func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOutput, error) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "Login")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "service.Login")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

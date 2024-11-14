@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 )
 
 func TestNew(t *testing.T) {
@@ -19,8 +20,9 @@ func TestNew(t *testing.T) {
 			name: "Success",
 			dep: func() Dependency {
 				return Dependency{
-					Router:    &httprouter.Router{},
-					Telemetry: telemetry.NewTelemetry(),
+					Router:     &httprouter.Router{},
+					GRPCServer: &grpc.Server{},
+					Telemetry:  telemetry.NewTelemetry(),
 				}
 			},
 			want:    &Expose{},

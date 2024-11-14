@@ -26,7 +26,7 @@ func NewSQLAuth(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *S
 }
 
 func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "FindUserByEmail")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindUserByEmail")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -41,7 +41,7 @@ func (st *SQLAuth) FindUserByEmail(ctx context.Context, email string) (*domain.U
 }
 
 func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "SaveUser")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SaveUser")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -61,7 +61,7 @@ func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
 }
 
 func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass string) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "UpdateUserPassword")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.UpdateUserPassword")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -76,7 +76,7 @@ func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass strin
 }
 
 func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.Token, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "FindTokenByUserID")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindTokenByUserID")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -98,7 +98,7 @@ func (st *SQLAuth) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.T
 }
 
 func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "FindTokenByRefresh")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindTokenByRefresh")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -120,7 +120,7 @@ func (st *SQLAuth) FindTokenByRefresh(ctx context.Context, ref string) (*domain.
 }
 
 func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "SaveToken")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SaveToken")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -162,7 +162,7 @@ func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
 }
 
 func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "FindPasswordResetByUserID")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindPasswordResetByUserID")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -177,7 +177,7 @@ func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*
 }
 
 func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "FindPasswordResetByToken")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindPasswordResetByToken")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -192,7 +192,7 @@ func (st *SQLAuth) FindPasswordResetByToken(ctx context.Context, t string) (*dom
 }
 
 func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "SavePasswordReset")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SavePasswordReset")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -212,7 +212,7 @@ func (st *SQLAuth) SavePasswordReset(ctx context.Context, ps domain.PasswordRese
 }
 
 func (st *SQLAuth) DeletePasswordReset(ctx context.Context, id uint64) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "DeletePasswordReset")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.DeletePasswordReset")
 	defer span.End()
 
 	query := func() (string, []any, error) {

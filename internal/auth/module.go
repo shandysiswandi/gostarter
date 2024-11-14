@@ -5,6 +5,7 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/julienschmidt/httprouter"
+	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/service"
@@ -13,20 +14,23 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"google.golang.org/grpc"
 )
 
 type Expose struct{}
 
 type Dependency struct {
-	Database     *sql.DB
-	QueryBuilder goqu.DialectWrapper
-	Telemetry    *telemetry.Telemetry
-	Router       *httprouter.Router
-	Validator    validation.Validator
-	UIDNumber    uid.NumberID
-	Hash         hash.Hash
-	SecHash      hash.Hash
-	JWT          jwt.JWT
+	Database       *sql.DB
+	QueryBuilder   goqu.DialectWrapper
+	Telemetry      *telemetry.Telemetry
+	Router         *httprouter.Router
+	GRPCServer     *grpc.Server
+	Validator      validation.Validator
+	ProtoValidator validation.Validator
+	UIDNumber      uid.NumberID
+	Hash           hash.Hash
+	SecHash        hash.Hash
+	JWT            jwt.JWT
 }
 
 //nolint:funlen // it's long line because it format param dependency
@@ -82,18 +86,27 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes REST API endpoints to handle core user workflows:
-	endpoint := inbound.NewEndpoint(
+	hEndpoint := inbound.NewHTTPEndpoint(
 		loginUC,
 		registerUC,
 		refreshTokenUC,
 		forgotPasswordUC,
 		resetPasswordUC,
 	)
-	inbound.RegisterRESTEndpoint(
-		dep.Router,
-		dep.Telemetry.Logger(),
-		endpoint,
+	inbound.RegisterAuthServiceServer(dep.Router, hEndpoint)
+
+	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+	// This block initializes gRPC API endpoints to handle core user workflows:
+	gEndpoint := inbound.NewGrpcEndpoint(
+		dep.Telemetry,
+		dep.ProtoValidator,
+		loginUC,
+		registerUC,
+		refreshTokenUC,
+		forgotPasswordUC,
+		resetPasswordUC,
 	)
+	pb.RegisterAuthServiceServer(dep.GRPCServer, gEndpoint)
 
 	return &Expose{}, nil
 }
