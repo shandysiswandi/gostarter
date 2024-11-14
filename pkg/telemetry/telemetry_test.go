@@ -53,17 +53,10 @@ func TestTelemetry_Close(t *testing.T) {
 			},
 		},
 		{
-			name:    "SuccessWithConsoleTracer",
-			wantErr: nil,
-			mockFn: func() *Telemetry {
-				return NewTelemetry(WithConsoleTracer("test"))
-			},
-		},
-		{
 			name:    "ErrorWithZapLogger",
 			wantErr: errors.New("sync /dev/stderr: invalid argument"),
 			mockFn: func() *Telemetry {
-				return NewTelemetry(WithZapLogger(logger.DebugLevel, make([]string, 0)))
+				return NewTelemetry(WithZapLogger())
 			},
 		},
 	}

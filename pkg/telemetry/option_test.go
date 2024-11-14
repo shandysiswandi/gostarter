@@ -7,6 +7,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWithServiceName(t *testing.T) {
+	type args struct {
+		serviceName string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		want   string
+		mockFn func(a args) *Telemetry
+	}{
+		{
+			name: "Success",
+			args: args{serviceName: "gostarter"},
+			want: "gostarter",
+			mockFn: func(a args) *Telemetry {
+				tel := NewTelemetry()
+
+				WithServiceName(a.serviceName)(tel)
+
+				return tel
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tel := tt.mockFn(tt.args)
+			assert.Equal(t, tel.name, tt.want)
+		})
+	}
+}
+
 func TestWithZapLogger(t *testing.T) {
 	type args struct {
 		level   logger.Level
@@ -26,7 +58,7 @@ func TestWithZapLogger(t *testing.T) {
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithZapLogger(a.level, a.filters)(tel)
+				WithZapLogger()(tel)
 
 				return tel
 			},
@@ -44,44 +76,9 @@ func TestWithZapLogger(t *testing.T) {
 	}
 }
 
-func TestWithConsoleTracer(t *testing.T) {
-	type args struct {
-		serviceName string
-	}
-	tests := []struct {
-		name   string
-		args   args
-		mockFn func(a args) *Telemetry
-	}{
-		{
-			name: "Success",
-			args: args{serviceName: "gostarter"},
-			mockFn: func(a args) *Telemetry {
-				tel := NewTelemetry()
-
-				WithConsoleTracer(a.serviceName)(tel)
-
-				return tel
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			tel := tt.mockFn(tt.args)
-			defer tel.Close()
-
-			assert.Len(t, tel.flushers, 1)
-			assert.NotNil(t, tel.Tracer())
-		})
-	}
-}
-
 func TestWithOTLPTracer(t *testing.T) {
 	type args struct {
-		address     string
-		serviceName string
+		address string
 	}
 	tests := []struct {
 		name   string
@@ -90,11 +87,11 @@ func TestWithOTLPTracer(t *testing.T) {
 	}{
 		{
 			name: "Success",
-			args: args{serviceName: "gostarter"},
+			args: args{address: "gostarter"},
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithOTLPTracer(a.address, a.serviceName)(tel)
+				WithOTLPTracer(a.address)(tel)
 
 				return tel
 			},

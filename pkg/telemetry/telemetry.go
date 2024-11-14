@@ -65,6 +65,14 @@ func (t *Telemetry) Tracer() trace.Tracer {
 	return t.tracer.Tracer(t.name)
 }
 
+func (t *Telemetry) TracerProvider() trace.TracerProvider {
+	return t.tracer
+}
+
+func (t *Telemetry) TracerCollector() Collector {
+	return t.tracerCollector
+}
+
 func (t *Telemetry) Meter() metric.Meter {
 	return nil
 }

@@ -5,8 +5,16 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/requestid"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+)
+
+const (
+	correlationIDLabel = "_cID"
+	traceIDLabel       = "trace-id"
+	spanIDLabel        = "span-id"
 )
 
 type ZapOption struct {
@@ -76,20 +84,27 @@ func NewZapLogger(opts ...func(*ZapOption)) (*ZapLogger, error) {
 	return &ZapLogger{logger: logger, option: zopt}, nil
 }
 
-func (z *ZapLogger) Debug(_ context.Context, message string, fields ...Field) {
-	z.logger.Debug(message, z.convertFields(fields)...)
-}
-
-func (z *ZapLogger) Info(_ context.Context, message string, fields ...Field) {
-	z.logger.Info(message, z.convertFields(fields)...)
-}
-
-func (z *ZapLogger) Warn(_ context.Context, message string, fields ...Field) {
-	z.logger.Warn(message, z.convertFields(fields)...)
-}
-
-func (z *ZapLogger) Error(_ context.Context, message string, err error, fields ...Field) {
+func (z *ZapLogger) Debug(ctx context.Context, message string, fields ...Field) {
 	zf := z.convertFields(fields)
+	zf = append(zf, z.withTelemetry(ctx)...)
+	z.logger.Debug(message, zf...)
+}
+
+func (z *ZapLogger) Info(ctx context.Context, message string, fields ...Field) {
+	zf := z.convertFields(fields)
+	zf = append(zf, z.withTelemetry(ctx)...)
+	z.logger.Info(message, zf...)
+}
+
+func (z *ZapLogger) Warn(ctx context.Context, message string, fields ...Field) {
+	zf := z.convertFields(fields)
+	zf = append(zf, z.withTelemetry(ctx)...)
+	z.logger.Warn(message, zf...)
+}
+
+func (z *ZapLogger) Error(ctx context.Context, message string, err error, fields ...Field) {
+	zf := z.convertFields(fields)
+	zf = append(zf, z.withTelemetry(ctx)...)
 	zf = append(zf, zap.Error(err))
 	z.logger.Error(message, zf...)
 }
@@ -103,6 +118,20 @@ func (z *ZapLogger) WithFields(fields ...Field) Logger {
 
 func (z *ZapLogger) Close() error {
 	return z.logger.Sync()
+}
+
+func (z *ZapLogger) withTelemetry(ctx context.Context) []zap.Field {
+	if ctx == nil {
+		return nil
+	}
+
+	spanCtx := trace.SpanFromContext(ctx).SpanContext()
+
+	return []zap.Field{
+		zap.String(correlationIDLabel, requestid.Get(ctx)),
+		zap.String(spanIDLabel, spanCtx.SpanID().String()),
+		zap.String(traceIDLabel, spanCtx.TraceID().String()),
+	}
 }
 
 func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
