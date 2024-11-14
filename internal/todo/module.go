@@ -44,6 +44,7 @@ type Dependency struct {
 	Goroutine      *goroutine.Manager
 }
 
+//nolint:funlen // it's long line because it format param dependency
 func New(dep Dependency) (*Expose, error) {
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes outbound dependencies for core services.
@@ -77,7 +78,7 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes gRPC API endpoints to handle core user workflows:
-	pb.RegisterTodoServiceServer(dep.GRPCServer, inboundgrpc.NewEndpoint(
+	grpcEndpoint := inboundgrpc.NewEndpoint(
 		dep.ProtoValidator,
 		findUC,
 		fetchUC,
@@ -85,18 +86,20 @@ func New(dep Dependency) (*Expose, error) {
 		deleteUC,
 		updateUC,
 		updateStatusUC,
-	))
+	)
+	pb.RegisterTodoServiceServer(dep.GRPCServer, grpcEndpoint)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes graphQL API endpoints to handle core user workflows:
-	inboundgql.RegisterGQLEndpoint(dep.Router, dep.Config, &inboundgql.Endpoint{
+	gqlEndpoint := &inboundgql.Endpoint{
 		FindUC:         findUC,
 		CreateUC:       createUC,
 		DeleteUC:       deleteUC,
 		FetchUC:        fetchUC,
 		UpdateUC:       updateUC,
 		UpdateStatusUC: updateStatusUC,
-	})
+	}
+	inboundgql.RegisterGQLEndpoint(dep.Router, gqlEndpoint, dep.Config, dep.JWT)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes runner job to handle background workflows:

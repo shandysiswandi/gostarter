@@ -7,13 +7,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
 func TestRegisterGQLEndpoint(t *testing.T) {
 	type args struct {
 		router *httprouter.Router
-		cfg    config.Config
 		h      *Endpoint
+		cfg    config.Config
+		jwte   jwt.JWT
 	}
 	tests := []struct {
 		name string
@@ -23,7 +25,7 @@ func TestRegisterGQLEndpoint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			RegisterGQLEndpoint(tt.args.router, tt.args.cfg, tt.args.h)
+			RegisterGQLEndpoint(tt.args.router, tt.args.h, tt.args.cfg, tt.args.jwte)
 		})
 	}
 }
