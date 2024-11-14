@@ -27,8 +27,10 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
+	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/instrument"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
@@ -56,16 +58,56 @@ func (a *App) initConfig() {
 // across the application, allowing tracking of application metrics and logs for observability.
 func (a *App) initTelemetry() {
 	a.telemetry = telemetry.NewTelemetry(
+		telemetry.WithServiceName(a.config.GetString("telemetry.name")),
 		telemetry.WithZapLogger(
-			logger.InfoLevel,
-			[]string{"authorization", "password", "access_token", "refresh_token"},
+			logger.ZapWithVerbose(true),
+			logger.ZapWithLevel(logger.InfoLevel),
+			logger.ZapWithFilteredKeys([]string{
+				"authorization",
+				"password",
+				"access_token",
+				"refresh_token",
+			}),
 		),
-		// telemetry.WithConsoleTracer(a.config.GetString("telemetry.name")),
 		telemetry.WithOTLPTracer(
-			a.config.GetString("telemetry.otpl.address"),
-			a.config.GetString("telemetry.name"),
+			a.config.GetString("telemetry.otlp.address"),
 		),
 	)
+}
+
+// initLibraries initializes various utility libraries used throughout the application,
+// such as UID generators, clock, codecs for JSON and MsgPack, and the validation library.
+// If any library fails to initialize, the application will log a fatal error and terminate.
+func (a *App) initLibraries() {
+	snow, err := uid.NewSnowflakeNumber()
+	if err != nil {
+		log.Fatalln("failed to init uid number snowflake", err)
+	}
+
+	pvalidator, err := validation.NewProtoValidator()
+	if err != nil {
+		log.Fatalln("failed to init validation proto validator", err)
+	}
+
+	jewete, err := jwt.NewJSONWebToken(
+		a.config.GetString("jwt.private.key"),
+		a.config.GetString("jwt.public.key"),
+	)
+	if err != nil {
+		log.Fatalln("failed to init json web token (jwt)", err)
+	}
+
+	a.jwt = jewete
+	a.uidNumber = snow
+	a.protoValidator = pvalidator
+
+	a.uuid = uid.NewUUIDString()
+	a.hash = hash.NewBcryptHash(10)
+	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("jwt.hash.secret"))
+	a.codecJSON = codec.NewJSONCodec()
+	a.goroutine = goroutine.NewManager(100)
+	a.codecMsgPack = codec.NewMsgPackCodec()
+	a.validator = validation.NewV10Validator()
 }
 
 // dsnMySQL constructs a Data Source Name (DSN) for connecting to a MySQL database
@@ -164,7 +206,7 @@ func (a *App) initHTTPRouter() {
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("content-type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		err := json.NewEncoder(w).Encode(map[string]string{"message": "endpoint not found"})
+		err := json.NewEncoder(w).Encode(map[string]string{"error": "endpoint not found"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -173,7 +215,7 @@ func (a *App) initHTTPRouter() {
 	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("content-type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		err := json.NewEncoder(w).Encode(map[string]string{"message": "method endpoint not allowed"})
+		err := json.NewEncoder(w).Encode(map[string]string{"error": "method endpoint not allowed"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -191,11 +233,14 @@ func (a *App) initHTTPRouter() {
 // This method should be called after initializing the router to ensure the server
 // is ready to handle incoming requests.
 func (a *App) initHTTPServer() {
-	handler := cors.Default().Handler(a.httpRouter)
-
 	a.httpServer = &http.Server{
-		Addr:              a.config.GetString("server.address.http"),
-		Handler:           handler,
+		Addr: a.config.GetString("server.address.http"),
+		Handler: middleware.Chain(
+			a.httpRouter,
+			middleware.Recovery,
+			cors.AllowAll().Handler,
+			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
+		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 		WriteTimeout:      10 * time.Second,
@@ -204,44 +249,10 @@ func (a *App) initHTTPServer() {
 }
 
 func (a *App) initGRPCServer() {
-	server := grpc.NewServer()
+	opttel := instrument.UnaryTelemetryServerInterceptor(a.telemetry, a.uuid.Generate)
+	server := grpc.NewServer(opttel...)
 	reflection.Register(server)
 	a.grpcServer = server
-}
-
-// initLibraries initializes various utility libraries used throughout the application,
-// such as UID generators, clock, codecs for JSON and MsgPack, and the validation library.
-// If any library fails to initialize, the application will log a fatal error and terminate.
-func (a *App) initLibraries() {
-	snow, err := uid.NewSnowflakeNumber()
-	if err != nil {
-		log.Fatalln("failed to init uid number snowflake", err)
-	}
-
-	pvalidator, err := validation.NewProtoValidator()
-	if err != nil {
-		log.Fatalln("failed to init validation proto validator", err)
-	}
-
-	jewete, err := jwt.NewJSONWebToken(
-		a.config.GetString("jwt.private.key"),
-		a.config.GetString("jwt.public.key"),
-	)
-	if err != nil {
-		log.Fatalln("failed to init json web token (jwt)", err)
-	}
-
-	a.jwt = jewete
-	a.uidNumber = snow
-	a.protoValidator = pvalidator
-
-	a.uuid = uid.NewUUIDString()
-	a.hash = hash.NewBcryptHash(10)
-	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("jwt.hash.secret"))
-	a.codecJSON = codec.NewJSONCodec()
-	a.goroutine = goroutine.NewManager(100)
-	a.codecMsgPack = codec.NewMsgPackCodec()
-	a.validator = validation.NewV10Validator()
 }
 
 // initTasks starts all background tasks or services registered with the application.

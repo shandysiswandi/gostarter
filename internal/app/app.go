@@ -66,12 +66,12 @@ func New() *App {
 
 	app.initConfig()
 	app.initTelemetry()
+	app.initLibraries()
 	app.initDatabase()
 	app.initRedis()
 	app.initHTTPRouter()
 	app.initHTTPServer()
 	app.initGRPCServer()
-	app.initLibraries()
 	app.initModules()
 	app.initTasks()
 	app.initClosers()

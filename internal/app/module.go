@@ -11,66 +11,31 @@ import (
 	"log"
 
 	"github.com/shandysiswandi/gostarter/internal/auth"
-	"github.com/shandysiswandi/gostarter/internal/region"
-	"github.com/shandysiswandi/gostarter/internal/shortly"
 	"github.com/shandysiswandi/gostarter/internal/todo"
 )
 
 func (a *App) initModules() {
 	a.moduleAuth()
-	a.moduleShortly()
-	a.moduleRegion()
 	a.moduleTodo()
 }
 
 func (a *App) moduleAuth() {
 	if a.config.GetBool("module.flag.auth") {
 		_, err := auth.New(auth.Dependency{
-			Database:     a.database,
-			QueryBuilder: a.queryBuilder,
-			Telemetry:    a.telemetry,
-			Router:       a.httpRouter,
-			Validator:    a.validator,
-			UIDNumber:    a.uidNumber,
-			Hash:         a.hash,
-			SecHash:      a.secHash,
-			JWT:          a.jwt,
+			Database:       a.database,
+			QueryBuilder:   a.queryBuilder,
+			Telemetry:      a.telemetry,
+			Router:         a.httpRouter,
+			GRPCServer:     a.grpcServer,
+			ProtoValidator: a.protoValidator,
+			Validator:      a.validator,
+			UIDNumber:      a.uidNumber,
+			Hash:           a.hash,
+			SecHash:        a.secHash,
+			JWT:            a.jwt,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module auth", err)
-		}
-	}
-}
-
-func (a *App) moduleShortly() {
-	if a.config.GetBool("module.flag.shortly") {
-		_, err := shortly.New(shortly.Dependency{
-			RedisDB:   a.redisDB,
-			Config:    a.config,
-			CodecJSON: a.codecJSON,
-			Validator: a.validator,
-			Router:    a.httpRouter,
-			Telemetry: a.telemetry,
-		})
-		if err != nil {
-			log.Fatalln("failed to init module shortly", err)
-		}
-	}
-}
-
-func (a *App) moduleRegion() {
-	if a.config.GetBool("module.flag.region") {
-		_, err := region.New(region.Dependency{
-			Database:  a.database,
-			RedisDB:   a.redisDB,
-			Config:    a.config,
-			CodecJSON: a.codecJSON,
-			Validator: a.validator,
-			Router:    a.httpRouter,
-			Telemetry: a.telemetry,
-		})
-		if err != nil {
-			log.Fatalln("failed to init module region", err)
 		}
 	}
 }
