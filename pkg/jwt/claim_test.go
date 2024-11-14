@@ -117,7 +117,7 @@ func TestExtractClaimFromToken(t *testing.T) {
 	}
 }
 
-func TestSetClaimToContext(t *testing.T) {
+func TestSetClaim(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		clm *Claim
@@ -139,13 +139,13 @@ func TestSetClaimToContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ctx := tt.mockFn(tt.args)
-			got := SetClaimToContext(tt.args.ctx, tt.args.clm)
+			got := SetClaim(tt.args.ctx, tt.args.clm)
 			assert.Equal(t, ctx, got)
 		})
 	}
 }
 
-func TestGetClaimFromContext(t *testing.T) {
+func TestGetClaim(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  func() context.Context
@@ -161,7 +161,7 @@ func TestGetClaimFromContext(t *testing.T) {
 		{
 			name: "Success",
 			ctx: func() context.Context {
-				return SetClaimToContext(context.Background(), &Claim{})
+				return SetClaim(context.Background(), &Claim{})
 			},
 			want: &Claim{},
 		},
@@ -169,7 +169,7 @@ func TestGetClaimFromContext(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := GetClaimFromContext(tt.ctx())
+			got := GetClaim(tt.ctx())
 			assert.Equal(t, tt.want, got)
 		})
 	}
