@@ -10,7 +10,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/framework/serve"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
@@ -20,7 +19,7 @@ import (
 var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
 
 func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint, jwte jwt.JWT) {
-	serve := serve.New(serve.WithMiddlewares(middleware.JWT(jwte, "gostarter.access.token")))
+	serve := serve.New()
 
 	router.GET("/test", h.Test)
 
