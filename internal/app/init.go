@@ -25,6 +25,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/framework/interceptor"
 	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
@@ -238,8 +239,10 @@ func (a *App) initHTTPServer() {
 		Handler: middleware.Chain(
 			a.httpRouter,
 			middleware.Recovery,
+			// next-mr: Need to create a custom CORS implementation to standardize error messages
 			cors.AllowAll().Handler,
 			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
+			middleware.JWT(a.jwt, "gostarter.access.token", "/auth"),
 		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
@@ -249,8 +252,15 @@ func (a *App) initHTTPServer() {
 }
 
 func (a *App) initGRPCServer() {
-	opttel := instrument.UnaryTelemetryServerInterceptor(a.telemetry, a.uuid.Generate)
-	server := grpc.NewServer(opttel...)
+	opts := []grpc.ServerOption{grpc.ChainUnaryInterceptor(interceptor.UnaryServerRecovery())}
+	opts = append(opts, instrument.UnaryTelemetryServerInterceptor(a.telemetry, a.uuid.Generate)...)
+	opts = append(opts, grpc.ChainUnaryInterceptor(
+		interceptor.UnaryServerError(),
+		interceptor.UnaryServerJWT(a.jwt, "gostarter.access.token", "/gostarter.api.auth.AuthService"),
+		interceptor.UnaryServerProtoValidate(a.protoValidator),
+	))
+
+	server := grpc.NewServer(opts...)
 	reflection.Register(server)
 	a.grpcServer = server
 }
