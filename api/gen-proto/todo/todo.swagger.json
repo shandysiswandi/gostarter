@@ -17,6 +17,17 @@
   ],
   "paths": {},
   "definitions": {
+    "apitodoStatus": {
+      "type": "string",
+      "enum": [
+        "STATUS_UNSPECIFIED",
+        "STATUS_INITIATE",
+        "STATUS_IN_PROGRESS",
+        "STATUS_DROP",
+        "STATUS_DONE"
+      ],
+      "default": "STATUS_UNSPECIFIED"
+    },
     "googlerpcStatus": {
       "type": "object",
       "properties": {
@@ -36,113 +47,6 @@
         }
       }
     },
-    "gostarterCreateResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        }
-      }
-    },
-    "gostarterDeleteResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        }
-      }
-    },
-    "gostarterFetchResponse": {
-      "type": "object",
-      "properties": {
-        "todos": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/gostarterTodo"
-          }
-        }
-      }
-    },
-    "gostarterFindResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "status": {
-          "$ref": "#/definitions/gostarterStatus"
-        }
-      }
-    },
-    "gostarterStatus": {
-      "type": "string",
-      "enum": [
-        "STATUS_UNSPECIFIED",
-        "STATUS_INITIATE",
-        "STATUS_IN_PROGRESS",
-        "STATUS_DROP",
-        "STATUS_DONE"
-      ],
-      "default": "STATUS_UNSPECIFIED"
-    },
-    "gostarterTodo": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "status": {
-          "$ref": "#/definitions/gostarterStatus"
-        }
-      }
-    },
-    "gostarterUpdateResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "status": {
-          "$ref": "#/definitions/gostarterStatus"
-        }
-      }
-    },
-    "gostarterUpdateStatusResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "status": {
-          "$ref": "#/definitions/gostarterStatus"
-        }
-      }
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -151,6 +55,102 @@
         }
       },
       "additionalProperties": {}
+    },
+    "todoCreateResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "todoDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "todoFetchResponse": {
+      "type": "object",
+      "properties": {
+        "todos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/todoTodo"
+          }
+        }
+      }
+    },
+    "todoFindResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apitodoStatus"
+        }
+      }
+    },
+    "todoTodo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apitodoStatus"
+        }
+      }
+    },
+    "todoUpdateResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apitodoStatus"
+        }
+      }
+    },
+    "todoUpdateStatusResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "status": {
+          "$ref": "#/definitions/apitodoStatus"
+        }
+      }
     }
   }
 }

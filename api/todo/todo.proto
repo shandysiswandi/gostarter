@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package gostarter;
+package gostarter.api.todo;
 
 import "google/type/decimal.proto";
 import "buf/validate/validate.proto";

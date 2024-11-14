@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TodoService_Create_FullMethodName       = "/gostarter.TodoService/Create"
-	TodoService_Delete_FullMethodName       = "/gostarter.TodoService/Delete"
-	TodoService_Find_FullMethodName         = "/gostarter.TodoService/Find"
-	TodoService_Fetch_FullMethodName        = "/gostarter.TodoService/Fetch"
-	TodoService_UpdateStatus_FullMethodName = "/gostarter.TodoService/UpdateStatus"
-	TodoService_Update_FullMethodName       = "/gostarter.TodoService/Update"
+	TodoService_Create_FullMethodName       = "/gostarter.api.todo.TodoService/Create"
+	TodoService_Delete_FullMethodName       = "/gostarter.api.todo.TodoService/Delete"
+	TodoService_Find_FullMethodName         = "/gostarter.api.todo.TodoService/Find"
+	TodoService_Fetch_FullMethodName        = "/gostarter.api.todo.TodoService/Fetch"
+	TodoService_UpdateStatus_FullMethodName = "/gostarter.api.todo.TodoService/UpdateStatus"
+	TodoService_Update_FullMethodName       = "/gostarter.api.todo.TodoService/Update"
 )
 
 // TodoServiceClient is the client API for TodoService service.
@@ -278,7 +278,7 @@ func _TodoService_Update_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TodoService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gostarter.TodoService",
+	ServiceName: "gostarter.api.todo.TodoService",
 	HandlerType: (*TodoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
