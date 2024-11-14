@@ -9,9 +9,19 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
-func JWT(jwte jwt.JWT, audience string) func(http.Handler) http.Handler {
+func JWT(jwte jwt.JWT, audience string, skipPaths ...string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if len(skipPaths) > 0 {
+				for _, prefix := range skipPaths {
+					if strings.HasPrefix(r.URL.Path, prefix) {
+						h.ServeHTTP(w, r)
+
+						return
+					}
+				}
+			}
+
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				jsonResponse(w, "authorization header missing")
