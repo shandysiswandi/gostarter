@@ -44,7 +44,7 @@ func JWT(jwte jwt.JWT, audience string) func(http.Handler) http.Handler {
 				return
 			}
 
-			h.ServeHTTP(w, r.WithContext(jwt.SetClaimToContext(r.Context(), clm)))
+			h.ServeHTTP(w, r.WithContext(jwt.SetClaim(r.Context(), clm)))
 		})
 	}
 }

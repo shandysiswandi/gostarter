@@ -20,7 +20,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 )
 
 // RegisterSSEEndpoint registers the SSE endpoints for handling event streams

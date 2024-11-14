@@ -7,8 +7,8 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
-	"github.com/shandysiswandi/gostarter/pkg/http/serve"
+	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework/serve"
 )
 
 func RegisterAuthServiceServer(router *httprouter.Router, h *Endpoint) {

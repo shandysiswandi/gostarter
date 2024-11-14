@@ -10,10 +10,10 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework/serve"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
-	"github.com/shandysiswandi/gostarter/pkg/http/serve"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 

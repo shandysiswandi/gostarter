@@ -8,8 +8,8 @@ import (
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/http/gql"
-	"github.com/shandysiswandi/gostarter/pkg/http/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework/gql"
+	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
