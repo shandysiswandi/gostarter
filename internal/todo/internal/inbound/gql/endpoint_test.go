@@ -4,15 +4,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
 func TestRegisterGQLEndpoint(t *testing.T) {
 	type args struct {
-		router *httprouter.Router
+		router *httpserver.Router
 		h      *Endpoint
 		cfg    config.Config
 		jwte   jwt.JWT

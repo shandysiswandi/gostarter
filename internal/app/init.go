@@ -10,7 +10,6 @@ package app
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,12 +18,12 @@ import (
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/framework/interceptor"
 	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
@@ -199,41 +198,12 @@ func (a *App) initRedis() {
 	a.redisDB = rdb
 }
 
-// initHTTPRouter initializes the HTTP router using the httprouter library.
-// It sets up custom handlers for "Not Found" and "Method Not Allowed" errors,
-// returning JSON responses with appropriate status codes.
-func (a *App) initHTTPRouter() {
-	router := httprouter.New()
-	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("content-type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusNotFound)
-		err := json.NewEncoder(w).Encode(map[string]string{"error": "endpoint not found"})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	})
-
-	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("content-type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		err := json.NewEncoder(w).Encode(map[string]string{"error": "method endpoint not allowed"})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	})
-
-	router.GET("/health", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	a.httpRouter = router
-}
-
 // initHTTPServer initializes the HTTP server with settings from the configuration,
 // such as address, timeouts, and the router handler wrapped with CORS middleware.
 // This method should be called after initializing the router to ensure the server
 // is ready to handle incoming requests.
 func (a *App) initHTTPServer() {
+	a.httpRouter = httpserver.New()
 	a.httpServer = &http.Server{
 		Addr: a.config.GetString("server.address.http"),
 		Handler: middleware.Chain(

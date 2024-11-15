@@ -5,21 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
-	"github.com/shandysiswandi/gostarter/pkg/framework/serve"
 )
-
-func RegisterAuthServiceServer(router *httprouter.Router, h *Endpoint) {
-	serve := serve.New(serve.WithMiddlewares(middleware.Recovery))
-
-	router.Handler(http.MethodPost, "/auth/login", serve.Endpoint(h.Login))
-	router.Handler(http.MethodPost, "/auth/register", serve.Endpoint(h.Register))
-	router.Handler(http.MethodPost, "/auth/refresh-token", serve.Endpoint(h.RefreshToken))
-	router.Handler(http.MethodPost, "/auth/forgot-password", serve.Endpoint(h.ForgotPassword))
-	router.Handler(http.MethodPost, "/auth/reset-password", serve.Endpoint(h.ResetPassword))
-}
 
 type Endpoint struct {
 	loginUC          domain.Login
@@ -29,8 +16,11 @@ type Endpoint struct {
 	resetPasswordUC  domain.ResetPassword
 }
 
-func NewHTTPEndpoint(loginUC domain.Login, registerUC domain.Register,
-	refreshTokenUC domain.RefreshToken, forgotPasswordUC domain.ForgotPassword,
+func NewHTTPEndpoint(
+	loginUC domain.Login,
+	registerUC domain.Register,
+	refreshTokenUC domain.RefreshToken,
+	forgotPasswordUC domain.ForgotPassword,
 	resetPasswordUC domain.ResetPassword,
 ) *Endpoint {
 	return &Endpoint{

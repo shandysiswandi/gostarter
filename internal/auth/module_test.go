@@ -3,7 +3,7 @@ package auth
 import (
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -20,7 +20,7 @@ func TestNew(t *testing.T) {
 			name: "Success",
 			dep: func() Dependency {
 				return Dependency{
-					Router:     &httprouter.Router{},
+					Router:     &httpserver.Router{},
 					GRPCServer: &grpc.Server{},
 					Telemetry:  telemetry.NewTelemetry(),
 				}

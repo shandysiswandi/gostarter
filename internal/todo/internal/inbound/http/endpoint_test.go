@@ -5,29 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-
-	"github.com/julienschmidt/httprouter"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
-
-func TestRegisterRESTEndpoint(t *testing.T) {
-	type args struct {
-		router *httprouter.Router
-		h      *Endpoint
-		jwte   jwt.JWT
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			RegisterRESTEndpoint(tt.args.router, tt.args.h, tt.args.jwte)
-		})
-	}
-}
 
 func TestEndpoint_Create(t *testing.T) {
 	type args struct {

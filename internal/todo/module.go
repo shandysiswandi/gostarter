@@ -2,9 +2,9 @@ package todo
 
 import (
 	"database/sql"
+	"net/http"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	inboundgql "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/gql"
@@ -15,6 +15,8 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/service"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/task"
@@ -38,7 +40,7 @@ type Dependency struct {
 	Validator      validation.Validator
 	ProtoValidator validation.Validator
 	JWT            jwt.JWT
-	Router         *httprouter.Router
+	Router         *httpserver.Router
 	GRPCServer     *grpc.Server
 	Telemetry      *telemetry.Telemetry
 	Goroutine      *goroutine.Manager
@@ -62,31 +64,26 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes REST API endpoints to handle core user workflows:
-	endpoint := inboundhttp.NewEndpoint(
-		createUC,
-		deleteUC,
-		findUC,
-		fetchUC,
-		updateStatusUC,
-		updateUC,
-		dep.Goroutine,
-	)
-	inboundhttp.RegisterRESTEndpoint(dep.Router, endpoint, dep.JWT)
-	inboundhttp.RegisterSSEEndpoint(dep.Router, inboundhttp.NewSSE(
-		dep.CodecJSON,
-	))
+	eHTTP := inboundhttp.NewEndpoint(createUC, deleteUC, findUC, fetchUC,
+		updateStatusUC, updateUC, dep.Goroutine)
+	eSSE := inboundhttp.NewSSE(dep.CodecJSON)
+
+	//
+	dep.Router.Endpoint(http.MethodGet, "/todos/:id", eHTTP.Find)
+	dep.Router.Endpoint(http.MethodGet, "/todos", eHTTP.Fetch)
+	dep.Router.Endpoint(http.MethodPost, "/todos", eHTTP.Create)
+	dep.Router.Endpoint(http.MethodPut, "/todos/:id", eHTTP.Update)
+	dep.Router.Endpoint(http.MethodPatch, "/todos/:id/status", eHTTP.UpdateStatus)
+	dep.Router.Endpoint(http.MethodDelete, "/todos/:id", eHTTP.Delete)
+	//
+	dep.Router.Native(http.MethodGet, "/events", http.HandlerFunc(eSSE.HandleEvent), middleware.Recovery)
+	dep.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(eSSE.HandleEvent),
+		middleware.Recovery)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes gRPC API endpoints to handle core user workflows:
-	grpcEndpoint := inboundgrpc.NewEndpoint(
-		dep.ProtoValidator,
-		findUC,
-		fetchUC,
-		createUC,
-		deleteUC,
-		updateUC,
-		updateStatusUC,
-	)
+	grpcEndpoint := inboundgrpc.NewEndpoint(dep.ProtoValidator, findUC, fetchUC,
+		createUC, deleteUC, updateUC, updateStatusUC)
 	pb.RegisterTodoServiceServer(dep.GRPCServer, grpcEndpoint)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====

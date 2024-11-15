@@ -18,17 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 )
-
-// RegisterSSEEndpoint registers the SSE endpoints for handling event streams
-// and triggering events using the provided httprouter.Router.
-func RegisterSSEEndpoint(router *httprouter.Router, h *SSE) {
-	router.Handler(http.MethodGet, "/events", middleware.Recovery(http.HandlerFunc(h.HandleEvent)))
-	router.Handler(http.MethodGet, "/trigger-event", middleware.Recovery(http.HandlerFunc(h.TrigerEvent)))
-}
 
 // Event represents a simple event with a name and value to be sent to clients.
 type Event struct {

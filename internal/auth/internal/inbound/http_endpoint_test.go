@@ -6,27 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 )
-
-func TestRegisterRESTEndpoint(t *testing.T) {
-	type args struct {
-		router *httprouter.Router
-		h      *Endpoint
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			RegisterAuthServiceServer(tt.args.router, tt.args.h)
-		})
-	}
-}
 
 func TestNewEndpoint(t *testing.T) {
 	type args struct {

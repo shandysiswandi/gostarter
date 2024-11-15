@@ -13,11 +13,11 @@ import (
 	"net/http"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/julienschmidt/httprouter"
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -47,7 +47,7 @@ type App struct {
 	redisDB        *redis.Client
 	httpServer     *http.Server
 	grpcServer     *grpc.Server
-	httpRouter     *httprouter.Router
+	httpRouter     *httpserver.Router
 	goroutine      *goroutine.Manager
 	hash           hash.Hash
 	secHash        hash.Hash
@@ -69,7 +69,6 @@ func New() *App {
 	app.initLibraries()
 	app.initDatabase()
 	app.initRedis()
-	app.initHTTPRouter()
 	app.initHTTPServer()
 	app.initGRPCServer()
 	app.initModules()

@@ -10,26 +10,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/serve"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
 var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
-
-func RegisterRESTEndpoint(router *httprouter.Router, h *Endpoint, jwte jwt.JWT) {
-	serve := serve.New()
-
-	router.GET("/test", h.Test)
-
-	router.Handler(http.MethodGet, "/todos/:id", serve.Endpoint(h.Find))
-	router.Handler(http.MethodGet, "/todos", serve.Endpoint(h.Fetch))
-	router.Handler(http.MethodPost, "/todos", serve.Endpoint(h.Create))
-	router.Handler(http.MethodPut, "/todos/:id", serve.Endpoint(h.Update))
-	router.Handler(http.MethodPatch, "/todos/:id/status", serve.Endpoint(h.UpdateStatus))
-	router.Handler(http.MethodDelete, "/todos/:id", serve.Endpoint(h.Delete))
-}
 
 type Endpoint struct {
 	createUC       domain.Create

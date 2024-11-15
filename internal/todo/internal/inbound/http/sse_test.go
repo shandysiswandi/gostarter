@@ -9,27 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 )
-
-func TestRegisterSSEEndpoint(t *testing.T) {
-	type args struct {
-		router *httprouter.Router
-		h      *SSE
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			RegisterSSEEndpoint(tt.args.router, tt.args.h)
-		})
-	}
-}
 
 func TestNewSSE(t *testing.T) {
 	type args struct {

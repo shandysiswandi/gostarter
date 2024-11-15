@@ -2,13 +2,14 @@ package auth
 
 import (
 	"database/sql"
+	"net/http"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/julienschmidt/httprouter"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/service"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -23,7 +24,7 @@ type Dependency struct {
 	Database     *sql.DB
 	QueryBuilder goqu.DialectWrapper
 	Telemetry    *telemetry.Telemetry
-	Router       *httprouter.Router
+	Router       *httpserver.Router
 	GRPCServer   *grpc.Server
 	Validator    validation.Validator
 	UIDNumber    uid.NumberID
@@ -92,7 +93,11 @@ func New(dep Dependency) (*Expose, error) {
 		forgotPasswordUC,
 		resetPasswordUC,
 	)
-	inbound.RegisterAuthServiceServer(dep.Router, hEndpoint)
+	dep.Router.Endpoint(http.MethodPost, "/auth/login", hEndpoint.Login)
+	dep.Router.Endpoint(http.MethodPost, "/auth/register", hEndpoint.Register)
+	dep.Router.Endpoint(http.MethodPost, "/auth/refresh-token", hEndpoint.RefreshToken)
+	dep.Router.Endpoint(http.MethodPost, "/auth/forgot-password", hEndpoint.ForgotPassword)
+	dep.Router.Endpoint(http.MethodPost, "/auth/reset-password", hEndpoint.ResetPassword)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes gRPC API endpoints to handle core user workflows:

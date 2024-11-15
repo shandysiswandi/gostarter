@@ -3,9 +3,9 @@ package todo
 import (
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
 	configMock "github.com/shandysiswandi/gostarter/pkg/config/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -26,7 +26,11 @@ func TestNew(t *testing.T) {
 				mc.EXPECT().GetString("database.driver").Return("mysql").Once()
 				mc.EXPECT().GetBool("feature.flag.graphql.playground").Return(true).Once()
 
-				return Dependency{Config: mc, Router: &httprouter.Router{}, GRPCServer: grpc.NewServer()}
+				return Dependency{
+					Config:     mc,
+					Router:     &httpserver.Router{},
+					GRPCServer: grpc.NewServer(),
+				}
 			},
 			want:    &Expose{Tasks: []task.Runner{&job.ExampleJob{}}},
 			wantErr: nil,
