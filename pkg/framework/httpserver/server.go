@@ -139,8 +139,8 @@ func defaultNotFound(w http.ResponseWriter, _ *http.Request) {
 
 func defaultMethodNotAllowedh(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("content-type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusNotFound)
-	err := json.NewEncoder(w).Encode(map[string]string{"error": "endpoint not found"})
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	err := json.NewEncoder(w).Encode(map[string]string{"error": "method not allowed"})
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}

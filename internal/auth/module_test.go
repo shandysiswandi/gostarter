@@ -20,8 +20,8 @@ func TestNew(t *testing.T) {
 			name: "Success",
 			dep: func() Dependency {
 				return Dependency{
-					Router:     &httpserver.Router{},
-					GRPCServer: &grpc.Server{},
+					Router:     httpserver.New(),
+					GRPCServer: grpc.NewServer(),
 					Telemetry:  telemetry.NewTelemetry(),
 				}
 			},

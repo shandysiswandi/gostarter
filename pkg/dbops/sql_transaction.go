@@ -28,25 +28,14 @@ func NewTransaction(db *sql.DB) *Transaction {
 // Transaction executes the provided function within a transaction context.
 // It starts a new transaction, attaches it to the context, and ensures that the transaction
 // is either committed on success or rolled back on failure or panic.
-//
-// Example:
-//
-//	err := tx.Transaction(ctx, func(ctx context.Context) error {
-//	    return repository.DoSomething(ctx)
-//	})
 func (t *Transaction) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
 	tx, err := t.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	// Attach the transaction to the context.
 	ctx = context.WithValue(ctx, contextKeySQLTx{}, tx)
 
-	// Execute the provided function within the transaction context.
-	err = fn(ctx)
-
-	// Ensure that the transaction is either committed or rolled back.
 	defer func() {
 		if r := recover(); r != nil {
 			if err := tx.Rollback(); err != nil {
@@ -55,8 +44,7 @@ func (t *Transaction) Transaction(ctx context.Context, fn func(ctx context.Conte
 
 			log.Println("recover from panic when execute function")
 
-			// panic(r) // is need to re-panic or not
-			return
+			panic(r) // is need to re-panic or not
 		}
 
 		if err != nil {
@@ -71,6 +59,8 @@ func (t *Transaction) Transaction(ctx context.Context, fn func(ctx context.Conte
 			log.Println("error when commit transaction", err)
 		}
 	}()
+
+	err = fn(ctx)
 
 	return err
 }

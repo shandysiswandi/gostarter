@@ -3,6 +3,7 @@ package dbops
 import (
 	"context"
 	"database/sql"
+	"log"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -128,7 +129,7 @@ func TestTransaction_Transaction(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				fn: func(ctx context.Context) error {
-					return nil
+					panic(1)
 				},
 			},
 			wantErr: nil,
@@ -148,6 +149,16 @@ func TestTransaction_Transaction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tr := tt.mockFn(tt.args)
+
+			didPanic := false
+			defer func() {
+				if r := recover(); r != nil {
+					didPanic = true
+				}
+				log.Println(didPanic)
+			}()
+
+			// Call the transaction function
 			err := tr.Transaction(tt.args.ctx, tt.args.fn)
 			assert.Equal(t, tt.wantErr, err)
 		})

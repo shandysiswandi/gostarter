@@ -18,14 +18,29 @@ var (
 	ErrScanRow = errors.New("failed to scan column into field type")
 )
 
-// Exec executes a query and handles the result.
-func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) error {
-	query, args, err := qp()
+func prepare(qp QueryProvider) (query string, args []any, err error) {
+	query, args, err = qp()
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
 		}
 
+		return "", nil, err
+	}
+
+	return query, args, err
+}
+
+func closeRow(rows *sql.Rows) {
+	if err := rows.Close(); err != nil {
+		log.Printf("error closing rows: %v\n", err)
+	}
+}
+
+// Exec executes a query and handles the result.
+func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) error {
+	query, args, err := prepare(qp)
+	if err != nil {
 		return err
 	}
 
@@ -66,12 +81,8 @@ func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) 
 // SQLGet executes a query that is expected to return a single row and scans the result into a type T.
 // It uses the provided Row[T] implementation to handle scanning of columns.
 func SQLGet[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider) (*T, error) {
-	query, args, err := qp()
+	query, args, err := prepare(qp)
 	if err != nil {
-		if verbose {
-			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
-		}
-
 		return nil, err
 	}
 
@@ -106,12 +117,8 @@ func SQLGet[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider) 
 // SQLGets executes a query that may return multiple rows and scans the results into a slice of type T.
 // It uses the provided Row[T] implementation to handle scanning of columns.
 func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider) ([]T, error) {
-	query, args, err := qp()
+	query, args, err := prepare(qp)
 	if err != nil {
-		if verbose {
-			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
-		}
-
 		return nil, err
 	}
 
@@ -128,12 +135,7 @@ func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider)
 
 		return nil, err
 	}
-
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Printf("error closing rows: %v\n", err)
-		}
-	}()
+	defer closeRow(rows)
 
 	var entities []T
 	for rows.Next() {

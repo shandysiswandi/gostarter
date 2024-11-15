@@ -22,10 +22,9 @@ func (r *testStruct) ScanColumn() []any {
 
 func TestExec(t *testing.T) {
 	SetVerbose(true)
-	// defer SetVerbose(false)
 
 	type args struct {
-		ctx           context.Context
+		ctx           func() context.Context
 		execer        func() *sql.DB
 		queryProvider func() (string, []any, error)
 		feedback      []bool
@@ -38,7 +37,9 @@ func TestExec(t *testing.T) {
 		{
 			name: "ErrorQueryProvider",
 			args: args{
-				ctx:    context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				execer: func() *sql.DB { return nil },
 				queryProvider: func() (string, []any, error) {
 					return "", []any{}, assert.AnError
@@ -49,11 +50,14 @@ func TestExec(t *testing.T) {
 		{
 			name: "ErrorExec",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				execer: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnError(assert.AnError)
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").
+						WillReturnError(assert.AnError)
 
 					return db
 				},
@@ -66,11 +70,14 @@ func TestExec(t *testing.T) {
 		{
 			name: "ErrorGetRowsAffected",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				execer: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").
+						WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
 
 					return db
 				},
@@ -84,11 +91,14 @@ func TestExec(t *testing.T) {
 		{
 			name: "ErrorGetRowsAffectedWithoutFeedback",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				execer: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").
+						WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
 
 					return db
 				},
@@ -102,11 +112,14 @@ func TestExec(t *testing.T) {
 		{
 			name: "ErrorZeroRowsAffected",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				execer: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnResult(sqlmock.NewResult(0, 0))
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").
+						WillReturnResult(sqlmock.NewResult(0, 0))
 
 					return db
 				},
@@ -120,13 +133,21 @@ func TestExec(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				ctx: context.Background(),
-				execer: func() *sql.DB {
+				ctx: func() context.Context {
 					db, mock, _ := sqlmock.New()
+					mock.ExpectBegin()
+					tx, _ := db.Begin()
 
-					mock.ExpectExec("DELETE FROM test WHERE id = ?").WillReturnResult(sqlmock.NewResult(1, 1))
+					ctx := context.Background()
+					ctx = context.WithValue(ctx, contextKeySQLTx{}, tx)
 
-					return db
+					mock.ExpectExec("DELETE FROM test WHERE id = ?").
+						WillReturnResult(sqlmock.NewResult(1, 1))
+
+					return ctx
+				},
+				execer: func() *sql.DB {
+					return nil
 				},
 				queryProvider: func() (string, []any, error) {
 					return "DELETE FROM test WHERE id = ?", []any{1}, nil
@@ -141,7 +162,7 @@ func TestExec(t *testing.T) {
 			t.Parallel()
 
 			db := tt.args.execer()
-			err := Exec(tt.args.ctx, db, tt.args.queryProvider, tt.args.feedback...)
+			err := Exec(tt.args.ctx(), db, tt.args.queryProvider, tt.args.feedback...)
 			assert.Equal(t, tt.wantErr, err)
 			if db != nil {
 				db.Close()
@@ -152,7 +173,7 @@ func TestExec(t *testing.T) {
 
 func TestSQLGet(t *testing.T) {
 	type args struct {
-		ctx           context.Context
+		ctx           func() context.Context
 		querier       func() *sql.DB
 		queryProvider func() (string, []any, error)
 	}
@@ -165,7 +186,9 @@ func TestSQLGet(t *testing.T) {
 		{
 			name: "ErrorQueryProvider",
 			args: args{
-				ctx:     context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB { return nil },
 				queryProvider: func() (string, []any, error) {
 					return "", []any{}, assert.AnError
@@ -177,7 +200,9 @@ func TestSQLGet(t *testing.T) {
 		{
 			name: "ErrorScanNoRows",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
@@ -195,7 +220,9 @@ func TestSQLGet(t *testing.T) {
 		{
 			name: "ErrorScanInternal",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
@@ -213,14 +240,24 @@ func TestSQLGet(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				ctx: context.Background(),
-				querier: func() *sql.DB {
+				ctx: func() context.Context {
 					db, mock, _ := sqlmock.New()
+					mock.ExpectBegin()
+					tx, _ := db.Begin()
 
-					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name")
-					mock.ExpectQuery("SELECT id, name FROM test WHERE id = ?").WillReturnRows(rows)
+					ctx := context.Background()
+					ctx = context.WithValue(ctx, contextKeySQLTx{}, tx)
 
-					return db
+					rows := sqlmock.NewRows([]string{"id", "name"}).
+						AddRow(1, "name")
+
+					mock.ExpectQuery("SELECT id, name FROM test WHERE id = ?").
+						WillReturnRows(rows)
+
+					return ctx
+				},
+				querier: func() *sql.DB {
+					return nil
 				},
 				queryProvider: func() (string, []any, error) {
 					return "SELECT id, name FROM test WHERE id = ?", []any{1}, nil
@@ -234,7 +271,7 @@ func TestSQLGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			db := tt.args.querier()
-			got, err := SQLGet[testStruct](tt.args.ctx, db, tt.args.queryProvider)
+			got, err := SQLGet[testStruct](tt.args.ctx(), db, tt.args.queryProvider)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 			if db != nil {
@@ -246,7 +283,7 @@ func TestSQLGet(t *testing.T) {
 
 func TestSQLGets(t *testing.T) {
 	type args struct {
-		ctx           context.Context
+		ctx           func() context.Context
 		querier       func() *sql.DB
 		queryProvider func() (string, []any, error)
 	}
@@ -259,7 +296,9 @@ func TestSQLGets(t *testing.T) {
 		{
 			name: "ErrorQueryProvider",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					return nil
 				},
@@ -273,7 +312,9 @@ func TestSQLGets(t *testing.T) {
 		{
 			name: "ErrorQuery",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
@@ -291,11 +332,13 @@ func TestSQLGets(t *testing.T) {
 		{
 			name: "ErrorScanTypeInternal",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name").AddRow(true, "anme2")
+					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name").AddRow(true, "name2")
 					mock.ExpectQuery("SELECT id, name FROM test").WillReturnRows(rows)
 
 					return db
@@ -310,11 +353,13 @@ func TestSQLGets(t *testing.T) {
 		{
 			name: "ErrorScanInternal",
 			args: args{
-				ctx: context.Background(),
+				ctx: func() context.Context {
+					return context.Background()
+				},
 				querier: func() *sql.DB {
 					db, mock, _ := sqlmock.New()
 
-					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name").AddRow(2, "anme2").RowError(1, assert.AnError)
+					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name").AddRow(2, "name2").RowError(1, assert.AnError)
 					mock.ExpectQuery("SELECT id, name FROM test").WillReturnRows(rows)
 
 					return db
@@ -329,14 +374,24 @@ func TestSQLGets(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				ctx: context.Background(),
-				querier: func() *sql.DB {
+				ctx: func() context.Context {
 					db, mock, _ := sqlmock.New()
+					mock.ExpectBegin()
+					tx, _ := db.Begin()
 
-					rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "name")
-					mock.ExpectQuery("SELECT id, name FROM test").WillReturnRows(rows)
+					ctx := context.Background()
+					ctx = context.WithValue(ctx, contextKeySQLTx{}, tx)
 
-					return db
+					rows := sqlmock.NewRows([]string{"id", "name"}).
+						AddRow(1, "name")
+
+					mock.ExpectQuery("SELECT id, name FROM test").
+						WillReturnRows(rows)
+
+					return ctx
+				},
+				querier: func() *sql.DB {
+					return nil
 				},
 				queryProvider: func() (string, []any, error) {
 					return "SELECT id, name FROM test", nil, nil
@@ -350,7 +405,7 @@ func TestSQLGets(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			db := tt.args.querier()
-			got, err := SQLGets[testStruct](tt.args.ctx, db, tt.args.queryProvider)
+			got, err := SQLGets[testStruct](tt.args.ctx(), db, tt.args.queryProvider)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 			if db != nil {

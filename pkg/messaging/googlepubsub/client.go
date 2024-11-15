@@ -251,9 +251,9 @@ func (c *Client) doAsyncBulkPublish(ctx context.Context, topic *pubsub.Topic, me
 	close(errChan) // Close error channel after all goroutines are done
 
 	// Check if any errors were collected
-	//nolint:godox,err113 // will add later
+	//nolint:err1113 // will add later
 	if len(publishErrors) > 0 {
-		// TODO: here to handle retry with configuration, for now only log all errors
+		// next-mr: here to handle retry with configuration, for now only log all errors
 		// Return an aggregate error if there were any issues
 		return fmt.Errorf("errors occurred during bulk publish: %v", publishErrors)
 	}

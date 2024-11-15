@@ -11,6 +11,10 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+const (
+	xRequestId = "X-Request-ID"
+)
+
 func UseTelemetryServer(tel *telemetry.Telemetry, sid func() string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,12 +71,12 @@ type instarumentHTTPServer struct {
 }
 
 func (ihs *instarumentHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if rid := r.Header.Get("X-Request-ID"); rid == "" {
-		r.Header.Set("X-Request-ID", ihs.uuid())
+	if rid := r.Header.Get(xRequestId); rid == "" {
+		r.Header.Set(xRequestId, ihs.uuid())
 	}
 
 	ctx := r.Context()
-	ctx = requestid.Set(ctx, r.Header.Get("X-Request-ID"))
+	ctx = requestid.Set(ctx, r.Header.Get(xRequestId))
 	r = r.WithContext(ctx)
 
 	srw := &statusResponseWriter{ResponseWriter: w}

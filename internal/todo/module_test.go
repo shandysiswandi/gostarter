@@ -28,7 +28,7 @@ func TestNew(t *testing.T) {
 
 				return Dependency{
 					Config:     mc,
-					Router:     &httpserver.Router{},
+					Router:     httpserver.New(),
 					GRPCServer: grpc.NewServer(),
 				}
 			},

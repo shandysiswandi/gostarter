@@ -41,6 +41,11 @@ load:
 	-d '{"title":"title", "description":"description is for testing"}' \
 	localhost:50001 -O json | http POST localhost:3000/api/ingest
 
+# Code Quality
+scan: test-unit
+	@sonar-scanner
+
+
 # ***** *****
 # TESTING
 # ***** *****

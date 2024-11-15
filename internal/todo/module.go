@@ -49,6 +49,8 @@ type Dependency struct {
 	Goroutine      *goroutine.Manager
 }
 
+const todoPath = "/todos"
+
 //nolint:funlen // it's long line because it format param dependency
 func New(dep Dependency) (*Expose, error) {
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
@@ -72,12 +74,12 @@ func New(dep Dependency) (*Expose, error) {
 	eSSE := inboundhttp.NewSSE(dep.CodecJSON)
 
 	//
-	dep.Router.Endpoint(http.MethodGet, "/todos/:id", eHTTP.Find)
-	dep.Router.Endpoint(http.MethodGet, "/todos", eHTTP.Fetch)
-	dep.Router.Endpoint(http.MethodPost, "/todos", eHTTP.Create)
-	dep.Router.Endpoint(http.MethodPut, "/todos/:id", eHTTP.Update)
-	dep.Router.Endpoint(http.MethodPatch, "/todos/:id/status", eHTTP.UpdateStatus)
-	dep.Router.Endpoint(http.MethodDelete, "/todos/:id", eHTTP.Delete)
+	dep.Router.Endpoint(http.MethodGet, todoPath+"/:id", eHTTP.Find)
+	dep.Router.Endpoint(http.MethodGet, todoPath, eHTTP.Fetch)
+	dep.Router.Endpoint(http.MethodPost, todoPath, eHTTP.Create)
+	dep.Router.Endpoint(http.MethodPut, todoPath+"/:id", eHTTP.Update)
+	dep.Router.Endpoint(http.MethodPatch, todoPath+"/:id/status", eHTTP.UpdateStatus)
+	dep.Router.Endpoint(http.MethodDelete, todoPath+"/:id", eHTTP.Delete)
 	//
 	dep.Router.Native(http.MethodGet, "/events", http.HandlerFunc(eSSE.HandleEvent), middleware.Recovery)
 	dep.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(eSSE.HandleEvent),
