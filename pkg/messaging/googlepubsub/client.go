@@ -39,8 +39,6 @@ type Client struct {
 }
 
 // WithAutoAck configures the client to automatically acknowledge messages.
-//
-// isAuto: If true, messages will be automatically acknowledged after being received.
 func WithAutoAck(isAuto bool) func(*Client) {
 	return func(client *Client) {
 		client.autoAck = isAuto
@@ -48,8 +46,6 @@ func WithAutoAck(isAuto bool) func(*Client) {
 }
 
 // WithAutoCreateTopic configures the client to automatically create a topic if it does not exist.
-//
-// isAuto: If true, the client will create the topic when attempting to publish or subscribe.
 func WithAutoCreateTopic(isAuto bool) func(*Client) {
 	return func(client *Client) {
 		client.autoCreateTopic = isAuto
@@ -58,8 +54,6 @@ func WithAutoCreateTopic(isAuto bool) func(*Client) {
 
 // WithAutoCreateSubscriber configures the client to automatically create a subscription
 // and associated topic if they do not exist.
-//
-// isAuto: If true, the client will create both the subscription and the topic as necessary.
 func WithAutoCreateSubscriber(isAuto bool) func(*Client) {
 	return func(client *Client) {
 		if isAuto {
@@ -70,8 +64,6 @@ func WithAutoCreateSubscriber(isAuto bool) func(*Client) {
 }
 
 // WithSyncPublisher configures the client to publish messages synchronously.
-//
-// isSyncPublisher: If true, the Publish call will wait for the message to be acknowledged before returning.
 func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
 	return func(client *Client) {
 		client.syncPublisher = isSyncPublisher
@@ -79,12 +71,6 @@ func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
 }
 
 // NewClient creates a new Google Cloud Pub/Sub client with the provided configuration options.
-//
-// ctx: The context to use for client initialization.
-// projectID: The Google Cloud project ID.
-// opts: Configuration options for the client.
-//
-// Returns a pointer to the created Client or an error if the client could not be created.
 func NewClient(ctx context.Context, projectID string, opts ...func(*Client)) (*Client, error) {
 	client := &Client{
 		subscriptions:        make(map[string]*SubscriberHandler),
@@ -109,8 +95,6 @@ func NewClient(ctx context.Context, projectID string, opts ...func(*Client)) (*C
 }
 
 // Close closes the Pub/Sub client and releases any resources associated with it.
-//
-// Returns an error if the client could not be closed.
 func (c *Client) Close() error {
 	if c.client == nil {
 		return nil
@@ -130,12 +114,6 @@ func (c *Client) Close() error {
 }
 
 // Publish sends a single message to the specified topic.
-//
-// ctx: The context to use for the publish operation.
-// topic: The name of the Pub/Sub topic.
-// message: The message to be published.
-//
-// Returns an error if the message could not be published.
 func (c *Client) Publish(ctx context.Context, topic string, message []byte) error {
 	if c.client == nil {
 		return ErrInactiveClient
@@ -159,12 +137,6 @@ func (c *Client) Publish(ctx context.Context, topic string, message []byte) erro
 }
 
 // BulkPublish sends multiple messages to the specified topic.
-//
-// ctx: The context to use for the publish operation.
-// topic: The name of the Pub/Sub topic.
-// messages: A slice of messages to be published.
-//
-// Returns an error if any of the messages could not be published.
 func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byte) error {
 	if c.client == nil {
 		return ErrInactiveClient
@@ -183,14 +155,7 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 }
 
 // Subscribe subscribes to a specified topic with a given subscription ID and handler function.
-//
-// ctx: The context to use for the subscription operation.
-// topic: The name of the Pub/Sub topic.
-// subscriptionID: The ID for the subscription.
-// handler: The function to handle incoming messages.
-//
-// Returns a SubscriptionHandler to manage the subscription and an error if the subscription could not be created.
-func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, handler messaging.SubscriberHandlerFunc) (
+func (c *Client) Subscribe(ctx context.Context, topic, subID string, h messaging.SubscriberHandlerFunc) (
 	messaging.SubscriptionHandler, error,
 ) {
 	if c.client == nil {
@@ -202,7 +167,7 @@ func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, ha
 		return nil, err
 	}
 
-	subscription := c.client.Subscription(subscriptionID)
+	subscription := c.client.Subscription(subID)
 	exists, err := subscription.Exists(ctx)
 	if err != nil {
 		return nil, err
@@ -213,20 +178,15 @@ func (c *Client) Subscribe(ctx context.Context, topic, subscriptionID string, ha
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
-	sh := &SubscriberHandler{cancelFunc: cancel, client: c, name: subscriptionID}
-	c.addHandler(subscriptionID, sh)
+	sh := &SubscriberHandler{cancelFunc: cancel, client: c, name: subID}
+	c.addHandler(subID, sh)
 
-	go c.subscribingMessage(ctx, subscription, topic, subscriptionID, handler)
+	go c.subscribingMessage(ctx, subscription, topic, subID, h)
 
 	return sh, nil
 }
 
 // getTopic retrieves a reference to a Pub/Sub topic and checks its existence.
-//
-// ctx: The context to use for the topic operation.
-// topic: The name of the Pub/Sub topic.
-//
-// Returns a reference to the topic and an error if the topic does not exist or another error occurred.
 func (c *Client) getTopic(ctx context.Context, topic string) (*pubsub.Topic, error) {
 	t := c.client.Topic(topic)
 
@@ -243,12 +203,6 @@ func (c *Client) getTopic(ctx context.Context, topic string) (*pubsub.Topic, err
 }
 
 // doSyncBulkPublish sends multiple messages to the specified topic synchronously.
-//
-// ctx: The context to use for the publish operation.
-// topic: The Pub/Sub topic to publish messages to.
-// messages: A slice of messages to be published.
-//
-// Returns an error if any of the messages could not be published.
 func (c *Client) doSyncBulkPublish(ctx context.Context, topic *pubsub.Topic, messages [][]byte) error {
 	for i, msg := range messages {
 		pubMsg := &pubsub.Message{Data: msg, Attributes: make(map[string]string)}
@@ -263,12 +217,6 @@ func (c *Client) doSyncBulkPublish(ctx context.Context, topic *pubsub.Topic, mes
 }
 
 // doAsyncBulkPublish sends multiple messages to the specified topic asynchronously.
-//
-// ctx: The context to use for the publish operation.
-// topic: The Pub/Sub topic to publish messages to.
-// messages: A slice of messages to be published.
-//
-// Returns an error if any of the messages could not be published.
 func (c *Client) doAsyncBulkPublish(ctx context.Context, topic *pubsub.Topic, messages [][]byte) error {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -314,11 +262,6 @@ func (c *Client) doAsyncBulkPublish(ctx context.Context, topic *pubsub.Topic, me
 }
 
 // addHandler adds a new SubscriberHandler to the client's subscription management.
-//
-// key: The unique identifier for the subscription handler.
-// handler: The SubscriberHandler instance to be added.
-//
-// This method is thread-safe, as it uses a mutex to synchronize access to the subscriptions map.
 func (c *Client) addHandler(key string, handler *SubscriberHandler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -326,10 +269,6 @@ func (c *Client) addHandler(key string, handler *SubscriberHandler) {
 }
 
 // removeHandler removes a SubscriberHandler from the client's subscription management.
-//
-// key: The unique identifier for the subscription handler to be removed.
-//
-// This method is thread-safe, as it uses a mutex to synchronize access to the subscriptions map.
 func (c *Client) removeHandler(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -337,13 +276,7 @@ func (c *Client) removeHandler(key string) {
 }
 
 // subscribingMessage handles the receiving and processing of messages from a given Pub/Sub subscription.
-//
-// ctx: The context used to control cancellation and timeouts for receiving messages.
-// subs: A pointer to the pubsub.Subscription object representing the Pub/Sub subscription.
-// topic: The name of the topic associated with the subscription.
-// subscription: The ID of the subscription within the Pub/Sub system.
-// handler: A messaging.Handler function that processes the message data.
-func (c *Client) subscribingMessage(ctx context.Context, subs *pubsub.Subscription, topic, subscription string,
+func (c *Client) subscribingMessage(ctx context.Context, subs *pubsub.Subscription, topic, subID string,
 	handler messaging.SubscriberHandlerFunc,
 ) {
 	defer func() {
@@ -354,9 +287,9 @@ func (c *Client) subscribingMessage(ctx context.Context, subs *pubsub.Subscripti
 	}()
 
 	f := func(ctx context.Context, m *pubsub.Message) {
-		err := handler(ctx, topic, subscription, m.Data)
+		err := handler(ctx, topic, subID, m.Data)
 		if err != nil {
-			log.Printf("Failed to handle message topic(%s) subscription(%s): %v", topic, subscription, err)
+			log.Printf("Failed to handle message topic(%s) subscription(%s): %v", topic, subID, err)
 		}
 	}
 

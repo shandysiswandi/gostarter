@@ -3,15 +3,12 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 )
 
 var errFailedParseToUint = goerror.NewInvalidInput("failed parse id to uint", nil)
@@ -23,7 +20,6 @@ type Endpoint struct {
 	fetchUC        domain.Fetch
 	updateStatusUC domain.UpdateStatus
 	updateUC       domain.Update
-	routine        *goroutine.Manager
 }
 
 func NewEndpoint(
@@ -33,7 +29,6 @@ func NewEndpoint(
 	fetchUC domain.Fetch,
 	updateStatusUC domain.UpdateStatus,
 	updateUC domain.Update,
-	routine *goroutine.Manager,
 ) *Endpoint {
 	return &Endpoint{
 		createUC:       createUC,
@@ -42,22 +37,7 @@ func NewEndpoint(
 		fetchUC:        fetchUC,
 		updateStatusUC: updateStatusUC,
 		updateUC:       updateUC,
-		routine:        routine,
 	}
-}
-
-func (e *Endpoint) Test(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	ctx := context.Background()
-	e.routine.Go(ctx, func(_ context.Context) error {
-		log.Println("routine 1 started")
-		time.Sleep(8 * time.Second)
-		log.Println("routine 1 finished")
-
-		return domain.ErrTodoNotCreated
-	})
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok")) //nolint:errcheck // ignored
 }
 
 func (e *Endpoint) Create(ctx context.Context, r *http.Request) (any, error) {

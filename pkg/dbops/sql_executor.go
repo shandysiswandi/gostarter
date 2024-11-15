@@ -1,6 +1,6 @@
 // Package dbops provides abstractions and utility functions for database operations.
-// It defines interfaces for querying and executing SQL commands,
-// and includes helper functions for performing common database operations, such as executing queries and scanning rows.
+// It defines interfaces for querying and executing SQL commands, and includes helper functions
+// for performing common database operations, such as executing queries and scanning rows.
 package dbops
 
 import (
@@ -19,8 +19,8 @@ var (
 )
 
 // Exec executes a query and handles the result.
-func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []any, error), feedback ...bool) error {
-	query, args, err := queryProvider()
+func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) error {
+	query, args, err := qp()
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
@@ -31,10 +31,10 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
-		execer = tx
+		exec = tx
 	}
 
-	res, err := execer.ExecContext(ctx, query, args...)
+	res, err := exec.ExecContext(ctx, query, args...)
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:ExecContext result: %v, query: %s, err: %v \n", res, query, err)
@@ -65,12 +65,8 @@ func Exec(ctx context.Context, execer Execer, queryProvider func() (string, []an
 
 // SQLGet executes a query that is expected to return a single row and scans the result into a type T.
 // It uses the provided Row[T] implementation to handle scanning of columns.
-func SQLGet[T any, PT Row[T]](
-	ctx context.Context,
-	querier Queryer,
-	queryProvider func() (string, []any, error),
-) (*T, error) {
-	query, args, err := queryProvider()
+func SQLGet[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider) (*T, error) {
+	query, args, err := qp()
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
@@ -81,13 +77,13 @@ func SQLGet[T any, PT Row[T]](
 
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
-		querier = tx
+		q = tx
 	}
 
 	var t T
 	ptr := PT(&t)
 
-	err = querier.QueryRowContext(ctx, query, args...).Scan(ptr.ScanColumn()...)
+	err = q.QueryRowContext(ctx, query, args...).Scan(ptr.ScanColumn()...)
 	if errors.Is(err, sql.ErrNoRows) {
 		if verbose {
 			log.Printf("Exec: query: %s, data not found \n", query)
@@ -109,12 +105,8 @@ func SQLGet[T any, PT Row[T]](
 
 // SQLGets executes a query that may return multiple rows and scans the results into a slice of type T.
 // It uses the provided Row[T] implementation to handle scanning of columns.
-func SQLGets[T any, PT Row[T]](
-	ctx context.Context,
-	querier Queryer,
-	queryProvider func() (string, []any, error),
-) ([]T, error) {
-	query, args, err := queryProvider()
+func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider) ([]T, error) {
+	query, args, err := qp()
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
@@ -125,10 +117,10 @@ func SQLGets[T any, PT Row[T]](
 
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
-		querier = tx
+		q = tx
 	}
 
-	rows, err := querier.QueryContext(ctx, query, args...)
+	rows, err := q.QueryContext(ctx, query, args...)
 	if err != nil {
 		if verbose {
 			log.Printf("Exec:QueryRowContext query: %s, err: %v \n", query, err)

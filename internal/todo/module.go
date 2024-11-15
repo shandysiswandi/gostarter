@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
+	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	inboundgql "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/gql"
 	inboundgrpc "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/grpc"
@@ -15,6 +17,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/service"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/framework/gql"
 	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
@@ -65,7 +68,7 @@ func New(dep Dependency) (*Expose, error) {
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes REST API endpoints to handle core user workflows:
 	eHTTP := inboundhttp.NewEndpoint(createUC, deleteUC, findUC, fetchUC,
-		updateStatusUC, updateUC, dep.Goroutine)
+		updateStatusUC, updateUC)
 	eSSE := inboundhttp.NewSSE(dep.CodecJSON)
 
 	//
@@ -79,16 +82,17 @@ func New(dep Dependency) (*Expose, error) {
 	dep.Router.Native(http.MethodGet, "/events", http.HandlerFunc(eSSE.HandleEvent), middleware.Recovery)
 	dep.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(eSSE.HandleEvent),
 		middleware.Recovery)
+	//
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes gRPC API endpoints to handle core user workflows:
-	grpcEndpoint := inboundgrpc.NewEndpoint(dep.ProtoValidator, findUC, fetchUC,
+	eGRPC := inboundgrpc.NewEndpoint(dep.ProtoValidator, findUC, fetchUC,
 		createUC, deleteUC, updateUC, updateStatusUC)
-	pb.RegisterTodoServiceServer(dep.GRPCServer, grpcEndpoint)
+	pb.RegisterTodoServiceServer(dep.GRPCServer, eGRPC)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes graphQL API endpoints to handle core user workflows:
-	gqlEndpoint := &inboundgql.Endpoint{
+	eGQL := &inboundgql.Endpoint{
 		FindUC:         findUC,
 		CreateUC:       createUC,
 		DeleteUC:       deleteUC,
@@ -96,7 +100,13 @@ func New(dep Dependency) (*Expose, error) {
 		UpdateUC:       updateUC,
 		UpdateStatusUC: updateStatusUC,
 	}
-	inboundgql.RegisterGQLEndpoint(dep.Router, gqlEndpoint, dep.Config, dep.JWT)
+	exec := ql.NewExecutableSchema(ql.Config{Resolvers: eGQL})
+	gqlServer := gql.ServerDefault(exec)
+	dep.Router.Native(http.MethodPost, "/graphql", gqlServer)
+	if dep.Config.GetBool("feature.flag.graphql.playground") {
+		dep.Router.Native(http.MethodGet, "/graphql/playground",
+			playground.Handler("GraphQL playground", "/graphql"))
+	}
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes runner job to handle background workflows:

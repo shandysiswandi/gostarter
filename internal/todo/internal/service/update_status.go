@@ -27,7 +27,9 @@ func NewUpdateStatus(t *telemetry.Telemetry, s UpdateStatusStore, v validation.V
 	}
 }
 
-func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (*domain.UpdateStatusOutput, error) {
+func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (
+	*domain.UpdateStatusOutput, error,
+) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

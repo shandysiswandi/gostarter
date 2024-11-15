@@ -15,10 +15,10 @@ const (
 	VendorHTTPRouter
 )
 
-// Handler defines the type for endpoint handlers with context, request, and response writer
+// Handler defines the type for endpoint handlers with context, request, and response writer.
 type Handler func(context.Context, *http.Request) (any, error)
 
-// Middleware defines the type for middleware functions
+// Middleware defines the type for middleware functions.
 type Middleware func(http.Handler) http.Handler
 
 // StatusCoder is an interface for custom responses that allows them to specify their

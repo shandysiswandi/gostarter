@@ -47,7 +47,10 @@ func (e *Endpoint) Create(ctx context.Context, req *pb.CreateRequest) (*pb.Creat
 		return nil, err
 	}
 
-	resp, err := e.createUC.Execute(ctx, domain.CreateInput{Title: req.GetTitle(), Description: req.GetDescription()})
+	resp, err := e.createUC.Execute(ctx, domain.CreateInput{
+		Title:       req.GetTitle(),
+		Description: req.GetDescription(),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +119,9 @@ func (e *Endpoint) Fetch(ctx context.Context, req *pb.FetchRequest) (
 	return &pb.FetchResponse{Todos: todos}, nil
 }
 
-func (e *Endpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (*pb.UpdateStatusResponse, error) {
+func (e *Endpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (
+	*pb.UpdateStatusResponse, error,
+) {
 	if err := e.validator.Validate(req); err != nil {
 		return nil, err
 	}

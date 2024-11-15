@@ -4,10 +4,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -installsuffix cgo -o server .
-RUN upx --best --lzma /app/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -installsuffix cgo -o server . && upx --best --lzma /app/server
 
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/static-debian12:nonroot
 ARG TZ="UTC"
 ENV TZ=${TZ}
 COPY --from=builder /app/server /server

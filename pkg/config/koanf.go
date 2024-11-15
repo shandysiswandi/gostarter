@@ -17,7 +17,7 @@ type KoanfConfig struct {
 	k *koanf.Koanf
 }
 
-// NewKoanfConfig creates a new KoanfConfig instance, initializing Koanf with file and environment variable providers.
+// NewKoanfConfig creates a new KoanfConfig instance, initializing Koanf with file providers.
 func NewKoanfConfig(pathFile string) (*KoanfConfig, error) {
 	k := koanf.New(".")
 

@@ -57,7 +57,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to hash refresh token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	refToken, err := s.store.FindTokenByRefresh(ctx, string(refHash))
@@ -65,7 +65,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		s.telemetry.Logger().Error(ctx, "failed to get token", err,
 			logger.KeyVal("refresh_token_hash", string(refHash)))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if refToken == nil {

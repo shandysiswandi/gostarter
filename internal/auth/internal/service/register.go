@@ -51,7 +51,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if user != nil {
@@ -64,7 +64,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to hash password", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	userData := domain.User{
@@ -75,7 +75,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 	if err := s.store.SaveUser(ctx, userData); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to save user", err, logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.RegisterOutput{}, nil

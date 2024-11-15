@@ -53,7 +53,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get password reset", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if ps == nil {
@@ -71,20 +71,20 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 	if err := s.store.DeletePasswordReset(ctx, ps.ID); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to delete password reset", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	passHash, err := s.hash.Hash(in.Password)
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to hash password", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if err := s.store.UpdateUserPassword(ctx, ps.UserID, string(passHash)); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to delete password reset", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.ResetPasswordOutput{}, nil

@@ -1,6 +1,6 @@
 // Package dbops provides abstractions and utility functions for database operations.
-// It defines interfaces for querying and executing SQL commands,
-// and includes helper functions for performing common database operations, such as executing queries and scanning rows.
+// It defines interfaces for querying and executing SQL commands, and includes helper functions
+// for performing common database operations, such as executing queries and scanning rows.
 package dbops
 
 import (
@@ -39,3 +39,5 @@ type Tx interface {
 	// and ensures that the transaction is committed or rolled back based on success or failure.
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 }
+
+type QueryProvider func() (string, []any, error)

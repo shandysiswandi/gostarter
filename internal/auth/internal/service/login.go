@@ -57,7 +57,7 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if user == nil {
@@ -76,7 +76,7 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get token", err, logger.KeyVal("email", user.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	tid := s.uidnumber.Generate()

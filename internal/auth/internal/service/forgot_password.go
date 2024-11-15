@@ -59,7 +59,7 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if user == nil {
@@ -72,7 +72,7 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get password reset", err, logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return s.doBest(ctx, in, user, ps)
@@ -91,7 +91,7 @@ func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInp
 			s.telemetry.Logger().Error(ctx, "failed to delete password reset", err,
 				logger.KeyVal("email", in.Email))
 
-			return nil, goerror.NewServer("internal server error", err)
+			return nil, goerror.NewServerInternal(err)
 		}
 	}
 
@@ -99,7 +99,7 @@ func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInp
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to generate password reset token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	psData := domain.PasswordReset{
@@ -112,7 +112,7 @@ func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInp
 		s.telemetry.Logger().Error(ctx, "failed to save password reset", err,
 			logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.ForgotPasswordOutput{}, nil

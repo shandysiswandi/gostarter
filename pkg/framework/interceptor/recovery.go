@@ -11,7 +11,9 @@ import (
 )
 
 func UnaryServerRecovery() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, next grpc.UnaryHandler) (_ any, err error) {
+	return func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, next grpc.UnaryHandler) (
+		_ any, err error,
+	) {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("panic because: %v\n", r)

@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
-func JWT(jwte jwt.JWT, audience string, skipPaths ...string) func(http.Handler) http.Handler {
+func JWT(jwte jwt.JWT, audience string, skipPaths ...string) httpserver.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if len(skipPaths) > 0 {
@@ -62,6 +63,7 @@ func JWT(jwte jwt.JWT, audience string, skipPaths ...string) func(http.Handler) 
 func jsonResponse(w http.ResponseWriter, msg string) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusUnauthorized)
-	//nolint:errcheck,errchkjson // ignore for this, it never error
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	if err := json.NewEncoder(w).Encode(map[string]string{"error": msg}); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 }

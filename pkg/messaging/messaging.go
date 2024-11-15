@@ -13,7 +13,7 @@ import (
 // and subscription. It takes a context for managing deadlines and cancellations,
 // a topic string, a subscription ID string, and the message content as a byte slice.
 // It returns an error if the message could not be processed.
-type SubscriberHandlerFunc func(ctx context.Context, topic string, subscriptionID string, message []byte) error
+type SubscriberHandlerFunc func(ctx context.Context, topic string, subscriptionID string, msg []byte) error
 
 // SubscriptionHandler is an interface for managing a subscription to a topic.
 // It embeds the io.Closer interface, requiring an implementation of the Close method,

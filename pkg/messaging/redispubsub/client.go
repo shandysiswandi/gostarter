@@ -26,8 +26,6 @@ type Client struct {
 }
 
 // WithSyncPublisher configures the client to publish messages synchronously.
-//
-// isSyncPublisher: If true, the Publish call will wait for the message to be acknowledged before returning.
 func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
 	return func(client *Client) {
 		client.syncPublisher = isSyncPublisher
@@ -35,10 +33,6 @@ func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
 }
 
 // WithExistsClient uses an existing Redis client.
-//
-// ruc: An instance of redis.UniversalClient. This option allows you to provide
-// your own Redis client to the Pub/Sub client, useful for custom configurations
-// or sharing the client across different parts of your application.
 func WithExistsClient(ruc redis.UniversalClient) func(*Client) {
 	return func(client *Client) {
 		client.client = ruc
@@ -46,11 +40,6 @@ func WithExistsClient(ruc redis.UniversalClient) func(*Client) {
 }
 
 // NewRedisClient creates a new Client instance configured with the given Redis URL and options.
-//
-// url: The Redis server URL.
-// opts: A list of Option functions for configuring the client.
-//
-// Returns a new Client instance or an error if the client could not be created.
 func NewRedisClient(url string, opts ...func(*Client)) (*Client, error) {
 	client := &Client{
 		subscriptions: make(map[string]*SubscriberHandler),
@@ -100,7 +89,6 @@ func (c *Client) goroutine(f func()) {
 }
 
 // Close terminates all active subscriptions and closes the Redis client connection.
-// Returns an error if the client could not be closed.
 func (c *Client) Close() error {
 	if c.client == nil {
 		return nil
@@ -121,12 +109,6 @@ func (c *Client) Close() error {
 
 // Publish sends a single message to the specified topic.
 // It supports both synchronous and asynchronous publishing based on the client's configuration.
-//
-// ctx: The context for managing cancellations and timeouts.
-// topic: The topic to which the message will be published.
-// msg: The message to be published.
-//
-// Returns an error if the message could not be published.
 func (c *Client) Publish(ctx context.Context, topic string, msg []byte) error {
 	if c.client == nil {
 		return ErrInactiveClient
@@ -143,12 +125,6 @@ func (c *Client) Publish(ctx context.Context, topic string, msg []byte) error {
 
 // BulkPublish sends multiple messages to the specified topic using a Redis pipeline.
 // It can operate in either synchronous or asynchronous mode based on the syncPublisher setting.
-//
-// ctx: The context for managing cancellations and timeouts.
-// topic: The topic to which the messages will be published.
-// messages: A slice of messages to be published.
-//
-// Returns an error if any of the messages could not be published.
 func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byte) error {
 	if c.client == nil {
 		return ErrInactiveClient
@@ -180,14 +156,7 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 
 // Subscribe subscribes to a specified topic with a given subscription ID and handler function.
 // The handler is called whenever a message is received on the topic.
-//
-// ctx: The context for managing cancellations and timeouts.
-// topic: The topic to which the subscription is made.
-// subscription: The unique identifier for the subscription.
-// handler: The function to be called when a message is received.
-//
-// Returns a SubscriptionHandler for managing the subscription, or an error if the subscription could not be created.
-func (c *Client) Subscribe(ctx context.Context, topic, subscription string, handler messaging.SubscriberHandlerFunc) (
+func (c *Client) Subscribe(ctx context.Context, topic, subID string, h messaging.SubscriberHandlerFunc) (
 	messaging.SubscriptionHandler, error,
 ) {
 	if c.client == nil {
@@ -196,8 +165,8 @@ func (c *Client) Subscribe(ctx context.Context, topic, subscription string, hand
 
 	pubsub := c.client.Subscribe(ctx, topic)
 	ctx, cancel := context.WithCancel(ctx)
-	sh := &SubscriberHandler{cancelFunc: cancel, client: c, name: subscription}
-	c.addHandler(subscription, sh)
+	sh := &SubscriberHandler{cancelFunc: cancel, client: c, name: subID}
+	c.addHandler(subID, sh)
 
 	go func(ps *redis.PubSub) {
 		defer func() {
@@ -210,9 +179,9 @@ func (c *Client) Subscribe(ctx context.Context, topic, subscription string, hand
 		for {
 			select {
 			case msg := <-ps.Channel():
-				err := handler(ctx, topic, subscription, []byte(msg.Payload))
+				err := h(ctx, topic, subID, []byte(msg.Payload))
 				if err != nil {
-					log.Printf("Failed to handle message topic(%s) subscription(%s): %v", topic, subscription, err)
+					log.Printf("Failed to handle message topic(%s) subscription(%s): %v", topic, subID, err)
 				}
 
 			case <-ctx.Done():

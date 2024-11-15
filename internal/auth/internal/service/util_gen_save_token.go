@@ -27,7 +27,7 @@ func generateAndSaveToken(ctx context.Context, log logger.Logger, jwte jwt.JWT, 
 	if err != nil {
 		log.Error(ctx, "failed to generate access token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	refClaim := jwt.NewClaim(email, time.Hour*24, []string{"gostarter.refresh.token"})
@@ -35,21 +35,21 @@ func generateAndSaveToken(ctx context.Context, log logger.Logger, jwte jwt.JWT, 
 	if err != nil {
 		log.Error(ctx, "failed to generate refresh token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	acHash, err := secHash.Hash(accToken)
 	if err != nil {
 		log.Error(ctx, "failed to hash access token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	refHash, err := secHash.Hash(refToken)
 	if err != nil {
 		log.Error(ctx, "failed to hash refresh token", err)
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	token := domain.Token{
@@ -63,7 +63,7 @@ func generateAndSaveToken(ctx context.Context, log logger.Logger, jwte jwt.JWT, 
 	if err := store(ctx, token); err != nil {
 		log.Error(ctx, "failed to save tokens", err, logger.KeyVal("email", email))
 
-		return nil, goerror.NewServer("internal server error", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &generateAndSaveTokenOutput{

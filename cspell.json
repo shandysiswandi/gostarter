@@ -38,11 +38,14 @@
   "words": [
     "dbops",
     "goerror",
+    "googlepubsub",
     "gostarter",
     "HMACSHA",
     "httprouter",
     "idletime",
+    "Koanf",
     "otlp",
+    "redispubsub",
     "shandysiswandi",
     "sslmode",
     "todos"

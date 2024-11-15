@@ -1,8 +1,8 @@
 /*
 Package goroutine provides utilities for managing and controlling concurrent goroutines.
-It simplifies the process of executing and coordinating multiple tasks concurrently,
-with built-in synchronization, error handling, and limiting the maximum number of active goroutines
-at any given time. This helps prevent resource exhaustion and ensures smooth execution of concurrent operations.
+It simplifies the process of executing and coordinating multiple tasks concurrently, with built-in
+synchronization, error handling, and limiting the maximum number of active goroutines at any given time.
+This helps prevent resource exhaustion and ensures smooth execution of concurrent operations.
 
 Example usage:
 

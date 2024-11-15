@@ -57,6 +57,8 @@ linters-settings:
       use-field-name: true
       rules:
         json: snake
+  lll:
+    line-length: 110
 
 linters:
   # disable-all: true
