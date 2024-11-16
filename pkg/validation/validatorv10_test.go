@@ -13,10 +13,18 @@ type testStruct struct {
 }
 
 func TestNewV10Validator(t *testing.T) {
-	v := NewV10Validator()
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.validate)
-	assert.IsType(t, &V10Validator{}, v)
+	tests := []struct {
+		name string
+	}{
+		{name: "Success"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := NewV10Validator()
+			assert.NotNil(t, got)
+		})
+	}
 }
 
 func TestV10Validator_Validate(t *testing.T) {

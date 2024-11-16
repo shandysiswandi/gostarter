@@ -1,6 +1,3 @@
-// Package config provides an interface for accessing configuration values from
-// various sources such as environment variables, configuration files, or remote
-// configuration services.
 package config
 
 import (
@@ -65,10 +62,9 @@ func (kc *KoanfConfig) GetArray(key string) []string {
 
 // GetMap retrieves the configuration value associated with the given key as a map of strings to strings.
 func (kc *KoanfConfig) GetMap(key string) map[string]string {
-	pairs := strings.Split(kc.k.String(key), ",")
 	m := make(map[string]string)
 
-	for _, pair := range pairs {
+	for _, pair := range kc.GetArray(key) {
 		kv := strings.SplitN(pair, ":", 2)
 		if len(kv) == 2 {
 			m[kv[0]] = kv[1]
@@ -78,8 +74,8 @@ func (kc *KoanfConfig) GetMap(key string) map[string]string {
 	return m
 }
 
-// Close is implemented to satisfy the io.Closer interface but doesn't do anything in this case.
+// Close performs any necessary cleanup.
 func (kc *KoanfConfig) Close() error {
-	// No resources to close in this simplified example.
+	// No resources to close for KoanfConfig; this is just for interface completeness.
 	return nil
 }

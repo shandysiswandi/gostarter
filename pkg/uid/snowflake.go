@@ -1,4 +1,3 @@
-// Package uid provides interfaces and implementations for generating unique identifiers (UIDs).
 package uid
 
 import (

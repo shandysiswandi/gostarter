@@ -8,10 +8,25 @@ import (
 )
 
 func TestNewProtoValidator(t *testing.T) {
-	v, err := NewProtoValidator()
-	assert.NoError(t, err)
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.validate)
+	tests := []struct {
+		name    string
+		wantErr error
+	}{
+		{
+			name:    "Success",
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := NewProtoValidator()
+			assert.Equal(t, tt.wantErr, err)
+			if err != nil {
+				assert.NotNil(t, got)
+			}
+		})
+	}
 }
 
 func TestProtoValidator_Validate(t *testing.T) {

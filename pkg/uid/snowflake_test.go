@@ -27,7 +27,6 @@ func TestNewSnowflakeNumber(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
-				// Optionally, you might want to verify that the node ID is within expected range
 				assert.True(t, got.node != nil)
 			}
 		})

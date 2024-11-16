@@ -7,10 +7,6 @@ import "context"
 
 // Runner defines an interface for managing the lifecycle of a task or service.
 // It provides methods to start the task and to stop it gracefully using a context.
-//
-// Implementations of Runner should ensure that the Start method initiates the task
-// and that the Stop method halts it in a controlled manner, respecting the context
-// for proper shutdown sequences.
 type Runner interface {
 	// Start initiates the task or service. It returns an error if the task fails
 	// to start or encounters an issue during the startup process.

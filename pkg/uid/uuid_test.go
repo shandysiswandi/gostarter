@@ -42,10 +42,9 @@ func TestUUIDString_Generate(t *testing.T) {
 			u := NewUUIDString()
 			got := u.Generate()
 
-			// Validate UUID format and length
 			parsedUUID, err := uuid.Parse(got)
 			assert.NoError(t, err)
-			assert.Equal(t, 36, len(got)) // Length of UUID string with hyphens
+			assert.Equal(t, 36, len(got))
 			assert.True(t, parsedUUID.Version() == 4, "UUID version should be 4")
 		})
 	}
