@@ -6,12 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"runtime/debug"
 	"sync"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/shandysiswandi/gostarter/pkg/messaging"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"google.golang.org/api/option"
 )
 
@@ -28,57 +28,22 @@ var (
 
 // Client represents a Google Cloud Pub/Sub client with additional configuration options.
 type Client struct {
-	clientOptions        []option.ClientOption // Options for the Pub/Sub client.
-	autoAck              bool                  // Whether to automatically acknowledge messages.
-	autoCreateTopic      bool                  // Automatically create topic if not existing.
-	autoCreateSubscriber bool                  // Automatically create subscription if not existing.
-	syncPublisher        bool                  // Whether to use synchronous publishing.
-	client               *pubsub.Client
-	subscriptions        map[string]*SubscriberHandler
-	mu                   sync.RWMutex
-}
-
-// WithAutoAck configures the client to automatically acknowledge messages.
-func WithAutoAck(isAuto bool) func(*Client) {
-	return func(client *Client) {
-		client.autoAck = isAuto
-	}
-}
-
-// WithAutoCreateTopic configures the client to automatically create a topic if it does not exist.
-func WithAutoCreateTopic(isAuto bool) func(*Client) {
-	return func(client *Client) {
-		client.autoCreateTopic = isAuto
-	}
-}
-
-// WithAutoCreateSubscriber configures the client to automatically create a subscription
-// and associated topic if they do not exist.
-func WithAutoCreateSubscriber(isAuto bool) func(*Client) {
-	return func(client *Client) {
-		if isAuto {
-			client.autoCreateTopic = true
-		}
-		client.autoCreateSubscriber = isAuto
-	}
-}
-
-// WithSyncPublisher configures the client to publish messages synchronously.
-func WithSyncPublisher(isSyncPublisher bool) func(*Client) {
-	return func(client *Client) {
-		client.syncPublisher = isSyncPublisher
-	}
+	clientOptions []option.ClientOption // Options for the Pub/Sub client.
+	autoAck       bool                  // Whether to automatically acknowledge messages.
+	syncPublisher bool                  // Whether to use synchronous publishing.
+	client        *pubsub.Client
+	log           logger.Logger
+	cancels       []context.CancelFunc
+	wg            sync.WaitGroup
 }
 
 // NewClient creates a new Google Cloud Pub/Sub client with the provided configuration options.
-func NewClient(ctx context.Context, projectID string, opts ...func(*Client)) (*Client, error) {
+func NewClient(ctx context.Context, projectID string, opts ...Option) (*Client, error) {
 	client := &Client{
-		subscriptions:        make(map[string]*SubscriberHandler),
-		clientOptions:        []option.ClientOption{},
-		autoAck:              false,
-		autoCreateTopic:      false,
-		autoCreateSubscriber: false,
-		syncPublisher:        false,
+		clientOptions: []option.ClientOption{},
+		autoAck:       false,
+		syncPublisher: false,
+		log:           logger.NewNoopLogger(),
 	}
 
 	for _, opt := range opts {
@@ -100,23 +65,23 @@ func (c *Client) Close() error {
 		return nil
 	}
 
-	for _, sub := range c.subscriptions {
-		_ = sub.Close()
+	for _, cancel := range c.cancels {
+		cancel()
 	}
 
-	if err := c.client.Close(); err != nil {
-		return err
-	}
+	c.wg.Wait()
 
-	c.client = nil
-
-	return nil
+	return c.client.Close()
 }
 
 // Publish sends a single message to the specified topic.
-func (c *Client) Publish(ctx context.Context, topic string, message []byte) error {
+func (c *Client) Publish(ctx context.Context, topic string, data *messaging.Data) error {
 	if c.client == nil {
 		return ErrInactiveClient
+	}
+
+	if err := data.Validate(); err != nil {
+		return err
 	}
 
 	t, err := c.getTopic(ctx, topic)
@@ -124,20 +89,25 @@ func (c *Client) Publish(ctx context.Context, topic string, message []byte) erro
 		return err
 	}
 
-	msg := &pubsub.Message{Data: message, Attributes: make(map[string]string)}
+	msg := &pubsub.Message{Data: data.Msg, Attributes: data.Attributes}
 	if c.syncPublisher {
 		_, err := t.Publish(ctx, msg).Get(ctx)
 
 		return err
 	}
 
-	_ = t.Publish(ctx, msg)
+	go func() {
+		_, err = t.Publish(ctx, msg).Get(ctx)
+		if err != nil {
+			c.log.Error(ctx, "async publish failed", err)
+		}
+	}()
 
 	return nil
 }
 
 // BulkPublish sends multiple messages to the specified topic.
-func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byte) error {
+func (c *Client) BulkPublish(ctx context.Context, topic string, datas []*messaging.Data) error {
 	if c.client == nil {
 		return ErrInactiveClient
 	}
@@ -148,42 +118,66 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, messages [][]byt
 	}
 
 	if c.syncPublisher {
-		return c.doSyncBulkPublish(ctx, t, messages)
+		return c.doBulkPublish(ctx, t, datas)
 	}
 
-	return c.doAsyncBulkPublish(ctx, t, messages)
+	go func() {
+		err := c.doBulkPublish(ctx, t, datas)
+		if err != nil {
+			c.log.Error(ctx, "async bulk publish failed", err)
+		}
+	}()
+
+	return nil
 }
 
 // Subscribe subscribes to a specified topic with a given subscription ID and handler function.
-func (c *Client) Subscribe(ctx context.Context, topic, subID string, h messaging.SubscriberHandlerFunc) (
-	messaging.SubscriptionHandler, error,
-) {
+func (c *Client) Subscribe(ctx context.Context, topic, subID string, h messaging.SubscriberFunc) error {
 	if c.client == nil {
-		return nil, ErrInactiveClient
+		return ErrInactiveClient
 	}
 
 	_, err := c.getTopic(ctx, topic)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	subscription := c.client.Subscription(subID)
 	exists, err := subscription.Exists(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !exists {
-		return nil, ErrSubscriptionNotFound
+		return ErrSubscriptionNotFound
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
-	sh := &SubscriberHandler{cancelFunc: cancel, client: c, name: subID}
-	c.addHandler(subID, sh)
+	subCtx, cancel := context.WithCancel(ctx)
+	c.cancels = append(c.cancels, cancel)
+	c.wg.Add(1)
 
-	go c.subscribingMessage(ctx, subscription, topic, subID, h)
+	go func() {
+		defer c.wg.Done()
 
-	return sh, nil
+		defer func() {
+			if r := recover(); r != nil {
+				c.log.Error(subCtx, "recovered from subscriber panic", nil, logger.KeyVal("cause", r))
+				debug.PrintStack()
+			}
+		}()
+
+		f := func(subCtx context.Context, m *pubsub.Message) {
+			err := h(subCtx, &messaging.Data{Msg: m.Data, Attributes: m.Attributes})
+			c.doMessageResult(subCtx, topic, subID, err, m)
+		}
+
+		err := subscription.Receive(subCtx, f)
+		if err != nil {
+			c.log.Error(subCtx, "failed when receive message", err)
+		}
+	}()
+
+	return nil
 }
 
 // getTopic retrieves a reference to a Pub/Sub topic and checks its existence.
@@ -202,12 +196,14 @@ func (c *Client) getTopic(ctx context.Context, topic string) (*pubsub.Topic, err
 	return t, nil
 }
 
-// doSyncBulkPublish sends multiple messages to the specified topic synchronously.
-func (c *Client) doSyncBulkPublish(ctx context.Context, topic *pubsub.Topic, messages [][]byte) error {
-	for i, msg := range messages {
-		pubMsg := &pubsub.Message{Data: msg, Attributes: make(map[string]string)}
+// doBulkPublish sends multiple messages to the specified topic.
+func (c *Client) doBulkPublish(ctx context.Context, topic *pubsub.Topic, datas []*messaging.Data) error {
+	for i, data := range datas {
+		if err := data.Validate(); err != nil {
+			return err
+		}
 
-		result := topic.Publish(ctx, pubMsg)
+		result := topic.Publish(ctx, &pubsub.Message{Data: data.Msg, Attributes: data.Attributes})
 		if _, err := result.Get(ctx); err != nil {
 			return fmt.Errorf("failed to publish message at index %d: %w", i, err)
 		}
@@ -216,85 +212,18 @@ func (c *Client) doSyncBulkPublish(ctx context.Context, topic *pubsub.Topic, mes
 	return nil
 }
 
-// doAsyncBulkPublish sends multiple messages to the specified topic asynchronously.
-func (c *Client) doAsyncBulkPublish(ctx context.Context, topic *pubsub.Topic, messages [][]byte) error {
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var publishErrors []error
-	errChan := make(chan error, len(messages)) // Buffer size to hold all possible errors
-
-	// Start a goroutine to handle logging errors
-	go func() {
-		for err := range errChan {
-			if err != nil {
-				mu.Lock()
-				publishErrors = append(publishErrors, err) // Collect errors
-				mu.Unlock()
-				log.Printf("Publishing error: %v", err) // Log the error
-			}
-		}
-	}()
-
-	for _, msg := range messages {
-		wg.Add(1)
-		go func(m []byte) {
-			defer wg.Done()
-			res := topic.Publish(ctx, &pubsub.Message{Data: m})
-			if _, err := res.Get(ctx); err != nil {
-				errChan <- err // Send error to channel
-			}
-		}(msg)
-	}
-
-	// Wait for all goroutines to finish
-	wg.Wait()
-	close(errChan) // Close error channel after all goroutines are done
-
-	// Check if any errors were collected
-	//nolint:err1113 // will add later
-	if len(publishErrors) > 0 {
-		// next-mr: here to handle retry with configuration, for now only log all errors
-		// Return an aggregate error if there were any issues
-		return fmt.Errorf("errors occurred during bulk publish: %v", publishErrors)
-	}
-
-	return nil
-}
-
-// addHandler adds a new SubscriberHandler to the client's subscription management.
-func (c *Client) addHandler(key string, handler *SubscriberHandler) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.subscriptions[key] = handler
-}
-
-// removeHandler removes a SubscriberHandler from the client's subscription management.
-func (c *Client) removeHandler(key string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	delete(c.subscriptions, key)
-}
-
-// subscribingMessage handles the receiving and processing of messages from a given Pub/Sub subscription.
-func (c *Client) subscribingMessage(ctx context.Context, subs *pubsub.Subscription, topic, subID string,
-	handler messaging.SubscriberHandlerFunc,
-) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("subscribingMessage recover: %v", r)
-			debug.PrintStack()
-		}
-	}()
-
-	f := func(ctx context.Context, m *pubsub.Message) {
-		err := handler(ctx, topic, subID, m.Data)
-		if err != nil {
-			log.Printf("Failed to handle message topic(%s) subscription(%s): %v", topic, subID, err)
+// processMessageResult handles message acknowledgment based on processing result
+func (c *Client) doMessageResult(ctx context.Context, topic, subID string, err error, m *pubsub.Message) {
+	if err != nil {
+		c.log.Error(ctx, "message handler failed", err,
+			logger.KeyVal("topic", topic),
+			logger.KeyVal("subscription", subID),
+		)
+		if !c.autoAck {
+			m.Nack()
+			return
 		}
 	}
 
-	err := subs.Receive(ctx, f)
-	if err != nil && !errors.Is(err, context.Canceled) {
-		log.Printf("Subscription receive error: %v", err)
-	}
+	m.Ack()
 }

@@ -6,42 +6,49 @@ package messaging
 
 import (
 	"context"
+	"errors"
 	"io"
 )
 
-// SubscriberHandlerFunc is a function type that processes a message received on a specific topic
-// and subscription. It takes a context for managing deadlines and cancellations,
-// a topic string, a subscription ID string, and the message content as a byte slice.
-// It returns an error if the message could not be processed.
-type SubscriberHandlerFunc func(ctx context.Context, topic string, subscriptionID string, msg []byte) error
+var (
+	ErrDataNil    = errors.New("data nil")
+	ErrMessageNil = errors.New("data message nil")
+)
 
-// SubscriptionHandler is an interface for managing a subscription to a topic.
-// It embeds the io.Closer interface, requiring an implementation of the Close method,
-// which should clean up any resources associated with the subscription.
-type SubscriptionHandler interface {
-	io.Closer
-}
+// SubscriberFunc defines a callback function to process messages received from a subscription.
+type SubscriberFunc func(ctx context.Context, data *Data) error
 
-// Client is an interface that defines methods for interacting with a messaging system.
-// It embeds the io.Closer interface, requiring an implementation of the Close method,
-// which should be used to clean up resources when the client is no longer needed.
+// Client defines methods for interacting with a messaging system.
 type Client interface {
 	io.Closer
 
 	// Publish sends a single message to the specified topic. The context parameter
-	// allows the operation to be cancelled or have a timeout applied. It returns
-	// an error if the message could not be published.
-	Publish(ctx context.Context, topic string, message []byte) error
+	// allows cancellation or timeouts. Returns an error if the operation fails.
+	Publish(ctx context.Context, topic string, data *Data) error
 
-	// BulkPublish sends multiple messages to the specified topic. The context
-	// parameter allows the operation to be cancelled or have a timeout applied.
-	// It returns an error if any of the messages could not be published.
-	BulkPublish(ctx context.Context, topic string, messages [][]byte) error
+	// BulkPublish sends multiple messages to the specified topic in a single operation.
+	// If any message fails, an aggregated error is returned. Atomicity is implementation-defined.
+	BulkPublish(ctx context.Context, topic string, data []*Data) error
 
-	// Subscribe subscribes to a specified topic with a given subscription ID and
-	// handler function. The handler is called whenever a message is received on the
-	// topic. The method returns a SubscriptionHandler, which can be used to manage
-	// the subscription, and an error if the subscription could not be created.
-	Subscribe(ctx context.Context, topic, subscriptionID string, handler SubscriberHandlerFunc) (
-		SubscriptionHandler, error)
+	// Subscribe sets up a subscription to a topic, invoking the provided SubscriberFunc
+	// for each received message. Returns an error if subscription setup fails.
+	Subscribe(ctx context.Context, topic, subscriptionID string, handler SubscriberFunc) error
+}
+
+// Data represents a message with its payload and attributes.
+type Data struct {
+	Msg        []byte
+	Attributes map[string]string
+}
+
+func (d *Data) Validate() error {
+	if d == nil {
+		return ErrDataNil
+	}
+
+	if d.Msg == nil {
+		return ErrMessageNil
+	}
+
+	return nil
 }
