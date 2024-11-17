@@ -44,23 +44,23 @@ func NewClient(url string, opts ...Option) (*Client, error) {
 }
 
 // Close terminates all active subscriptions and closes the Redis client connection.
-func (c *Client) Close() error {
-	if c.client == nil {
+func (rc *Client) Close() error {
+	if rc.client == nil {
 		return nil
 	}
 
-	for _, cancel := range c.cancels {
+	for _, cancel := range rc.cancels {
 		cancel()
 	}
 
-	c.wg.Wait()
+	rc.wg.Wait()
 
-	return c.client.Close()
+	return rc.client.Close()
 }
 
 // Publish sends a message to a specific topic. If syncPublisher is enabled, publishing is synchronous.
-func (c *Client) Publish(ctx context.Context, topic string, data *messaging.Data) error {
-	if c.client == nil {
+func (rc *Client) Publish(ctx context.Context, topic string, data *messaging.Data) error {
+	if rc.client == nil {
 		return ErrInactiveClient
 	}
 
@@ -68,13 +68,13 @@ func (c *Client) Publish(ctx context.Context, topic string, data *messaging.Data
 		return err
 	}
 
-	if c.syncPublisher {
-		return c.client.Publish(ctx, topic, data.Msg).Err()
+	if rc.syncPublisher {
+		return rc.client.Publish(ctx, topic, data.Msg).Err()
 	}
 
 	go func() {
-		if err := c.client.Publish(ctx, topic, data.Msg).Err(); err != nil {
-			c.log.Error(ctx, "async publish failed", err)
+		if err := rc.client.Publish(ctx, topic, data.Msg).Err(); err != nil {
+			rc.log.Error(ctx, "async publish failed", err)
 		}
 	}()
 
@@ -82,12 +82,12 @@ func (c *Client) Publish(ctx context.Context, topic string, data *messaging.Data
 }
 
 // BulkPublish sends multiple messages to a topic using a Redis pipeline.
-func (c *Client) BulkPublish(ctx context.Context, topic string, datas []*messaging.Data) error {
-	if c.client == nil {
+func (rc *Client) BulkPublish(ctx context.Context, topic string, datas []*messaging.Data) error {
+	if rc.client == nil {
 		return ErrInactiveClient
 	}
 
-	pipe := c.client.Pipeline()
+	pipe := rc.client.Pipeline()
 	for _, data := range datas {
 		if err := data.Validate(); err != nil {
 			return err
@@ -95,7 +95,7 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, datas []*messagi
 		pipe.Publish(ctx, topic, data.Msg)
 	}
 
-	if c.syncPublisher {
+	if rc.syncPublisher {
 		_, err := pipe.Exec(ctx)
 
 		return err
@@ -103,7 +103,7 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, datas []*messagi
 
 	go func() {
 		if _, err := pipe.Exec(ctx); err != nil {
-			c.log.Error(ctx, "async bulk publish failed", err)
+			rc.log.Error(ctx, "async bulk publish failed", err)
 		}
 	}()
 
@@ -111,22 +111,22 @@ func (c *Client) BulkPublish(ctx context.Context, topic string, datas []*messagi
 }
 
 // Subscribe subscribes to a topic and calls the handler when a message is received.
-func (c *Client) Subscribe(ctx context.Context, topic, subID string, handler messaging.SubscriberFunc) error {
-	if c.client == nil {
+func (rc *Client) Subscribe(ctx context.Context, topic, subID string, h messaging.SubscriberFunc) error {
+	if rc.client == nil {
 		return ErrInactiveClient
 	}
 
 	subCtx, cancel := context.WithCancel(ctx)
-	c.cancels = append(c.cancels, cancel)
-	c.wg.Add(1)
+	rc.cancels = append(rc.cancels, cancel)
+	rc.wg.Add(1)
 
 	go func() {
-		defer c.wg.Done()
-		pubsub := c.client.Subscribe(subCtx, topic)
+		defer rc.wg.Done()
+		pubsub := rc.client.Subscribe(subCtx, topic)
 
 		defer func() {
 			if r := recover(); r != nil {
-				c.log.Error(subCtx, "recovered from subscriber panic", nil, logger.KeyVal("cause", r))
+				rc.log.Error(subCtx, "recovered from subscriber panic", nil, logger.KeyVal("cause", r))
 				debug.PrintStack()
 			}
 		}()
@@ -134,8 +134,8 @@ func (c *Client) Subscribe(ctx context.Context, topic, subID string, handler mes
 		for {
 			select {
 			case msg := <-pubsub.Channel():
-				if err := handler(subCtx, &messaging.Data{Msg: []byte(msg.Payload)}); err != nil {
-					c.log.Error(subCtx, "message handler failed", err,
+				if err := h(subCtx, &messaging.Data{Msg: []byte(msg.Payload)}); err != nil {
+					rc.log.Error(subCtx, "message handler failed", err,
 						logger.KeyVal("topic", topic),
 						logger.KeyVal("subscription", subID),
 					)

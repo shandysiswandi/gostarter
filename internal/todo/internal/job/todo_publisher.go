@@ -19,7 +19,7 @@ func (e *TodoPublisher) Start() error {
 	e.Tel.Logger().Debug(ctx, "starting publish to todo topic")
 
 	go func() {
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			err := e.MsgClient.Publish(ctx, "topic", &messaging.Data{Msg: []byte(`{"msg":"hello world"}`)})
 			if err != nil {
 				return
@@ -53,7 +53,6 @@ func (e *TodoPublisher) Start() error {
 		if err != nil {
 			return
 		}
-
 	}()
 
 	return nil

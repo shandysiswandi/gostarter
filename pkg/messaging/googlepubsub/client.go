@@ -212,7 +212,7 @@ func (c *Client) doBulkPublish(ctx context.Context, topic *pubsub.Topic, datas [
 	return nil
 }
 
-// processMessageResult handles message acknowledgment based on processing result
+// processMessageResult handles message acknowledgment based on processing result.
 func (c *Client) doMessageResult(ctx context.Context, topic, subID string, err error, m *pubsub.Message) {
 	if err != nil {
 		c.log.Error(ctx, "message handler failed", err,
@@ -221,6 +221,7 @@ func (c *Client) doMessageResult(ctx context.Context, topic, subID string, err e
 		)
 		if !c.autoAck {
 			m.Nack()
+
 			return
 		}
 	}

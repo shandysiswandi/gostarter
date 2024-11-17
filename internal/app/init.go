@@ -211,7 +211,6 @@ func (a *App) initMessaging() {
 	}
 
 	a.messaging = msg
-
 }
 
 // initHTTPServer initializes the HTTP server with settings from the configuration,

@@ -8,6 +8,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+const (
+	msgInternal  = "internal server error"
+	valAppJSONCT = "application/json; charset=utf-8"
+)
+
 type Vendor int
 
 const (
@@ -60,7 +65,7 @@ func (r *Router) Endpoint(method, path string, h Handler, mws ...Middleware) {
 		}
 
 		if err := r.resultCodec(ctx, w, res); err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
+			http.Error(w, msgInternal, http.StatusInternalServerError)
 
 			return
 		}
@@ -91,7 +96,7 @@ func chainMiddleware(h http.Handler, mws ...Middleware) http.Handler {
 // It sets the content type to JSON and writes a status code of 200 OK.
 // The response body contains the encoded `data` in a JSON object.
 func defaultResultCodec(_ context.Context, w http.ResponseWriter, data any) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Type", valAppJSONCT)
 
 	code := http.StatusOK
 	if sc, ok := data.(StatusCoder); ok {
@@ -113,7 +118,7 @@ func defaultResultCodec(_ context.Context, w http.ResponseWriter, data any) erro
 // It sets the content type to JSON and writes a status code of 500 Internal Server Error.
 // The response body contains the error message in a JSON object.
 func defaultErrorCodec(_ context.Context, w http.ResponseWriter, err error) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Type", valAppJSONCT)
 
 	code := http.StatusInternalServerError
 	if sc, ok := err.(StatusCoder); ok {
@@ -129,19 +134,19 @@ func defaultErrorCodec(_ context.Context, w http.ResponseWriter, err error) {
 }
 
 func defaultNotFound(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("content-type", "application/json; charset=utf-8")
+	w.Header().Set("content-type", valAppJSONCT)
 	w.WriteHeader(http.StatusNotFound)
 	err := json.NewEncoder(w).Encode(map[string]string{"error": "endpoint not found"})
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, msgInternal, http.StatusInternalServerError)
 	}
 }
 
 func defaultMethodNotAllowedh(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("content-type", "application/json; charset=utf-8")
+	w.Header().Set("content-type", valAppJSONCT)
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	err := json.NewEncoder(w).Encode(map[string]string{"error": "method not allowed"})
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, msgInternal, http.StatusInternalServerError)
 	}
 }
