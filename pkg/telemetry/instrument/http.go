@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	xRequestId = "X-Request-ID"
+	xRequestID = "X-Request-ID"
 )
 
 func UseTelemetryServer(tel *telemetry.Telemetry, sid func() string) func(http.Handler) http.Handler {
@@ -71,12 +71,12 @@ type instarumentHTTPServer struct {
 }
 
 func (ihs *instarumentHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if rid := r.Header.Get(xRequestId); rid == "" {
-		r.Header.Set(xRequestId, ihs.uuid())
+	if rid := r.Header.Get(xRequestID); rid == "" {
+		r.Header.Set(xRequestID, ihs.uuid())
 	}
 
 	ctx := r.Context()
-	ctx = requestid.Set(ctx, r.Header.Get(xRequestId))
+	ctx = requestid.Set(ctx, r.Header.Get(xRequestID))
 	r = r.WithContext(ctx)
 
 	srw := &statusResponseWriter{ResponseWriter: w}
