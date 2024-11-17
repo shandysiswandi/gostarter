@@ -45,6 +45,7 @@
     "Koanf",
     "otlp",
     "protovalidate",
+    "redismock",
     "redispubsub",
     "shandysiswandi",
     "sslmode",
