@@ -31,15 +31,9 @@ run:
 lint:
 	@golangci-lint run
 
-# load: Sends concurrent gRPC requests for load testing to the TodoService.Create endpoint.
-# GHZ_SERVER_PORT=3000 ghz-web can be used to visualize the performance metrics.
+# load: Sends concurrent gRPC requests for load testing
 load:
-	@ghz --insecure --async --call gostarter.TodoService.Create \
-	-n 1000 --rps 200 \
-  	--concurrency-schedule=step --concurrency-start=50 --concurrency-step=-5 \
-  	--concurrency-step-duration=5s --concurrency-max-duration=30s \
-	-d '{"title":"title", "description":"description is for testing"}' \
-	localhost:50001 -O json | http POST localhost:3000/api/ingest
+	@k6 run script/k6/index.js
 
 # Code Quality
 scan: test-unit
