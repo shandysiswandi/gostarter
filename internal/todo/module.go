@@ -22,6 +22,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
+	"github.com/shandysiswandi/gostarter/pkg/messaging"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -37,6 +38,7 @@ type Dependency struct {
 	Database       *sql.DB
 	QueryBuilder   goqu.DialectWrapper
 	RedisDB        *redis.Client
+	Messaging      messaging.Client
 	Config         config.Config
 	UIDNumber      uid.NumberID
 	CodecJSON      codec.Codec
@@ -112,9 +114,19 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes runner job to handle background workflows:
-	exampleJob := &job.ExampleJob{}
+	todoSub := &job.TodoSubscriber{
+		MsgClient: dep.Messaging,
+		Tel:       dep.Telemetry,
+	}
+	todoPub := &job.TodoPublisher{
+		MsgClient: dep.Messaging,
+		Tel:       dep.Telemetry,
+	}
 
 	return &Expose{
-		Tasks: []task.Runner{exampleJob},
+		Tasks: []task.Runner{
+			todoSub,
+			todoPub,
+		},
 	}, nil
 }

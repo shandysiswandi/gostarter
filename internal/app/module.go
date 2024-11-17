@@ -45,6 +45,7 @@ func (a *App) moduleTodo() {
 			Database:       a.database,
 			QueryBuilder:   a.queryBuilder,
 			RedisDB:        a.redisDB,
+			Messaging:      a.messaging,
 			Config:         a.config,
 			UIDNumber:      a.uidNumber,
 			CodecJSON:      a.codecJSON,

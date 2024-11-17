@@ -32,7 +32,7 @@ func TestNew(t *testing.T) {
 					GRPCServer: grpc.NewServer(),
 				}
 			},
-			want:    &Expose{Tasks: []task.Runner{&job.ExampleJob{}}},
+			want:    &Expose{Tasks: []task.Runner{&job.TodoSubscriber{}}},
 			wantErr: nil,
 		},
 	}

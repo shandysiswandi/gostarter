@@ -21,6 +21,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
+	"github.com/shandysiswandi/gostarter/pkg/messaging"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
@@ -45,6 +46,7 @@ type App struct {
 	transaction    dbops.Tx
 	queryBuilder   goqu.DialectWrapper
 	redisDB        *redis.Client
+	messaging      messaging.Client
 	httpServer     *http.Server
 	grpcServer     *grpc.Server
 	httpRouter     *httpserver.Router
@@ -69,6 +71,7 @@ func New() *App {
 	app.initLibraries()
 	app.initDatabase()
 	app.initRedis()
+	app.initMessaging()
 	app.initHTTPServer()
 	app.initGRPCServer()
 	app.initModules()
