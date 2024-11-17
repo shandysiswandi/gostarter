@@ -14,7 +14,7 @@ import (
 	inboundhttp "github.com/shandysiswandi/gostarter/internal/todo/internal/inbound/http"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/outbound"
-	"github.com/shandysiswandi/gostarter/internal/todo/internal/service"
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/framework/gql"
@@ -62,12 +62,12 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes core business logic or use cases to handle user interaction
-	findUC := service.NewFind(dep.Telemetry, sqlTodo, dep.Validator)
-	fetchUC := service.NewFetch(dep.Telemetry, sqlTodo)
-	createUC := service.NewCreate(dep.Telemetry, sqlTodo, dep.Validator, dep.UIDNumber)
-	deleteUC := service.NewDelete(dep.Telemetry, sqlTodo, dep.Validator)
-	updateUC := service.NewUpdate(dep.Telemetry, sqlTodo, dep.Validator)
-	updateStatusUC := service.NewUpdateStatus(dep.Telemetry, sqlTodo, dep.Validator)
+	findUC := usecase.NewFind(dep.Telemetry, sqlTodo, dep.Validator)
+	fetchUC := usecase.NewFetch(dep.Telemetry, sqlTodo)
+	createUC := usecase.NewCreate(dep.Telemetry, sqlTodo, dep.Validator, dep.UIDNumber)
+	deleteUC := usecase.NewDelete(dep.Telemetry, sqlTodo, dep.Validator)
+	updateUC := usecase.NewUpdate(dep.Telemetry, sqlTodo, dep.Validator)
+	updateStatusUC := usecase.NewUpdateStatus(dep.Telemetry, sqlTodo, dep.Validator)
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes REST API endpoints to handle core user workflows:

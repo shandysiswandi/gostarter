@@ -8,7 +8,7 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
-	"github.com/shandysiswandi/gostarter/internal/auth/internal/service"
+	"github.com/shandysiswandi/gostarter/internal/auth/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -42,7 +42,7 @@ func New(dep Dependency) (*Expose, error) {
 
 	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes core business logic or use cases to handle user interaction
-	loginUC := service.NewLogin(
+	loginUC := usecase.NewLogin(
 		dep.Telemetry,
 		dep.Validator,
 		dep.UIDNumber,
@@ -52,7 +52,7 @@ func New(dep Dependency) (*Expose, error) {
 		sqlAuth,
 	)
 
-	registerUC := service.NewRegister(
+	registerUC := usecase.NewRegister(
 		dep.Telemetry,
 		dep.Validator,
 		dep.UIDNumber,
@@ -60,7 +60,7 @@ func New(dep Dependency) (*Expose, error) {
 		sqlAuth,
 	)
 
-	refreshTokenUC := service.NewRefreshToken(
+	refreshTokenUC := usecase.NewRefreshToken(
 		dep.Telemetry,
 		dep.Validator,
 		dep.UIDNumber,
@@ -69,7 +69,7 @@ func New(dep Dependency) (*Expose, error) {
 		sqlAuth,
 	)
 
-	forgotPasswordUC := service.NewForgotPassword(
+	forgotPasswordUC := usecase.NewForgotPassword(
 		dep.Telemetry,
 		dep.Validator,
 		dep.UIDNumber,
@@ -77,7 +77,7 @@ func New(dep Dependency) (*Expose, error) {
 		sqlAuth,
 	)
 
-	resetPasswordUC := service.NewResetPassword(
+	resetPasswordUC := usecase.NewResetPassword(
 		dep.Telemetry,
 		dep.Validator,
 		dep.Hash,

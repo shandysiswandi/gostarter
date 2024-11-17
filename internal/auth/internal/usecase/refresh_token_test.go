@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"context"
@@ -13,42 +13,41 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
-func TestNewLogin(t *testing.T) {
+func TestNewRefreshToken(t *testing.T) {
 	type args struct {
 		t       *telemetry.Telemetry
 		v       validation.Validator
 		idnum   uid.NumberID
-		hash    hash.Hash
 		secHash hash.Hash
 		j       jwt.JWT
-		s       LoginStore
+		s       RefreshTokenStore
 	}
 	tests := []struct {
 		name string
 		args args
-		want *Login
+		want *RefreshToken
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewLogin(tt.args.t, tt.args.v, tt.args.idnum, tt.args.hash, tt.args.secHash, tt.args.j, tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewLogin() = %v, want %v", got, tt.want)
+			if got := NewRefreshToken(tt.args.t, tt.args.v, tt.args.idnum, tt.args.secHash, tt.args.j, tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewRefreshToken() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestLogin_Call(t *testing.T) {
+func TestRefreshToken_Call(t *testing.T) {
 	type args struct {
 		ctx context.Context
-		in  domain.LoginInput
+		in  domain.RefreshTokenInput
 	}
 	tests := []struct {
 		name    string
-		s       *Login
+		s       *RefreshToken
 		args    args
-		want    *domain.LoginOutput
+		want    *domain.RefreshTokenOutput
 		wantErr bool
 	}{
 		// TODO: Add test cases.
@@ -57,11 +56,11 @@ func TestLogin_Call(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.s.Call(tt.args.ctx, tt.args.in)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Login.Call() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("RefreshToken.Call() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Login.Call() = %v, want %v", got, tt.want)
+				t.Errorf("RefreshToken.Call() = %v, want %v", got, tt.want)
 			}
 		})
 	}
