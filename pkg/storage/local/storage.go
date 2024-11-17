@@ -18,7 +18,6 @@ type Storage struct {
 }
 
 // NewStorage creates a new instance of Storage using the provided base path.
-// The basePath parameter specifies the directory where files will be stored.
 func NewStorage(basePath string) *Storage {
 	return &Storage{basePath: basePath}
 }
@@ -29,7 +28,6 @@ func (s *Storage) Close() error {
 }
 
 // Upload saves the provided data to a file specified by the key within the basePath.
-// It returns the file path or an error if the operation fails.
 func (s *Storage) Upload(_ context.Context, key string, data []byte) (string, error) {
 	path := filepath.Join(s.basePath, key)
 
@@ -41,19 +39,16 @@ func (s *Storage) Upload(_ context.Context, key string, data []byte) (string, er
 }
 
 // Download retrieves the data from a file specified by the key within the basePath.
-// It returns the file contents or an error if the operation fails.
 func (s *Storage) Download(_ context.Context, key string) ([]byte, error) {
 	return os.ReadFile(filepath.Join(s.basePath, key))
 }
 
 // Delete removes the file specified by the key within the basePath.
-// It returns an error if the operation fails.
 func (s *Storage) Delete(_ context.Context, key string) error {
 	return os.Remove(filepath.Join(s.basePath, key))
 }
 
 // List returns a list of file paths within the basePath that match the specified prefix.
-// It returns a slice of file paths or an error if the operation fails.
 func (s *Storage) List(_ context.Context, prefix string) ([]string, error) {
 	var files []string
 	path := filepath.Join(s.basePath, prefix)
