@@ -2,36 +2,42 @@ package usecase
 
 import (
 	"context"
-	"reflect"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
+	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
+	mockClock "github.com/shandysiswandi/gostarter/pkg/clock/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	mockUID "github.com/shandysiswandi/gostarter/pkg/uid/mocker"
+	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewForgotPassword(t *testing.T) {
 	type args struct {
-		t       *telemetry.Telemetry
-		v       validation.Validator
-		idnum   uid.NumberID
-		secHash hash.Hash
-		s       ForgotPasswordStore
+		dep Dependency
+		s   ForgotPasswordStore
 	}
 	tests := []struct {
 		name string
 		args args
 		want *ForgotPassword
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Success",
+			args: args{},
+			want: &ForgotPassword{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewForgotPassword(tt.args.t, tt.args.v, tt.args.idnum, tt.args.secHash, tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewForgotPassword() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			got := NewForgotPassword(tt.args.dep, tt.args.s)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -43,53 +49,445 @@ func TestForgotPassword_Call(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		s       *ForgotPassword
 		args    args
 		want    *domain.ForgotPasswordOutput
-		wantErr bool
+		wantErr error
+		mockFn  func(a args) *ForgotPassword
 	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.Call(tt.args.ctx, tt.args.in)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ForgotPassword.Call() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ForgotPassword.Call() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+		{
+			name: "ErrorValidationInput",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				validatorMock := new(mockValidation.MockValidator)
 
-func TestForgotPassword_doBest(t *testing.T) {
-	type args struct {
-		ctx  context.Context
-		in   domain.ForgotPasswordInput
-		user *domain.User
-		ps   *domain.PasswordReset
-	}
-	tests := []struct {
-		name    string
-		s       *ForgotPassword
-		args    args
-		want    *domain.ForgotPasswordOutput
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+				validatorMock.EXPECT().Validate(a.in).Return(assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     nil,
+					clock:     nil,
+				}
+			},
+		},
+		{
+			name: "ErrorStoreFindUserByEmail",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(nil, assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: tel,
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     storeMock,
+					clock:     nil,
+				}
+			},
+		},
+		{
+			name: "SuccessButNotFound",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want: &domain.ForgotPasswordOutput{
+				Email:   "email",
+				Message: msgSuccess,
+			},
+			wantErr: nil,
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(nil, nil)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     storeMock,
+					clock:     nil,
+				}
+			},
+		},
+		{
+			name: "ErrorStoreFindPasswordResetByUserID",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				storeMock.EXPECT().FindPasswordResetByUserID(ctx, user.ID).Return(nil, assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     storeMock,
+					clock:     nil,
+				}
+			},
+		},
+		{
+			name: "SuccessPasswordResetAlreadyGeneratedButNotExpired",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want: &domain.ForgotPasswordOutput{
+				Email:   "email",
+				Message: msgSuccess,
+			},
+			wantErr: nil,
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+				clockMock := new(mockClock.MockClocker)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				now := time.Time{}
+				clockMock.EXPECT().
+					Now().
+					Return(now)
+
+				ps := &domain.PasswordReset{ExpiresAt: now.Add(time.Minute)}
+				storeMock.EXPECT().
+					FindPasswordResetByUserID(ctx, user.ID).
+					Return(ps, nil)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     storeMock,
+					clock:     clockMock,
+				}
+			},
+		},
+		{
+			name: "ErrorStoreDeletePasswordReset",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+				clockMock := new(mockClock.MockClocker)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				now := time.Time{}
+				clockMock.EXPECT().
+					Now().
+					Return(now)
+
+				ps := &domain.PasswordReset{ExpiresAt: now.Add(-time.Minute), ID: 10}
+				storeMock.EXPECT().
+					FindPasswordResetByUserID(ctx, user.ID).
+					Return(ps, nil)
+
+				storeMock.EXPECT().
+					DeletePasswordReset(ctx, ps.ID).
+					Return(assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   nil,
+					store:     storeMock,
+					clock:     clockMock,
+				}
+			},
+		},
+		{
+			name: "ErrorSecHash",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+				secHashMock := new(mockHash.MockHash)
+				clockMock := new(mockClock.MockClocker)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				now := time.Time{}
+				clockMock.EXPECT().
+					Now().
+					Return(now)
+
+				ps := &domain.PasswordReset{ExpiresAt: now.Add(-time.Minute), ID: 10}
+				storeMock.EXPECT().
+					FindPasswordResetByUserID(ctx, user.ID).
+					Return(ps, nil)
+
+				storeMock.EXPECT().
+					DeletePasswordReset(ctx, ps.ID).
+					Return(nil)
+
+				secHashMock.EXPECT().
+					Hash(fmt.Sprintf("%d-%v", user.ID, now.Unix())).
+					Return(nil, assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     nil,
+					secHash:   secHashMock,
+					store:     storeMock,
+					clock:     clockMock,
+				}
+			},
+		},
+		{
+			name: "ErrorStoreSavePasswordReset",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+				secHashMock := new(mockHash.MockHash)
+				clockMock := new(mockClock.MockClocker)
+				idnumMock := new(mockUID.MockNumberID)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				now := time.Time{}
+				clockMock.EXPECT().
+					Now().
+					Return(now)
+
+				ps := &domain.PasswordReset{ExpiresAt: now.Add(-time.Minute), ID: 10}
+				storeMock.EXPECT().
+					FindPasswordResetByUserID(ctx, user.ID).
+					Return(ps, nil)
+
+				storeMock.EXPECT().
+					DeletePasswordReset(ctx, ps.ID).
+					Return(nil)
+
+				sechashResult := []byte{}
+				secHashMock.EXPECT().
+					Hash(fmt.Sprintf("%d-%v", user.ID, now.Unix())).
+					Return(sechashResult, nil)
+
+				idnumMock.EXPECT().Generate().Return(111)
+
+				psData := domain.PasswordReset{
+					ID:        111,
+					UserID:    user.ID,
+					Token:     string(sechashResult),
+					ExpiresAt: now.Add(time.Hour),
+				}
+				storeMock.EXPECT().
+					SavePasswordReset(ctx, psData).
+					Return(assert.AnError)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     idnumMock,
+					secHash:   secHashMock,
+					store:     storeMock,
+					clock:     clockMock,
+				}
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.ForgotPasswordInput{Email: "email"},
+			},
+			want: &domain.ForgotPasswordOutput{
+				Email:   "email",
+				Message: msgSuccess,
+			},
+			wantErr: nil,
+			mockFn: func(a args) *ForgotPassword {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockForgotPasswordStore)
+				secHashMock := new(mockHash.MockHash)
+				clockMock := new(mockClock.MockClocker)
+				idnumMock := new(mockUID.MockNumberID)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ForgotPassword")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				user := &domain.User{ID: 1, Email: "email", Password: "password"}
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(user, nil)
+
+				now := time.Time{}
+				clockMock.EXPECT().
+					Now().
+					Return(now)
+
+				ps := &domain.PasswordReset{ExpiresAt: now.Add(-time.Minute), ID: 10}
+				storeMock.EXPECT().
+					FindPasswordResetByUserID(ctx, user.ID).
+					Return(ps, nil)
+
+				storeMock.EXPECT().
+					DeletePasswordReset(ctx, ps.ID).
+					Return(nil)
+
+				sechashResult := []byte{}
+				secHashMock.EXPECT().
+					Hash(fmt.Sprintf("%d-%v", user.ID, now.Unix())).
+					Return(sechashResult, nil)
+
+				idnumMock.EXPECT().Generate().Return(111)
+
+				psData := domain.PasswordReset{
+					ID:        111,
+					UserID:    user.ID,
+					Token:     string(sechashResult),
+					ExpiresAt: now.Add(time.Hour),
+				}
+				storeMock.EXPECT().
+					SavePasswordReset(ctx, psData).
+					Return(nil)
+
+				return &ForgotPassword{
+					telemetry: telemetry.NewTelemetry(),
+					validator: validatorMock,
+					idnum:     idnumMock,
+					secHash:   secHashMock,
+					store:     storeMock,
+					clock:     clockMock,
+				}
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.doBest(tt.args.ctx, tt.args.in, tt.args.user, tt.args.ps)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ForgotPassword.doBest() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ForgotPassword.doBest() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			s := tt.mockFn(tt.args)
+			got, err := s.Call(tt.args.ctx, tt.args.in)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

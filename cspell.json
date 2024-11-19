@@ -43,12 +43,15 @@
     "httprouter",
     "idletime",
     "Koanf",
+    "mockz",
     "otlp",
     "protovalidate",
+    "qualitygate",
     "redismock",
     "redispubsub",
     "shandysiswandi",
     "sslmode",
-    "todos"
+    "todos",
+    "usecase"
   ]
 }

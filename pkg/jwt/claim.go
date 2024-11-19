@@ -13,20 +13,13 @@ import (
 type contextKey struct{}
 
 type Claim struct {
-	now   time.Time
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-func (c *Claim) Now() time.Time {
-	return c.now
-}
-
-func NewClaim(email string, exp time.Duration, aud []string) *Claim {
-	now := time.Now()
+func NewClaim(email string, exp time.Duration, now time.Time, aud []string) *Claim {
 
 	return &Claim{
-		now:   now,
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "gostarter",

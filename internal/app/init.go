@@ -20,6 +20,7 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
@@ -102,6 +103,7 @@ func (a *App) initLibraries() {
 	a.uidNumber = snow
 	a.protoValidator = pvalidator
 
+	a.clock = clock.New()
 	a.uuid = uid.NewUUIDString()
 	a.hash = hash.NewBcryptHash(10)
 	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("jwt.hash.secret"))

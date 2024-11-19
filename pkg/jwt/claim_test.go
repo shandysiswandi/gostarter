@@ -9,31 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestClaim_Now(t *testing.T) {
-	tests := []struct {
-		name string
-		c    *Claim
-		want time.Time
-	}{
-		{
-			name: "Success",
-			c:    &Claim{},
-			want: time.Time{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got := tt.c.Now()
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
 func TestNewClaim(t *testing.T) {
 	type args struct {
 		email string
 		exp   time.Duration
+		now   time.Time
 		aud   []string
 	}
 	tests := []struct {
@@ -46,6 +26,7 @@ func TestNewClaim(t *testing.T) {
 			args: args{
 				email: "email@email.com",
 				exp:   1,
+				now:   time.Time{},
 				aud:   []string{"aud"},
 			},
 			want: &Claim{
@@ -54,9 +35,9 @@ func TestNewClaim(t *testing.T) {
 					Issuer:    "gostarter",
 					Subject:   "email@email.com",
 					Audience:  []string{"aud"},
-					ExpiresAt: jwt.NewNumericDate(time.Now().Add(1)),
-					NotBefore: jwt.NewNumericDate(time.Now()),
-					IssuedAt:  jwt.NewNumericDate(time.Now()),
+					ExpiresAt: jwt.NewNumericDate(time.Time{}.Add(1)),
+					NotBefore: jwt.NewNumericDate(time.Time{}),
+					IssuedAt:  jwt.NewNumericDate(time.Time{}),
 				},
 			},
 		},
@@ -64,7 +45,7 @@ func TestNewClaim(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewClaim(tt.args.email, tt.args.exp, tt.args.aud)
+			got := NewClaim(tt.args.email, tt.args.exp, tt.args.now, tt.args.aud)
 			assert.Equal(t, tt.want.Email, got.Email)
 			assert.Equal(t, tt.want.RegisteredClaims, got.RegisteredClaims)
 		})
@@ -84,7 +65,6 @@ func TestExtractClaimFromToken(t *testing.T) {
 			name: "Success",
 			args: args{token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.UOQFRvx2JwT1PcDKqbfj9f_WN66Gs_giUMGv3bgVcE8"},
 			want: &Claim{
-				now:   time.Time{},
 				Email: "email@email.com",
 				RegisteredClaims: jwt.RegisteredClaims{
 					IssuedAt: jwt.NewNumericDate(time.Date(2018, time.January, 18, 8, 30, 22, 0, time.Local)),

@@ -458,7 +458,6 @@ func TestNewInvalidInput(t *testing.T) {
 func TestNewInvalidFormat(t *testing.T) {
 	type args struct {
 		msg string
-		err error
 	}
 	tests := []struct {
 		name    string
@@ -466,14 +465,13 @@ func TestNewInvalidFormat(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "NewInvalidInput",
+			name: "NewInvalidFormat",
 			args: args{
 				msg: "format",
-				err: assert.AnError,
 			},
 			wantErr: &GoError{
 				msg:     "format",
-				err:     assert.AnError,
+				err:     nil,
 				errType: TypeValidation,
 				code:    CodeInvalidFormat,
 			},
@@ -482,7 +480,7 @@ func TestNewInvalidFormat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			err := NewInvalidFormat(tt.args.msg, tt.args.err)
+			err := NewInvalidFormat(tt.args.msg)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}

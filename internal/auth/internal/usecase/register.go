@@ -14,55 +14,53 @@ import (
 
 type RegisterStore interface {
 	FindUserByEmail(ctx context.Context, email string) (*domain.User, error)
-	SaveUser(ctx context.Context, token domain.User) error
+	SaveUser(ctx context.Context, user domain.User) error
 }
 
 type Register struct {
-	telemetry *telemetry.Telemetry
+	tele      *telemetry.Telemetry
 	validator validation.Validator
 	uidnumber uid.NumberID
 	hash      hash.Hash
 	store     RegisterStore
 }
 
-func NewRegister(t *telemetry.Telemetry, v validation.Validator,
-	idnum uid.NumberID, hash hash.Hash, s RegisterStore,
-) *Register {
+func NewRegister(dep Dependency, s RegisterStore) *Register {
 	return &Register{
-		telemetry: t,
-		validator: v,
-		uidnumber: idnum,
-		hash:      hash,
+		tele:      dep.Telemetry,
+		validator: dep.Validator,
+		uidnumber: dep.UIDNumber,
+		hash:      dep.Hash,
 		store:     s,
 	}
 }
 
 func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.RegisterOutput, error) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "service.Register")
+	ctx, span := s.tele.Tracer().Start(ctx, "usecase.Register")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {
-		s.telemetry.Logger().Warn(ctx, "validation failed")
+		s.tele.Logger().Warn(ctx, "validation failed")
 
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
 	user, err := s.store.FindUserByEmail(ctx, in.Email)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
+		s.tele.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	if user != nil {
-		s.telemetry.Logger().Warn(ctx, "user already exists", logger.KeyVal("email", in.Email))
+		s.tele.Logger().Warn(ctx, "user already exists", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("email already registered", goerror.CodeConflict)
 	}
 
 	passHash, err := s.hash.Hash(in.Password)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to hash password", err)
+		s.tele.Logger().Error(ctx, "failed to hash password", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
@@ -73,10 +71,10 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 		Password: string(passHash),
 	}
 	if err := s.store.SaveUser(ctx, userData); err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to save user", err, logger.KeyVal("email", in.Email))
+		s.tele.Logger().Error(ctx, "failed to save user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	return &domain.RegisterOutput{}, nil
+	return &domain.RegisterOutput{Email: in.Email}, nil
 }

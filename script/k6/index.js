@@ -2,6 +2,8 @@ import grpc from "k6/net/grpc";
 import { faker } from "https://esm.sh/@faker-js/faker";
 import { check } from "k6";
 
+const password = __ENV.PASSWORD;
+
 const client = new grpc.Client();
 client.load(["./proto"], "auth.proto");
 
@@ -12,7 +14,7 @@ export default function () {
 
   const login = client.invoke(`${pathAuth}/Login`, {
     email: "admin@admin.com",
-    password: "admin123",
+    password: password,
   });
   check(login, {
     "login is success": (r) => r && r.status === grpc.StatusOK,

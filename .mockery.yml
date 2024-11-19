@@ -7,6 +7,13 @@ packages:
   # errs: skip, because errs does not have interfaces
   # http: skip, using net/http/httptest instead
 
+  github.com/shandysiswandi/gostarter/pkg/clock:
+    config:
+      all: True
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      outpkg: "mocker"
+      dir: "{{ .InterfaceDir }}/mocker"
+
   github.com/shandysiswandi/gostarter/pkg/codec:
     config:
       all: True

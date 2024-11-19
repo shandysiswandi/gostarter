@@ -175,6 +175,6 @@ func NewInvalidInput(msg string, err error) error {
 }
 
 // NewInvalidFormat creates a validation error for invalid format with a message and underlying error.
-func NewInvalidFormat(msg string, err error) error {
-	return New(err, msg, TypeValidation, CodeInvalidFormat)
+func NewInvalidFormat(msg string) error {
+	return New(nil, msg, TypeValidation, CodeInvalidFormat)
 }

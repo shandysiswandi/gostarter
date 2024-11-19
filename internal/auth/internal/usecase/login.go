@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -20,61 +21,69 @@ type LoginStore interface {
 }
 
 type Login struct {
-	telemetry *telemetry.Telemetry
+	tel       *telemetry.Telemetry
 	validator validation.Validator
 	uidnumber uid.NumberID
 	hash      hash.Hash
 	secHash   hash.Hash
 	jwt       jwt.JWT
+	clock     clock.Clocker
 	store     LoginStore
+	tgs       *tokenGenSaver
 }
 
-func NewLogin(t *telemetry.Telemetry, v validation.Validator, idnum uid.NumberID, hash, secHash hash.Hash,
-	j jwt.JWT, s LoginStore,
-) *Login {
+func NewLogin(dep Dependency, s LoginStore) *Login {
 	return &Login{
-		telemetry: t,
-		validator: v,
-		uidnumber: idnum,
-		hash:      hash,
-		secHash:   secHash,
-		jwt:       j,
+		tel:       dep.Telemetry,
+		validator: dep.Validator,
+		uidnumber: dep.UIDNumber,
+		hash:      dep.Hash,
+		secHash:   dep.SecHash,
+		jwt:       dep.JWT,
+		clock:     dep.Clock,
 		store:     s,
+		tgs: &tokenGenSaver{
+			jwt:     dep.JWT,
+			tel:     dep.Telemetry,
+			secHash: dep.SecHash,
+			clock:   dep.Clock,
+			ts:      s,
+		},
 	}
 }
 
 func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOutput, error) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "service.Login")
+	ctx, span := s.tel.Tracer().Start(ctx, "usecase.Login")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {
-		s.telemetry.Logger().Warn(ctx, "validation failed")
+		s.tel.Logger().Warn(ctx, "validation failed")
 
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	user, err := s.store.FindUserByEmail(ctx, in.Email)
+	u, err := s.store.FindUserByEmail(ctx, in.Email)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
+		s.tel.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	if user == nil {
-		s.telemetry.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
+	if u == nil {
+		s.tel.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
-	if !s.hash.Verify(user.Password, in.Password) {
-		s.telemetry.Logger().Warn(ctx, "password not match", logger.KeyVal("email", in.Email))
+	if !s.hash.Verify(u.Password, in.Password) {
+		s.tel.Logger().Warn(ctx, "password not match", logger.KeyVal("email", in.Email))
 
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
-	token, err := s.store.FindTokenByUserID(ctx, user.ID)
+	token, err := s.store.FindTokenByUserID(ctx, u.ID)
 	if err != nil {
-		s.telemetry.Logger().Error(ctx, "failed to get token", err, logger.KeyVal("email", user.Email))
+		s.tel.Logger().Error(ctx, "failed to get token", err, logger.KeyVal("email", u.Email))
 
 		return nil, goerror.NewServerInternal(err)
 	}
@@ -84,16 +93,16 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 		tid = token.ID
 	}
 
-	resp, err := generateAndSaveToken(ctx, s.telemetry.Logger(), s.jwt, s.secHash, s.store.SaveToken,
-		tid, user.ID, user.Email)
+	tgsIn := tokenGenSaverIn{ctx: ctx, email: in.Email, tokenId: tid, userId: u.ID}
+	tgso, err := s.tgs.do(tgsIn)
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.LoginOutput{
-		AccessToken:      resp.accessToken,
-		RefreshToken:     resp.refreshToken,
-		AccessExpiresIn:  resp.accessExpiresIn,
-		RefreshExpiresIn: resp.refreshExpiresIn,
+		AccessToken:      tgso.accessToken,
+		RefreshToken:     tgso.refreshToken,
+		AccessExpiresIn:  tgso.accessExpiresIn,
+		RefreshExpiresIn: tgso.refreshExpiresIn,
 	}, nil
 }

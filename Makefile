@@ -33,11 +33,12 @@ lint:
 
 # load: Sends concurrent gRPC requests for load testing
 load:
-	@k6 run script/k6/index.js
+	@k6 run -e PASSWORD=password script/k6/index.js
 
 # Code Quality
 scan: test-unit
-	@sonar-scanner
+	@sonar-scanner \
+	-Dsonar.projectVersion=$(shell git rev-parse --abbrev-ref HEAD)-$(shell git rev-parse --short HEAD)
 
 
 # ***** *****

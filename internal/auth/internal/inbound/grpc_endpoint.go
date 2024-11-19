@@ -5,37 +5,16 @@ import (
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type GrpcEndpoint struct {
 	pb.UnimplementedAuthServiceServer
-
-	telemetry *telemetry.Telemetry
 
 	loginUC          domain.Login
 	registerUC       domain.Register
 	refreshTokenUC   domain.RefreshToken
 	forgotPasswordUC domain.ForgotPassword
 	resetPasswordUC  domain.ResetPassword
-}
-
-func NewGrpcEndpoint(
-	telemetry *telemetry.Telemetry,
-	loginUC domain.Login,
-	registerUC domain.Register,
-	refreshTokenUC domain.RefreshToken,
-	forgotPasswordUC domain.ForgotPassword,
-	resetPasswordUC domain.ResetPassword,
-) *GrpcEndpoint {
-	return &GrpcEndpoint{
-		telemetry:        telemetry,
-		loginUC:          loginUC,
-		registerUC:       registerUC,
-		refreshTokenUC:   refreshTokenUC,
-		forgotPasswordUC: forgotPasswordUC,
-		resetPasswordUC:  resetPasswordUC,
-	}
 }
 
 func (g *GrpcEndpoint) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -52,15 +31,16 @@ func (g *GrpcEndpoint) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Log
 	}, nil
 }
 
-func (g *GrpcEndpoint) Register(ctx context.Context, req *pb.RegisterRequest) (
-	*pb.RegisterResponse, error,
-) {
-	_, err := g.registerUC.Call(ctx, domain.RegisterInput{Email: req.GetEmail(), Password: req.GetPassword()})
+func (g *GrpcEndpoint) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+	resp, err := g.registerUC.Call(ctx, domain.RegisterInput{
+		Email:    req.GetEmail(),
+		Password: req.GetPassword(),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.RegisterResponse{Email: req.GetEmail()}, nil
+	return &pb.RegisterResponse{Email: resp.Email}, nil
 }
 
 func (g *GrpcEndpoint) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (
@@ -82,28 +62,23 @@ func (g *GrpcEndpoint) RefreshToken(ctx context.Context, req *pb.RefreshTokenReq
 func (g *GrpcEndpoint) ForgotPassword(ctx context.Context, req *pb.ForgotPasswordRequest) (
 	*pb.ForgotPasswordResponse, error,
 ) {
-	_, err := g.forgotPasswordUC.Call(ctx, domain.ForgotPasswordInput{Email: req.GetEmail()})
+	resp, err := g.forgotPasswordUC.Call(ctx, domain.ForgotPasswordInput{Email: req.GetEmail()})
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.ForgotPasswordResponse{
-		Email:   req.GetEmail(),
-		Message: "If an account with this email exists, you'll receive a password reset email shortly.",
-	}, nil
+	return &pb.ForgotPasswordResponse{Email: resp.Email, Message: resp.Message}, nil
 }
 
 func (g *GrpcEndpoint) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) (
 	*pb.ResetPasswordResponse, error,
 ) {
-	_, err := g.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
+	resp, err := g.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
 		Token: req.GetToken(), Password: req.GetPassword(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.ResetPasswordResponse{
-		Message: "Your password has been successfully reset.",
-	}, nil
+	return &pb.ResetPasswordResponse{Message: resp.Message}, nil
 }

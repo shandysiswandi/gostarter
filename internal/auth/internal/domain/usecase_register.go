@@ -11,4 +11,6 @@ type RegisterInput struct {
 	Password string `validate:"required"`
 }
 
-type RegisterOutput struct{}
+type RegisterOutput struct {
+	Email string
+}

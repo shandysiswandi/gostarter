@@ -187,9 +187,9 @@ func (_c *MockForgotPasswordStore_FindUserByEmail_Call) RunAndReturn(run func(co
 	return _c
 }
 
-// SavePasswordReset provides a mock function with given fields: ctx, token
-func (_m *MockForgotPasswordStore) SavePasswordReset(ctx context.Context, token domain.PasswordReset) error {
-	ret := _m.Called(ctx, token)
+// SavePasswordReset provides a mock function with given fields: ctx, ps
+func (_m *MockForgotPasswordStore) SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error {
+	ret := _m.Called(ctx, ps)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SavePasswordReset")
@@ -197,7 +197,7 @@ func (_m *MockForgotPasswordStore) SavePasswordReset(ctx context.Context, token 
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, domain.PasswordReset) error); ok {
-		r0 = rf(ctx, token)
+		r0 = rf(ctx, ps)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -212,12 +212,12 @@ type MockForgotPasswordStore_SavePasswordReset_Call struct {
 
 // SavePasswordReset is a helper method to define mock.On call
 //   - ctx context.Context
-//   - token domain.PasswordReset
-func (_e *MockForgotPasswordStore_Expecter) SavePasswordReset(ctx interface{}, token interface{}) *MockForgotPasswordStore_SavePasswordReset_Call {
-	return &MockForgotPasswordStore_SavePasswordReset_Call{Call: _e.mock.On("SavePasswordReset", ctx, token)}
+//   - ps domain.PasswordReset
+func (_e *MockForgotPasswordStore_Expecter) SavePasswordReset(ctx interface{}, ps interface{}) *MockForgotPasswordStore_SavePasswordReset_Call {
+	return &MockForgotPasswordStore_SavePasswordReset_Call{Call: _e.mock.On("SavePasswordReset", ctx, ps)}
 }
 
-func (_c *MockForgotPasswordStore_SavePasswordReset_Call) Run(run func(ctx context.Context, token domain.PasswordReset)) *MockForgotPasswordStore_SavePasswordReset_Call {
+func (_c *MockForgotPasswordStore_SavePasswordReset_Call) Run(run func(ctx context.Context, ps domain.PasswordReset)) *MockForgotPasswordStore_SavePasswordReset_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.PasswordReset))
 	})

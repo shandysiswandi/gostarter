@@ -11,4 +11,6 @@ type ResetPasswordInput struct {
 	Password string `validate:"required"`
 }
 
-type ResetPasswordOutput struct{}
+type ResetPasswordOutput struct {
+	Message string
+}

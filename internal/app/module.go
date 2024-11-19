@@ -32,6 +32,7 @@ func (a *App) moduleAuth() {
 			Hash:         a.hash,
 			SecHash:      a.secHash,
 			JWT:          a.jwt,
+			Clock:        a.clock,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module auth", err)

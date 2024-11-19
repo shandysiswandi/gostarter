@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -14,10 +15,12 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
+const msgSuccess = "If an account with this email exists, you'll receive a password reset email shortly."
+
 type ForgotPasswordStore interface {
 	FindUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	FindPasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error)
-	SavePasswordReset(ctx context.Context, token domain.PasswordReset) error
+	SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error
 	DeletePasswordReset(ctx context.Context, id uint64) error
 }
 
@@ -26,27 +29,25 @@ type ForgotPassword struct {
 	validator validation.Validator
 	idnum     uid.NumberID
 	secHash   hash.Hash
+	clock     clock.Clocker
 	store     ForgotPasswordStore
-	now       func() time.Time
 }
 
-func NewForgotPassword(t *telemetry.Telemetry, v validation.Validator, idnum uid.NumberID,
-	secHash hash.Hash, s ForgotPasswordStore,
-) *ForgotPassword {
+func NewForgotPassword(dep Dependency, s ForgotPasswordStore) *ForgotPassword {
 	return &ForgotPassword{
-		telemetry: t,
-		validator: v,
-		idnum:     idnum,
-		secHash:   secHash,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
+		idnum:     dep.UIDNumber,
+		secHash:   dep.SecHash,
+		clock:     dep.Clock,
 		store:     s,
-		now:       time.Now,
 	}
 }
 
 func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput) (
 	*domain.ForgotPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "service.ForgotPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.ForgotPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {
@@ -65,7 +66,10 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 	if user == nil {
 		s.telemetry.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
 
-		return &domain.ForgotPasswordOutput{}, nil
+		return &domain.ForgotPasswordOutput{
+			Email:   in.Email,
+			Message: msgSuccess,
+		}, nil
 	}
 
 	ps, err := s.store.FindPasswordResetByUserID(ctx, user.ID)
@@ -75,16 +79,19 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	return s.doBest(ctx, in, user, ps)
+	return s.processPasswordReset(ctx, in, user, ps)
 }
 
-func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInput, user *domain.User,
-	ps *domain.PasswordReset,
+func (s *ForgotPassword) processPasswordReset(ctx context.Context, in domain.ForgotPasswordInput,
+	user *domain.User, ps *domain.PasswordReset,
 ) (*domain.ForgotPasswordOutput, error) {
-	now := s.now()
+	now := s.clock.Now()
 	if ps != nil {
 		if !ps.ExpiresAt.Before(now) {
-			return &domain.ForgotPasswordOutput{}, nil
+			return &domain.ForgotPasswordOutput{
+				Email:   in.Email,
+				Message: msgSuccess,
+			}, nil
 		}
 
 		if err := s.store.DeletePasswordReset(ctx, ps.ID); err != nil {
@@ -115,5 +122,8 @@ func (s *ForgotPassword) doBest(ctx context.Context, in domain.ForgotPasswordInp
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	return &domain.ForgotPasswordOutput{}, nil
+	return &domain.ForgotPasswordOutput{
+		Email:   in.Email,
+		Message: msgSuccess,
+	}, nil
 }

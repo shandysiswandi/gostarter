@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
@@ -22,29 +22,35 @@ type RefreshTokenStore interface {
 type RefreshToken struct {
 	telemetry *telemetry.Telemetry
 	validator validation.Validator
-	uidnumber uid.NumberID
 	secHash   hash.Hash
 	jwt       jwt.JWT
+	clock     clock.Clocker
 	store     RefreshTokenStore
+	tgs       *tokenGenSaver
 }
 
-func NewRefreshToken(t *telemetry.Telemetry, v validation.Validator,
-	idnum uid.NumberID, secHash hash.Hash, j jwt.JWT, s RefreshTokenStore,
-) *RefreshToken {
+func NewRefreshToken(dep Dependency, s RefreshTokenStore) *RefreshToken {
 	return &RefreshToken{
-		telemetry: t,
-		validator: v,
-		uidnumber: idnum,
-		secHash:   secHash,
-		jwt:       j,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
+		secHash:   dep.SecHash,
+		jwt:       dep.JWT,
+		clock:     dep.Clock,
 		store:     s,
+		tgs: &tokenGenSaver{
+			jwt:     dep.JWT,
+			tel:     dep.Telemetry,
+			secHash: dep.SecHash,
+			clock:   dep.Clock,
+			ts:      s,
+		},
 	}
 }
 
 func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	*domain.RefreshTokenOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "service.RefreshToken")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.RefreshToken")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {
@@ -90,16 +96,16 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
-	resp, err := generateAndSaveToken(ctx, s.telemetry.Logger(), s.jwt, s.secHash, s.store.SaveToken,
-		refToken.ID, refToken.UserID, clm.Email)
+	tgsIn := tokenGenSaverIn{ctx: ctx, email: clm.Email, tokenId: refToken.ID, userId: refToken.UserID}
+	tgso, err := s.tgs.do(tgsIn)
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.RefreshTokenOutput{
-		AccessToken:      resp.accessToken,
-		RefreshToken:     resp.refreshToken,
-		AccessExpiresIn:  resp.accessExpiresIn,
-		RefreshExpiresIn: resp.refreshExpiresIn,
+		AccessToken:      tgso.accessToken,
+		RefreshToken:     tgso.refreshToken,
+		AccessExpiresIn:  tgso.accessExpiresIn,
+		RefreshExpiresIn: tgso.refreshExpiresIn,
 	}, nil
 }

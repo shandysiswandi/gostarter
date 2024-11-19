@@ -2,13 +2,12 @@ package auth
 
 import (
 	"database/sql"
-	"net/http"
 
 	"github.com/doug-martin/goqu/v9"
-	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/usecase"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -31,85 +30,42 @@ type Dependency struct {
 	Hash         hash.Hash
 	SecHash      hash.Hash
 	JWT          jwt.JWT
+	Clock        clock.Clocker
 }
 
-//nolint:funlen // it's long line because it format param dependency
 func New(dep Dependency) (*Expose, error) {
-	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
-	// This block initializes outbound dependencies for core services.
-	// This includes setups for outbound services: Database, HTTP client, gRPC client, Redis, etc.
+	// This block initializes outbound services: Database, HTTP client, gRPC client, Redis, etc.
 	sqlAuth := outbound.NewSQLAuth(dep.Database, dep.QueryBuilder, dep.Telemetry)
 
-	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 	// This block initializes core business logic or use cases to handle user interaction
-	loginUC := usecase.NewLogin(
-		dep.Telemetry,
-		dep.Validator,
-		dep.UIDNumber,
-		dep.Hash,
-		dep.SecHash,
-		dep.JWT,
-		sqlAuth,
-	)
+	ucDep := usecase.Dependency{
+		Telemetry: dep.Telemetry,
+		Validator: dep.Validator,
+		UIDNumber: dep.UIDNumber,
+		Hash:      dep.Hash,
+		SecHash:   dep.SecHash,
+		JWT:       dep.JWT,
+		Clock:     dep.Clock,
+	}
 
-	registerUC := usecase.NewRegister(
-		dep.Telemetry,
-		dep.Validator,
-		dep.UIDNumber,
-		dep.Hash,
-		sqlAuth,
-	)
+	loginUC := usecase.NewLogin(ucDep, sqlAuth)
+	registerUC := usecase.NewRegister(ucDep, sqlAuth)
+	refreshTokenUC := usecase.NewRefreshToken(ucDep, sqlAuth)
+	forgotPasswordUC := usecase.NewForgotPassword(ucDep, sqlAuth)
+	resetPasswordUC := usecase.NewResetPassword(ucDep, sqlAuth)
 
-	refreshTokenUC := usecase.NewRefreshToken(
-		dep.Telemetry,
-		dep.Validator,
-		dep.UIDNumber,
-		dep.SecHash,
-		dep.JWT,
-		sqlAuth,
-	)
-
-	forgotPasswordUC := usecase.NewForgotPassword(
-		dep.Telemetry,
-		dep.Validator,
-		dep.UIDNumber,
-		dep.SecHash,
-		sqlAuth,
-	)
-
-	resetPasswordUC := usecase.NewResetPassword(
-		dep.Telemetry,
-		dep.Validator,
-		dep.Hash,
-		sqlAuth,
-	)
-
-	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
-	// This block initializes REST API endpoints to handle core user workflows:
-	hEndpoint := inbound.NewHTTPEndpoint(
-		loginUC,
-		registerUC,
-		refreshTokenUC,
-		forgotPasswordUC,
-		resetPasswordUC,
-	)
-	dep.Router.Endpoint(http.MethodPost, "/auth/login", hEndpoint.Login)
-	dep.Router.Endpoint(http.MethodPost, "/auth/register", hEndpoint.Register)
-	dep.Router.Endpoint(http.MethodPost, "/auth/refresh-token", hEndpoint.RefreshToken)
-	dep.Router.Endpoint(http.MethodPost, "/auth/forgot-password", hEndpoint.ForgotPassword)
-	dep.Router.Endpoint(http.MethodPost, "/auth/reset-password", hEndpoint.ResetPassword)
-
-	// ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
-	// This block initializes gRPC API endpoints to handle core user workflows:
-	gEndpoint := inbound.NewGrpcEndpoint(
-		dep.Telemetry,
-		loginUC,
-		registerUC,
-		refreshTokenUC,
-		forgotPasswordUC,
-		resetPasswordUC,
-	)
-	pb.RegisterAuthServiceServer(dep.GRPCServer, gEndpoint)
+	// This block initializes REST & gRPC API endpoints to handle core user workflows:
+	inbound := inbound.Inbound{
+		Router:     dep.Router,
+		GRPCServer: dep.GRPCServer,
+		//
+		LoginUC:          loginUC,
+		RegisterUC:       registerUC,
+		RefreshTokenUC:   refreshTokenUC,
+		ForgotPasswordUC: forgotPasswordUC,
+		ResetPasswordUC:  resetPasswordUC,
+	}
+	inbound.RegisterAuthServiceServer()
 
 	return &Expose{}, nil
 }

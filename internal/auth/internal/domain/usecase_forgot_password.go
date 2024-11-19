@@ -10,4 +10,7 @@ type ForgotPasswordInput struct {
 	Email string `validate:"required,email"`
 }
 
-type ForgotPasswordOutput struct{}
+type ForgotPasswordOutput struct {
+	Email   string
+	Message string
+}

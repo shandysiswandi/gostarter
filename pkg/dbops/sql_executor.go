@@ -31,12 +31,6 @@ func prepare(qp QueryProvider) (query string, args []any, err error) {
 	return query, args, err
 }
 
-func closeRow(rows *sql.Rows) {
-	if err := rows.Close(); err != nil {
-		log.Printf("error closing rows: %v\n", err)
-	}
-}
-
 // Exec executes a query and handles the result.
 func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) error {
 	query, args, err := prepare(qp)
@@ -135,7 +129,11 @@ func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider)
 
 		return nil, err
 	}
-	defer closeRow(rows)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing rows: %v\n", err)
+		}
+	}()
 
 	var entities []T
 	for rows.Next() {

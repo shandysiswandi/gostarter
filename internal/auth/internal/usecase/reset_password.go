@@ -19,28 +19,24 @@ type ResetPasswordStore interface {
 
 type ResetPassword struct {
 	telemetry *telemetry.Telemetry
-	store     ResetPasswordStore
 	validator validation.Validator
 	hash      hash.Hash
-	now       func() time.Time
+	store     ResetPasswordStore
 }
 
-func NewResetPassword(t *telemetry.Telemetry, v validation.Validator, h hash.Hash,
-	s ResetPasswordStore,
-) *ResetPassword {
+func NewResetPassword(dep Dependency, s ResetPasswordStore) *ResetPassword {
 	return &ResetPassword{
-		telemetry: t,
-		validator: v,
-		hash:      h,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
+		hash:      dep.Hash,
 		store:     s,
-		now:       time.Now,
 	}
 }
 
 func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) (
 	*domain.ResetPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "service.ResetPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.ResetPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {
@@ -62,7 +58,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 		return nil, goerror.NewBusiness("invalid token", goerror.CodeUnauthorized)
 	}
 
-	if ps.ExpiresAt.Before(s.now()) {
+	if ps.ExpiresAt.Before(time.Now()) {
 		s.telemetry.Logger().Warn(ctx, "password reset token has expired")
 
 		return nil, goerror.NewBusiness("token has expired", goerror.CodeUnauthorized)
@@ -87,5 +83,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	return &domain.ResetPasswordOutput{}, nil
+	return &domain.ResetPasswordOutput{
+		Message: "Your password has been successfully reset.",
+	}, nil
 }

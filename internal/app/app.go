@@ -14,6 +14,7 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
@@ -54,6 +55,7 @@ type App struct {
 	hash           hash.Hash
 	secHash        hash.Hash
 	jwt            jwt.JWT
+	clock          clock.Clocker
 	runnables      []task.Runner
 	closerFn       map[string]func(context.Context) error
 }
