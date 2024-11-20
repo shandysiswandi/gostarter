@@ -1,7 +1,7 @@
 # REF: https://gqlgen.com/config/
 
 schema:
-  - todo-gql/*.gql
+  - todo/todo.gql
 
 exec:
   filename: gen-gql/todo/generated.go

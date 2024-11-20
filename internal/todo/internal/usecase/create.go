@@ -17,21 +17,21 @@ type CreateStore interface {
 
 type Create struct {
 	telemetry *telemetry.Telemetry
-	store     CreateStore
-	uidnumber uid.NumberID
 	validator validation.Validator
+	uidnumber uid.NumberID
+	store     CreateStore
 }
 
-func NewCreate(t *telemetry.Telemetry, s CreateStore, v validation.Validator, idgen uid.NumberID) *Create {
+func NewCreate(dep Dependency, s CreateStore) *Create {
 	return &Create{
-		telemetry: t,
+		telemetry: dep.Telemetry,
+		uidnumber: dep.UIDNumber,
+		validator: dep.Validator,
 		store:     s,
-		uidnumber: idgen,
-		validator: v,
 	}
 }
 
-func (s *Create) Execute(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
+func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

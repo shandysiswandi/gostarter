@@ -1,15 +1,14 @@
 package inbound
 
 import (
-	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 )
 
-const msgInvalidBody = "invalid request body"
+var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
 
 type httpEndpoint struct {
 	loginUC          domain.Login
@@ -19,13 +18,13 @@ type httpEndpoint struct {
 	resetPasswordUC  domain.ResetPassword
 }
 
-func (e *httpEndpoint) Login(ctx context.Context, r *http.Request) (any, error) {
+func (e *httpEndpoint) Login(c httpserver.Context) (any, error) {
 	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat(msgInvalidBody)
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
 	}
 
-	resp, err := e.loginUC.Call(ctx, domain.LoginInput{Email: req.Email, Password: req.Password})
+	resp, err := e.loginUC.Call(c.Context(), domain.LoginInput{Email: req.Email, Password: req.Password})
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +37,16 @@ func (e *httpEndpoint) Login(ctx context.Context, r *http.Request) (any, error) 
 	}, nil
 }
 
-func (e *httpEndpoint) Register(ctx context.Context, r *http.Request) (any, error) {
+func (e *httpEndpoint) Register(c httpserver.Context) (any, error) {
 	var req RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat(msgInvalidBody)
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
 	}
 
-	resp, err := e.registerUC.Call(ctx, domain.RegisterInput{Email: req.Email, Password: req.Password})
+	resp, err := e.registerUC.Call(c.Context(), domain.RegisterInput{
+		Email:    req.Email,
+		Password: req.Password,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +54,13 @@ func (e *httpEndpoint) Register(ctx context.Context, r *http.Request) (any, erro
 	return RegisterResponse{Email: resp.Email}, nil
 }
 
-func (e *httpEndpoint) RefreshToken(ctx context.Context, r *http.Request) (any, error) {
+func (e *httpEndpoint) RefreshToken(c httpserver.Context) (any, error) {
 	var req RefreshTokenRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat(msgInvalidBody)
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
 	}
 
-	resp, err := e.refreshTokenUC.Call(ctx, domain.RefreshTokenInput{RefreshToken: req.RefreshToken})
+	resp, err := e.refreshTokenUC.Call(c.Context(), domain.RefreshTokenInput{RefreshToken: req.RefreshToken})
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +73,13 @@ func (e *httpEndpoint) RefreshToken(ctx context.Context, r *http.Request) (any, 
 	}, nil
 }
 
-func (e *httpEndpoint) ForgotPassword(ctx context.Context, r *http.Request) (any, error) {
+func (e *httpEndpoint) ForgotPassword(c httpserver.Context) (any, error) {
 	var req ForgotPasswordRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat(msgInvalidBody)
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
 	}
 
-	resp, err := e.forgotPasswordUC.Call(ctx, domain.ForgotPasswordInput{Email: req.Email})
+	resp, err := e.forgotPasswordUC.Call(c.Context(), domain.ForgotPasswordInput{Email: req.Email})
 	if err != nil {
 		return nil, err
 	}
@@ -85,14 +87,15 @@ func (e *httpEndpoint) ForgotPassword(ctx context.Context, r *http.Request) (any
 	return ForgotPasswordResponse{Email: resp.Email, Message: resp.Message}, nil
 }
 
-func (e *httpEndpoint) ResetPassword(ctx context.Context, r *http.Request) (any, error) {
+func (e *httpEndpoint) ResetPassword(c httpserver.Context) (any, error) {
 	var req ResetPasswordRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat(msgInvalidBody)
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
 	}
 
-	resp, err := e.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
-		Token: req.Token, Password: req.Password,
+	resp, err := e.resetPasswordUC.Call(c.Context(), domain.ResetPasswordInput{
+		Token:    req.Token,
+		Password: req.Password,
 	})
 	if err != nil {
 		return nil, err

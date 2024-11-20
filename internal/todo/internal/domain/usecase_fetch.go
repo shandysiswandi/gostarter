@@ -5,7 +5,7 @@ import (
 )
 
 type Fetch interface {
-	Execute(ctx context.Context, in FetchInput) ([]Todo, error)
+	Call(ctx context.Context, in FetchInput) ([]Todo, error)
 }
 
 type FetchInput struct {

@@ -13,26 +13,53 @@ type RESTSuite struct {
 
 	httpClient *resty.Client
 	baseURL    string
+	token      string
 }
 
 func (rs *RESTSuite) SetupSuite() {
-	// Hook 1: Initialize anything in suite
+	// Hook 1: Initialize anything in this suite
 
 	rs.baseURL = "http://localhost:8081"
 	rs.httpClient = resty.New()
+	rs.token = rs.getAccessToken()
+}
+
+func (rs *RESTSuite) getAccessToken() string {
+	responseBody := struct {
+		AccessToken string `json:"access_token"`
+	}{}
+
+	resp, err := rs.httpClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(map[string]any{
+			"email":    "admin@admin.com",
+			"password": "admin123",
+		}).
+		SetResult(&responseBody).
+		Post(rs.baseURL + "/auth/login")
+
+	rs.Assert().NoError(err)
+	rs.Assert().NotNil(resp)
+
+	if responseBody.AccessToken == "" {
+		rs.T().Fatal("access token is empty", resp, err)
+	}
+
+	return responseBody.AccessToken
 }
 
 func (rs *RESTSuite) TearDownSuite() {
-	// Hook 6: Clean up anything in suite
+	// Hook 6: Clean up anything in this suite
 
 	rs.httpClient = nil
 	rs.baseURL = ""
+	rs.token = ""
 }
 
 // -:::::::::::::-  -:::::::::::::-  -:::::::::::::-  -:::::::::::::-  -:::::::::::::-
 
-func (rs *RESTSuite) TestTodos() {
-	id := uint64(0)
+func (rs *RESTSuite) TestRESTTodos() {
+	var id uint64
 
 	rs.Run("Create", func() {
 		// Arrange
@@ -47,6 +74,7 @@ func (rs *RESTSuite) TestTodos() {
 		// Action
 		resp, err := rs.httpClient.R().
 			SetHeader("Content-Type", "application/json").
+			SetAuthToken(rs.token).
 			SetBody(requestBody).
 			SetResult(&responseBody).
 			Post(rs.baseURL + "/todos")
@@ -77,6 +105,7 @@ func (rs *RESTSuite) TestTodos() {
 		// Action
 		resp, err := rs.httpClient.R().
 			SetHeader("Content-Type", "application/json").
+			SetAuthToken(rs.token).
 			SetPathParam("todoId", strconv.FormatUint(id, 10)).
 			SetBody(requestBody).
 			SetResult(&responseBody).
@@ -107,6 +136,7 @@ func (rs *RESTSuite) TestTodos() {
 		// Action
 		resp, err := rs.httpClient.R().
 			SetHeader("Content-Type", "application/json").
+			SetAuthToken(rs.token).
 			SetPathParam("todoId", strconv.FormatUint(id, 10)).
 			SetBody(requestBody).
 			SetResult(&responseBody).
@@ -133,6 +163,7 @@ func (rs *RESTSuite) TestTodos() {
 
 		// Action
 		resp, err := rs.httpClient.R().
+			SetAuthToken(rs.token).
 			SetPathParam("todoId", strconv.FormatUint(id, 10)).
 			SetResult(&responseBody).
 			Get(rs.baseURL + "/todos/{todoId}")
@@ -165,6 +196,7 @@ func (rs *RESTSuite) TestTodos() {
 
 		// Action
 		resp, err := rs.httpClient.R().
+			SetAuthToken(rs.token).
 			SetResult(&responseBody).
 			Get(rs.baseURL + "/todos")
 
@@ -193,6 +225,7 @@ func (rs *RESTSuite) TestTodos() {
 
 		// Action
 		resp, err := rs.httpClient.R().
+			SetAuthToken(rs.token).
 			SetPathParam("todoId", strconv.FormatUint(id, 10)).
 			SetResult(&responseBody).
 			Delete(rs.baseURL + "/todos/{todoId}")

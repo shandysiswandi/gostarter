@@ -22,12 +22,12 @@ func (_m *MockUpdate) EXPECT() *MockUpdate_Expecter {
 	return &MockUpdate_Expecter{mock: &_m.Mock}
 }
 
-// Execute provides a mock function with given fields: ctx, in
-func (_m *MockUpdate) Execute(ctx context.Context, in domain.UpdateInput) (*domain.Todo, error) {
+// Call provides a mock function with given fields: ctx, in
+func (_m *MockUpdate) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Execute")
+		panic("no return value specified for Call")
 	}
 
 	var r0 *domain.Todo
@@ -52,31 +52,31 @@ func (_m *MockUpdate) Execute(ctx context.Context, in domain.UpdateInput) (*doma
 	return r0, r1
 }
 
-// MockUpdate_Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Execute'
-type MockUpdate_Execute_Call struct {
+// MockUpdate_Call_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Call'
+type MockUpdate_Call_Call struct {
 	*mock.Call
 }
 
-// Execute is a helper method to define mock.On call
+// Call is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in domain.UpdateInput
-func (_e *MockUpdate_Expecter) Execute(ctx interface{}, in interface{}) *MockUpdate_Execute_Call {
-	return &MockUpdate_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
+func (_e *MockUpdate_Expecter) Call(ctx interface{}, in interface{}) *MockUpdate_Call_Call {
+	return &MockUpdate_Call_Call{Call: _e.mock.On("Call", ctx, in)}
 }
 
-func (_c *MockUpdate_Execute_Call) Run(run func(ctx context.Context, in domain.UpdateInput)) *MockUpdate_Execute_Call {
+func (_c *MockUpdate_Call_Call) Run(run func(ctx context.Context, in domain.UpdateInput)) *MockUpdate_Call_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.UpdateInput))
 	})
 	return _c
 }
 
-func (_c *MockUpdate_Execute_Call) Return(_a0 *domain.Todo, _a1 error) *MockUpdate_Execute_Call {
+func (_c *MockUpdate_Call_Call) Return(_a0 *domain.Todo, _a1 error) *MockUpdate_Call_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockUpdate_Execute_Call) RunAndReturn(run func(context.Context, domain.UpdateInput) (*domain.Todo, error)) *MockUpdate_Execute_Call {
+func (_c *MockUpdate_Call_Call) RunAndReturn(run func(context.Context, domain.UpdateInput) (*domain.Todo, error)) *MockUpdate_Call_Call {
 	_c.Call.Return(run)
 	return _c
 }

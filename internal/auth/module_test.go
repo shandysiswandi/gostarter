@@ -13,7 +13,6 @@ func TestNew(t *testing.T) {
 	tests := []struct {
 		name    string
 		dep     func() Dependency
-		want    *Expose
 		wantErr error
 	}{
 		{
@@ -25,7 +24,6 @@ func TestNew(t *testing.T) {
 					Telemetry:  telemetry.NewTelemetry(),
 				}
 			},
-			want:    &Expose{},
 			wantErr: nil,
 		},
 	}
@@ -34,7 +32,7 @@ func TestNew(t *testing.T) {
 			t.Parallel()
 			got, err := New(tt.dep())
 			assert.Equal(t, tt.wantErr, err)
-			assert.Equal(t, tt.want, got)
+			assert.NotNil(t, got)
 		})
 	}
 }

@@ -15,19 +15,19 @@ type UpdateStatusStore interface {
 
 type UpdateStatus struct {
 	telemetry *telemetry.Telemetry
-	store     UpdateStatusStore
 	validator validation.Validator
+	store     UpdateStatusStore
 }
 
-func NewUpdateStatus(t *telemetry.Telemetry, s UpdateStatusStore, v validation.Validator) *UpdateStatus {
+func NewUpdateStatus(dep Dependency, s UpdateStatusStore) *UpdateStatus {
 	return &UpdateStatus{
-		telemetry: t,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
 		store:     s,
-		validator: v,
 	}
 }
 
-func (s *UpdateStatus) Execute(ctx context.Context, in domain.UpdateStatusInput) (
+func (s *UpdateStatus) Call(ctx context.Context, in domain.UpdateStatusInput) (
 	*domain.UpdateStatusOutput, error,
 ) {
 	if err := s.validator.Validate(in); err != nil {

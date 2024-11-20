@@ -5,7 +5,7 @@ import (
 )
 
 type Update interface {
-	Execute(ctx context.Context, in UpdateInput) (*Todo, error)
+	Call(ctx context.Context, in UpdateInput) (*Todo, error)
 }
 
 type UpdateInput struct {

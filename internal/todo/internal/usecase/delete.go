@@ -15,19 +15,19 @@ type DeleteStore interface {
 
 type Delete struct {
 	telemetry *telemetry.Telemetry
-	store     DeleteStore
 	validator validation.Validator
+	store     DeleteStore
 }
 
-func NewDelete(t *telemetry.Telemetry, s DeleteStore, v validation.Validator) *Delete {
+func NewDelete(dep Dependency, s DeleteStore) *Delete {
 	return &Delete{
-		telemetry: t,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
 		store:     s,
-		validator: v,
 	}
 }
 
-func (s *Delete) Execute(ctx context.Context, in domain.DeleteInput) (*domain.DeleteOutput, error) {
+func (s *Delete) Call(ctx context.Context, in domain.DeleteInput) (*domain.DeleteOutput, error) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

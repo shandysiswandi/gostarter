@@ -8,28 +8,30 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewUpdate(t *testing.T) {
 	type args struct {
-		t *telemetry.Telemetry
-		s UpdateStore
-		v validation.Validator
+		dep Dependency
+		s   UpdateStore
 	}
 	tests := []struct {
 		name string
 		args args
 		want *Update
 	}{
-		{name: "Success", args: args{}, want: &Update{}},
+		{
+			name: "Success",
+			args: args{},
+			want: &Update{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewUpdate(tt.args.t, tt.args.s, tt.args.v)
+			got := NewUpdate(tt.args.dep, tt.args.s)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -134,7 +136,7 @@ func TestUpdate_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			s := tt.mockFn(tt.args)
-			got, err := s.Execute(tt.args.ctx, tt.args.in)
+			got, err := s.Call(tt.args.ctx, tt.args.in)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 		})

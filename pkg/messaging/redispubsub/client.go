@@ -122,7 +122,15 @@ func (rc *Client) Subscribe(ctx context.Context, topic, subID string, h messagin
 
 	go func() {
 		defer rc.wg.Done()
+
 		pubsub := rc.client.Subscribe(subCtx, topic)
+		defer pubsub.Close()
+
+		if err := pubsub.Ping(subCtx); err != nil {
+			rc.log.Error(subCtx, "failed to subscribe to topic", err, logger.KeyVal("topic", topic))
+
+			return
+		}
 
 		defer func() {
 			if r := recover(); r != nil {
@@ -141,6 +149,11 @@ func (rc *Client) Subscribe(ctx context.Context, topic, subID string, h messagin
 					)
 				}
 			case <-subCtx.Done():
+				rc.log.Info(subCtx, "subscription canceled",
+					logger.KeyVal("topic", topic),
+					logger.KeyVal("subscription", subID),
+				)
+
 				return
 			}
 		}

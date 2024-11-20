@@ -5,7 +5,7 @@ import (
 )
 
 type Find interface {
-	Execute(ctx context.Context, in FindInput) (*Todo, error)
+	Call(ctx context.Context, in FindInput) (*Todo, error)
 }
 
 type FindInput struct {

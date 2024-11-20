@@ -30,7 +30,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/messaging/redispubsub"
+	"github.com/shandysiswandi/gostarter/pkg/messaging/googlepubsub"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/instrument"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
@@ -202,11 +202,18 @@ func (a *App) initRedis() {
 }
 
 func (a *App) initMessaging() {
-	msg, err := redispubsub.NewClient(
-		"",
-		redispubsub.WithExistingClient(a.redisDB),
-		redispubsub.WithLogger(a.telemetry.Logger()),
-		redispubsub.WithSyncPublisher(),
+	// msg, err := redispubsub.NewClient(
+	// 	"",
+	// 	redispubsub.WithExistingClient(a.redisDB),
+	// 	redispubsub.WithLogger(a.telemetry.Logger()),
+	// 	redispubsub.WithSyncPublisher(),
+	// )
+
+	msg, err := googlepubsub.NewClient(
+		context.Background(),
+		a.config.GetString("pubsub.project.id"),
+		googlepubsub.WithLogger(a.telemetry.Logger()),
+		googlepubsub.WithAutoAck(),
 	)
 	if err != nil {
 		log.Fatalln("failed to init messaging", err)

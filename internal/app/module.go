@@ -43,20 +43,19 @@ func (a *App) moduleAuth() {
 func (a *App) moduleTodo() {
 	if a.config.GetBool("module.flag.todo") {
 		expTodo, err := todo.New(todo.Dependency{
-			Database:       a.database,
-			QueryBuilder:   a.queryBuilder,
-			RedisDB:        a.redisDB,
-			Messaging:      a.messaging,
-			Config:         a.config,
-			UIDNumber:      a.uidNumber,
-			CodecJSON:      a.codecJSON,
-			Validator:      a.validator,
-			ProtoValidator: a.protoValidator,
-			Router:         a.httpRouter,
-			GRPCServer:     a.grpcServer,
-			Telemetry:      a.telemetry,
-			Goroutine:      a.goroutine,
-			JWT:            a.jwt,
+			Database:     a.database,
+			QueryBuilder: a.queryBuilder,
+			RedisDB:      a.redisDB,
+			Messaging:    a.messaging,
+			Config:       a.config,
+			UIDNumber:    a.uidNumber,
+			CodecJSON:    a.codecJSON,
+			Validator:    a.validator,
+			Router:       a.httpRouter,
+			GRPCServer:   a.grpcServer,
+			Telemetry:    a.telemetry,
+			Goroutine:    a.goroutine,
+			JWT:          a.jwt,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module todo", err)

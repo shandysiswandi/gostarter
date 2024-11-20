@@ -78,7 +78,7 @@ gen-proto:
 
 # gen-gql: Generates GraphQL files in the 'api' directory using gqlgen, clearing any existing 'gen-gql' directory.
 gen-gql:
-	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.49 generate
+	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.56 generate
 
 # gen-mock: Generates mock files for interfaces using mockery, facilitating mock-based testing.
 gen-mock:

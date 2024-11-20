@@ -1,7 +1,7 @@
-package http
+package inbound
 
 type Todo struct {
-	ID          uint64 `json:"id"`
+	ID          uint64 `json:"id,string"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
@@ -15,7 +15,7 @@ type (
 	}
 
 	CreateResponse struct {
-		ID uint64 `json:"id"`
+		ID uint64 `json:"id,string"`
 	}
 )
 
@@ -26,7 +26,7 @@ type (
 	}
 
 	DeleteResponse struct {
-		ID uint64 `json:"id"`
+		ID uint64 `json:"id,string"`
 	}
 )
 
@@ -37,7 +37,7 @@ type (
 	}
 
 	FindResponse struct {
-		ID          uint64 `json:"id"`
+		ID          uint64 `json:"id,string"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Status      string `json:"status"`
@@ -65,7 +65,7 @@ type (
 	}
 
 	UpdateStatusResponse struct {
-		ID     uint64 `json:"id"`
+		ID     uint64 `json:"id,string"`
 		Status string `json:"status"`
 	}
 )
@@ -79,7 +79,7 @@ type (
 	}
 
 	UpdateResponse struct {
-		ID          uint64 `json:"id"`
+		ID          uint64 `json:"id,string"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Status      string `json:"status"`

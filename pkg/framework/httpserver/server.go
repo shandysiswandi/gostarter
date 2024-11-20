@@ -21,7 +21,7 @@ const (
 )
 
 // Handler defines the type for endpoint handlers with context, request, and response writer.
-type Handler func(context.Context, *http.Request) (any, error)
+type Handler func(Context) (any, error)
 
 // Middleware defines the type for middleware functions.
 type Middleware func(http.Handler) http.Handler
@@ -55,16 +55,16 @@ func New() *Router {
 
 func (r *Router) Endpoint(method, path string, h Handler, mws ...Middleware) {
 	hm := chainMiddleware(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		ctx := req.Context()
+		cc := &routerCtx{r: req}
 
-		res, err := h(ctx, req)
+		res, err := h(cc)
 		if err != nil {
-			r.errorCodec(ctx, w, err)
+			r.errorCodec(cc.Request().Context(), w, err)
 
 			return
 		}
 
-		if err := r.resultCodec(ctx, w, res); err != nil {
+		if err := r.resultCodec(cc.Request().Context(), w, res); err != nil {
 			http.Error(w, msgInternal, http.StatusInternalServerError)
 
 			return

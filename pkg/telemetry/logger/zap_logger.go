@@ -127,10 +127,20 @@ func (z *ZapLogger) withTelemetry(ctx context.Context) []zap.Field {
 
 	spanCtx := trace.SpanFromContext(ctx).SpanContext()
 
+	sid := spanCtx.SpanID().String()
+	if sid == "0000000000000000" {
+		sid = ""
+	}
+
+	tid := spanCtx.TraceID().String()
+	if tid == "00000000000000000000000000000000" {
+		tid = ""
+	}
+
 	return []zap.Field{
 		zap.String(correlationIDLabel, requestid.Get(ctx)),
-		zap.String(spanIDLabel, spanCtx.SpanID().String()),
-		zap.String(traceIDLabel, spanCtx.TraceID().String()),
+		zap.String(spanIDLabel, sid),
+		zap.String(traceIDLabel, tid),
 	}
 }
 

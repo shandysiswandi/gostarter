@@ -2,55 +2,55 @@ package job
 
 import (
 	"context"
-	"log"
-	"time"
+	"fmt"
 
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/messaging"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
-type TodoPublisher struct {
-	MsgClient messaging.Client
-	Tel       *telemetry.Telemetry
+type todoPublisher struct {
+	cjson codec.Codec
+	mc    messaging.Client
+	tel   *telemetry.Telemetry
+	topic string
 }
 
-func (e *TodoPublisher) Start() error {
-	ctx := context.Background()
-	e.Tel.Logger().Debug(ctx, "starting publish to todo topic")
+func (e *todoPublisher) Start() error {
+	ctx, span := e.tel.Tracer().Start(context.Background(), "job.todoPublisher.Start")
+	defer span.End()
+
+	e.tel.Logger().Info(ctx, "todo publisher has started")
 
 	go func() {
-		for range 10 {
-			err := e.MsgClient.Publish(ctx, "topic", &messaging.Data{Msg: []byte(`{"msg":"hello world"}`)})
+		messages := make([]*messaging.Data, 0, 10)
+		for i := range 10 {
+			index := i + 1
+			todo := domain.Todo{
+				Title:       fmt.Sprintf("title from publisher %d", index),
+				Description: fmt.Sprintf("description from publisher %d, this only for example", index),
+			}
+
+			bt, err := e.cjson.Encode(todo)
 			if err != nil {
+				e.tel.Logger().Error(ctx, "failed encode to json", err)
+
 				return
 			}
 
-			time.Sleep(time.Second * 5)
+			messages = append(messages, &messaging.Data{Msg: bt, Attributes: nil})
 		}
 
-		err := e.MsgClient.BulkPublish(ctx, "topic", []*messaging.Data{
-			{
-				Msg:        []byte(`{"msg":"hello world 1"}`),
-				Attributes: nil,
-			},
-			{
-				Msg:        []byte(`{"msg":"hello world 2"}`),
-				Attributes: nil,
-			},
-			{
-				Msg:        []byte(`{"msg":"hello world  3"}`),
-				Attributes: nil,
-			},
-			{
-				Msg:        []byte(`{"msg":"hello world 4"}`),
-				Attributes: nil,
-			},
-			{
-				Msg:        []byte(`{"msg":"hello world 5"}`),
-				Attributes: nil,
-			},
-		})
-		if err != nil {
+		if err := e.mc.Publish(ctx, e.topic, messages[0]); err != nil {
+			e.tel.Logger().Error(ctx, "failed publish message", err)
+
+			return
+		}
+
+		if err := e.mc.BulkPublish(ctx, e.topic, messages[1:]); err != nil {
+			e.tel.Logger().Error(ctx, "failed bulk publish message", err)
+
 			return
 		}
 	}()
@@ -58,8 +58,8 @@ func (e *TodoPublisher) Start() error {
 	return nil
 }
 
-func (e *TodoPublisher) Stop(context.Context) error {
-	log.Println("example job stop")
+func (e *todoPublisher) Stop(ctx context.Context) error {
+	e.tel.Logger().Info(ctx, "todo publisher has stopped")
 
 	return nil
 }

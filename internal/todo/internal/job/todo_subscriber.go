@@ -2,33 +2,44 @@ package job
 
 import (
 	"context"
-	"log"
 
+	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/messaging"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
-type TodoSubscriber struct {
-	MsgClient messaging.Client
-	Tel       *telemetry.Telemetry
+type todoSubscriber struct {
+	cjson               codec.Codec
+	mc                  messaging.Client
+	tel                 *telemetry.Telemetry
+	createUC            domain.Create
+	topic, subscription string
 }
 
-func (e *TodoSubscriber) Start() error {
+func (e *todoSubscriber) Start() error {
 	ctx := context.Background()
-	e.Tel.Logger().Debug(ctx, "starting subscription to todo topic")
+	e.tel.Logger().Info(ctx, "todo subscriber has started")
 
-	fn := func(ctx context.Context, data *messaging.Data) error {
-		log.Println("ctx", ctx)
-		log.Println("data", data)
+	return e.mc.Subscribe(ctx, e.topic, e.subscription, e.do)
+}
 
-		return nil
+func (e *todoSubscriber) do(ctx context.Context, data *messaging.Data) error {
+	var todo domain.Todo
+	if err := e.cjson.Decode(data.Msg, &todo); err != nil {
+		return err
 	}
 
-	return e.MsgClient.Subscribe(ctx, "topic", "subID", fn)
+	_, err := e.createUC.Call(ctx, domain.CreateInput{
+		Title:       todo.Title,
+		Description: todo.Description,
+	})
+
+	return err
 }
 
-func (e *TodoSubscriber) Stop(context.Context) error {
-	log.Println("example job stop")
+func (e *todoSubscriber) Stop(ctx context.Context) error {
+	e.tel.Logger().Info(ctx, "todo subscriber has stopped")
 
 	return nil
 }

@@ -13,6 +13,7 @@ type GQLSuite struct {
 	httpClient *resty.Client
 	baseURL    string
 	idTodo     *string
+	token      string
 }
 
 func (gs *GQLSuite) SetupSuite() {
@@ -21,6 +22,31 @@ func (gs *GQLSuite) SetupSuite() {
 	gs.baseURL = "http://localhost:8081"
 	gs.httpClient = resty.New()
 	gs.idTodo = new(string)
+	gs.token = gs.getAccessToken()
+}
+
+func (gs *GQLSuite) getAccessToken() string {
+	responseBody := struct {
+		AccessToken string `json:"access_token"`
+	}{}
+
+	resp, err := gs.httpClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(map[string]any{
+			"email":    "admin@admin.com",
+			"password": "admin123",
+		}).
+		SetResult(&responseBody).
+		Post(gs.baseURL + "/auth/login")
+
+	gs.Assert().NoError(err)
+	gs.Assert().NotNil(resp)
+
+	if responseBody.AccessToken == "" {
+		gs.T().Fatal("access token is empty", resp, err)
+	}
+
+	return responseBody.AccessToken
 }
 
 func (gs *GQLSuite) TearDownSuite() {
@@ -28,23 +54,23 @@ func (gs *GQLSuite) TearDownSuite() {
 
 	gs.httpClient = nil
 	gs.baseURL = ""
+	gs.idTodo = nil
+	gs.token = ""
 }
 
 // -:::::::::::::-  -:::::::::::::-  -:::::::::::::-  -:::::::::::::-  -:::::::::::::-
 
-func (gs *GQLSuite) TestTodos() {
+func (gs *GQLSuite) TestGQLTodos() {
 	tests := []struct {
 		name  string
-		query func(id string) string
+		query func() string
 		cb    func(data any)
 	}{
 		{
 			name: "CREATE",
-			query: func(id string) string {
+			query: func() string {
 				return `mutation{
-					create(in: {title: "some title gql", description: "some description gql" }) { 
-						id title description status 
-					}
+					create(in: {title: "some title gql", description: "some description gql" })
 				}`
 			},
 			cb: func(v any) {
@@ -53,19 +79,19 @@ func (gs *GQLSuite) TestTodos() {
 					return
 				}
 
-				obj, ok := data["create"].(map[string]any)
+				obj, ok := data["create"].(string)
 				if !ok {
 					return
 				}
 
-				*gs.idTodo = obj["id"].(string)
+				*gs.idTodo = obj
 			},
 		},
 		{
 			name: "UPDATE_STATUS",
-			query: func(id string) string {
+			query: func() string {
 				return `mutation{
-					updateStatus(id: "` + id + `", status: DONE) {
+					updateStatus(in: { id: "` + *gs.idTodo + `", status: IN_PROGRESS }) {
 						id status
 					}
 				}`
@@ -73,12 +99,12 @@ func (gs *GQLSuite) TestTodos() {
 		},
 		{
 			name: "UPDATE",
-			query: func(id string) string {
+			query: func() string {
 				return `mutation{
-					update(
-						id: "` + id + `", in: {
-						title: "update title gql", 
-						description: "update description gql", 
+					update(in: {
+						id: "` + *gs.idTodo + `",
+						title: "update title gql",
+						description: "update description gql",
 						status: DROP
 					}) { id title description status }
 				}`
@@ -86,22 +112,22 @@ func (gs *GQLSuite) TestTodos() {
 		},
 		{
 			name: "FIND",
-			query: func(id string) string {
+			query: func() string {
 				return `query{
-					find(id: "` + id + `") { id title description status }
+					find(id: "` + *gs.idTodo + `") { id title description status }
 				}`
 			},
 		},
 		{
 			name: "FETCH",
-			query: func(id string) string {
+			query: func() string {
 				return `query{ fetch{ id title description status } }`
 			},
 		},
 		{
 			name: "DELETE",
-			query: func(id string) string {
-				return `mutation{ delete(id: "` + id + `") }`
+			query: func() string {
+				return `mutation{ delete(id: "` + *gs.idTodo + `") }`
 			},
 		},
 	}
@@ -110,7 +136,7 @@ func (gs *GQLSuite) TestTodos() {
 		gs.Run(tt.name, func() {
 			// Arrange
 			var result map[string]any
-			query := map[string]any{"query": tt.query(*gs.idTodo)}
+			query := map[string]any{"query": tt.query()}
 			requestBody, err := json.Marshal(query)
 			if err != nil {
 				gs.Assert().NoError(err, "json.Marshal cannot be error")
@@ -120,6 +146,7 @@ func (gs *GQLSuite) TestTodos() {
 			resp, err := gs.httpClient.R().
 				SetHeader("Content-Type", "application/json").
 				SetHeader("Accept", "application/json").
+				SetAuthToken(gs.token).
 				SetBody(requestBody).
 				SetResult(&result).
 				SetError(&result).

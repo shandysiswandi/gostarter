@@ -13,20 +13,24 @@ import (
 
 func TestNewFetch(t *testing.T) {
 	type args struct {
-		t *telemetry.Telemetry
-		s FetchStore
+		dep Dependency
+		s   FetchStore
 	}
 	tests := []struct {
 		name string
 		args args
 		want *Fetch
 	}{
-		{name: "Success", args: args{}, want: &Fetch{}},
+		{
+			name: "Success",
+			args: args{},
+			want: &Fetch{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewFetch(tt.args.t, tt.args.s)
+			got := NewFetch(tt.args.dep, tt.args.s)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -105,7 +109,7 @@ func TestFetch_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			s := tt.mockFn(tt.args)
-			got, err := s.Execute(tt.args.ctx, tt.args.in)
+			got, err := s.Call(tt.args.ctx, tt.args.in)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 		})

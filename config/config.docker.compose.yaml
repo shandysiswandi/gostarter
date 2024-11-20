@@ -6,6 +6,8 @@ telemetry.otlp.address: localhost:4318
 
 tz: "Asia/Jakarta"
 
+pubsub.project.id: "google project id"
+
 database.driver: mysql
 database.user: developer
 database.pass: secret_password
@@ -23,6 +25,7 @@ jwt.private.key: base64ofprivatekey
 jwt.hash.secret: secret
 
 feature.flag.graphql.playground: false
+feature.flag.todo.job: true
 
 module.flag.auth: true
 module.flag.user: true

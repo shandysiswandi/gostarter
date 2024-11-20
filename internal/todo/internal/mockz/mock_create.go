@@ -22,12 +22,12 @@ func (_m *MockCreate) EXPECT() *MockCreate_Expecter {
 	return &MockCreate_Expecter{mock: &_m.Mock}
 }
 
-// Execute provides a mock function with given fields: ctx, in
-func (_m *MockCreate) Execute(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
+// Call provides a mock function with given fields: ctx, in
+func (_m *MockCreate) Call(ctx context.Context, in domain.CreateInput) (*domain.CreateOutput, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Execute")
+		panic("no return value specified for Call")
 	}
 
 	var r0 *domain.CreateOutput
@@ -52,31 +52,31 @@ func (_m *MockCreate) Execute(ctx context.Context, in domain.CreateInput) (*doma
 	return r0, r1
 }
 
-// MockCreate_Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Execute'
-type MockCreate_Execute_Call struct {
+// MockCreate_Call_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Call'
+type MockCreate_Call_Call struct {
 	*mock.Call
 }
 
-// Execute is a helper method to define mock.On call
+// Call is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in domain.CreateInput
-func (_e *MockCreate_Expecter) Execute(ctx interface{}, in interface{}) *MockCreate_Execute_Call {
-	return &MockCreate_Execute_Call{Call: _e.mock.On("Execute", ctx, in)}
+func (_e *MockCreate_Expecter) Call(ctx interface{}, in interface{}) *MockCreate_Call_Call {
+	return &MockCreate_Call_Call{Call: _e.mock.On("Call", ctx, in)}
 }
 
-func (_c *MockCreate_Execute_Call) Run(run func(ctx context.Context, in domain.CreateInput)) *MockCreate_Execute_Call {
+func (_c *MockCreate_Call_Call) Run(run func(ctx context.Context, in domain.CreateInput)) *MockCreate_Call_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.CreateInput))
 	})
 	return _c
 }
 
-func (_c *MockCreate_Execute_Call) Return(_a0 *domain.CreateOutput, _a1 error) *MockCreate_Execute_Call {
+func (_c *MockCreate_Call_Call) Return(_a0 *domain.CreateOutput, _a1 error) *MockCreate_Call_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockCreate_Execute_Call) RunAndReturn(run func(context.Context, domain.CreateInput) (*domain.CreateOutput, error)) *MockCreate_Execute_Call {
+func (_c *MockCreate_Call_Call) RunAndReturn(run func(context.Context, domain.CreateInput) (*domain.CreateOutput, error)) *MockCreate_Call_Call {
 	_c.Call.Return(run)
 	return _c
 }

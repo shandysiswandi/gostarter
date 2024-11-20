@@ -15,19 +15,19 @@ type UpdateStore interface {
 
 type Update struct {
 	telemetry *telemetry.Telemetry
-	store     UpdateStore
 	validator validation.Validator
+	store     UpdateStore
 }
 
-func NewUpdate(t *telemetry.Telemetry, s UpdateStore, v validation.Validator) *Update {
+func NewUpdate(dep Dependency, s UpdateStore) *Update {
 	return &Update{
-		telemetry: t,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
 		store:     s,
-		validator: v,
 	}
 }
 
-func (s *Update) Execute(ctx context.Context, in domain.UpdateInput) (*domain.Todo, error) {
+func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo, error) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

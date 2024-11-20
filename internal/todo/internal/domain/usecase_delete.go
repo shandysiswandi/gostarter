@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Delete interface {
-	Execute(ctx context.Context, in DeleteInput) (*DeleteOutput, error)
+	Call(ctx context.Context, in DeleteInput) (*DeleteOutput, error)
 }
 
 type DeleteInput struct {

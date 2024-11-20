@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Create interface {
-	Execute(ctx context.Context, in CreateInput) (*CreateOutput, error)
+	Call(ctx context.Context, in CreateInput) (*CreateOutput, error)
 }
 
 type CreateInput struct {

@@ -17,14 +17,14 @@ type Fetch struct {
 	store     FetchStore
 }
 
-func NewFetch(t *telemetry.Telemetry, s FetchStore) *Fetch {
+func NewFetch(dep Dependency, s FetchStore) *Fetch {
 	return &Fetch{
-		telemetry: t,
+		telemetry: dep.Telemetry,
 		store:     s,
 	}
 }
 
-func (s *Fetch) Execute(ctx context.Context, in domain.FetchInput) ([]domain.Todo, error) {
+func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) ([]domain.Todo, error) {
 	filter := map[string]string{
 		"id":          in.ID,
 		"title":       in.Title,

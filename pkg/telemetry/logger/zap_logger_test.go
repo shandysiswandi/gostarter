@@ -203,6 +203,18 @@ func TestZapLogger_Debug(t *testing.T) {
 		mockFn func(a args) *ZapLogger
 	}{
 		{
+			name: "SuccessButContextNil",
+			args: args{
+				ctx:     nil,
+				message: "debug",
+				fields:  []Field{},
+			},
+			mockFn: func(a args) *ZapLogger {
+				z, _ := NewZapLogger()
+				return z
+			},
+		},
+		{
 			name: "Success",
 			args: args{
 				ctx:     context.Background(),

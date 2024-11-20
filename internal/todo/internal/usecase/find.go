@@ -15,19 +15,19 @@ type FindStore interface {
 
 type Find struct {
 	telemetry *telemetry.Telemetry
-	store     FindStore
 	validator validation.Validator
+	store     FindStore
 }
 
-func NewFind(t *telemetry.Telemetry, s FindStore, v validation.Validator) *Find {
+func NewFind(dep Dependency, s FindStore) *Find {
 	return &Find{
-		telemetry: t,
+		telemetry: dep.Telemetry,
+		validator: dep.Validator,
 		store:     s,
-		validator: v,
 	}
 }
 
-func (s *Find) Execute(ctx context.Context, in domain.FindInput) (*domain.Todo, error) {
+func (s *Find) Call(ctx context.Context, in domain.FindInput) (*domain.Todo, error) {
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
