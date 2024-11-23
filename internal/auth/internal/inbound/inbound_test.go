@@ -3,7 +3,7 @@ package inbound
 import (
 	"testing"
 
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"google.golang.org/grpc"
 )
 
@@ -15,7 +15,7 @@ func TestInbound_RegisterAuthServiceServer(t *testing.T) {
 		{
 			name: "Success",
 			in: Inbound{
-				Router:           httpserver.New(),
+				Router:           framework.New(),
 				GRPCServer:       grpc.NewServer(),
 				LoginUC:          nil,
 				RegisterUC:       nil,

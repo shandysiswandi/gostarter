@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 )
 
@@ -18,7 +18,7 @@ type httpEndpoint struct {
 	resetPasswordUC  domain.ResetPassword
 }
 
-func (e *httpEndpoint) Login(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Login(c framework.Context) (any, error) {
 	var req LoginRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -37,7 +37,7 @@ func (e *httpEndpoint) Login(c httpserver.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) Register(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Register(c framework.Context) (any, error) {
 	var req RegisterRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -54,7 +54,7 @@ func (e *httpEndpoint) Register(c httpserver.Context) (any, error) {
 	return RegisterResponse{Email: resp.Email}, nil
 }
 
-func (e *httpEndpoint) RefreshToken(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
 	var req RefreshTokenRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -73,7 +73,7 @@ func (e *httpEndpoint) RefreshToken(c httpserver.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) ForgotPassword(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) ForgotPassword(c framework.Context) (any, error) {
 	var req ForgotPasswordRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -87,7 +87,7 @@ func (e *httpEndpoint) ForgotPassword(c httpserver.Context) (any, error) {
 	return ForgotPasswordResponse{Email: resp.Email, Message: resp.Message}, nil
 }
 
-func (e *httpEndpoint) ResetPassword(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) ResetPassword(c framework.Context) (any, error) {
 	var req ResetPasswordRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody

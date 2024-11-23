@@ -1,4 +1,5 @@
 server.address.http: :8081
+server.address.gql: :8181
 server.address.grpc: :50001
 
 telemetry.name: gostarter

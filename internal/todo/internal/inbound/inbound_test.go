@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	mockConfig "github.com/shandysiswandi/gostarter/pkg/config/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +24,8 @@ func TestInbound_RegisterTodoServiceServer(t *testing.T) {
 
 				return Inbound{
 					Config:         configMock,
-					Router:         httpserver.New(),
+					Router:         framework.New(),
+					GQLRouter:      framework.New(),
 					GRPCServer:     grpc.NewServer(),
 					CodecJSON:      nil,
 					CreateUC:       nil,

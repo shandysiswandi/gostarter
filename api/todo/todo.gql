@@ -9,7 +9,7 @@ type Mutation {
   create(in: CreateInput!): String!
   delete(id: String!): String!
   updateStatus(in: UpdateStatusInput!): UpdateStatusOutput!
-  update(in: UpdateInput!): UpdateOutput!
+  update(in: UpdateInput!): Todo!
 }
 
 # type ...........................
@@ -59,12 +59,5 @@ input UpdateInput {
 
 type UpdateStatusOutput {
   id: String!
-  status: Status!
-}
-
-type UpdateOutput {
-  id: String!
-  title: String!
-  description: String!
   status: Status!
 }

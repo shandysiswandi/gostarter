@@ -8,7 +8,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -23,7 +23,7 @@ type Dependency struct {
 	Database     *sql.DB
 	QueryBuilder goqu.DialectWrapper
 	Telemetry    *telemetry.Telemetry
-	Router       *httpserver.Router
+	Router       *framework.Router
 	GRPCServer   *grpc.Server
 	Validator    validation.Validator
 	UIDNumber    uid.NumberID

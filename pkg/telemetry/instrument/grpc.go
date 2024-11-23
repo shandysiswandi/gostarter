@@ -15,7 +15,7 @@ import (
 func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string) []grpc.ServerOption {
 	var opts []grpc.ServerOption
 
-	ins := &instarumentGRPCServer{uuid: sid, tel: tel}
+	ins := &grpcServer{uuid: sid, tel: tel}
 
 	switch tel.TracerCollector() {
 	case telemetry.OPENTELEMETRY:
@@ -25,7 +25,7 @@ func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string
 			otelgrpc.WithTracerProvider(tracerProvider),
 		)
 
-		opts = append(opts, grpc.UnaryInterceptor(ins.logging), grpc.StatsHandler(statsHandler))
+		opts = append(opts, grpc.UnaryInterceptor(ins.log), grpc.StatsHandler(statsHandler))
 
 		return opts
 
@@ -37,14 +37,14 @@ func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string
 	}
 }
 
-type instarumentGRPCServer struct {
+type grpcServer struct {
 	uuid func() string
 	tel  *telemetry.Telemetry
 }
 
-func (ins *instarumentGRPCServer) logging(ctx context.Context, req any, info *grpc.UnaryServerInfo,
-	h grpc.UnaryHandler,
-) (any, error) {
+func (ins *grpcServer) log(ctx context.Context, req any, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (
+	any, error,
+) {
 	ctx = ins.requestID(ctx)
 
 	resp, err := h(ctx, req)
@@ -58,7 +58,7 @@ func (ins *instarumentGRPCServer) logging(ctx context.Context, req any, info *gr
 	return resp, err
 }
 
-func (ins *instarumentGRPCServer) requestID(ctx context.Context) context.Context {
+func (ins *grpcServer) requestID(ctx context.Context) context.Context {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ctx

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	configMock "github.com/shandysiswandi/gostarter/pkg/config/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 )
@@ -26,7 +26,8 @@ func TestNew(t *testing.T) {
 
 				return Dependency{
 					Config:     mc,
-					Router:     httpserver.New(),
+					Router:     framework.New(),
+					GQLRouter:  framework.New(),
 					GRPCServer: grpc.NewServer(),
 				}
 			},

@@ -8,7 +8,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,16 +16,16 @@ import (
 func Test_httpEndpoint_Login(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/login", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/login", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -36,9 +36,9 @@ func Test_httpEndpoint_Login(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/login", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/login", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -58,9 +58,9 @@ func Test_httpEndpoint_Login(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/login", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/login", body)
 				return c.Build()
 			},
 			want: LoginResponse{
@@ -104,16 +104,16 @@ func Test_httpEndpoint_Login(t *testing.T) {
 func Test_httpEndpoint_Register(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/register", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/register", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -125,9 +125,9 @@ func Test_httpEndpoint_Register(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/register", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/register", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -147,9 +147,9 @@ func Test_httpEndpoint_Register(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/register", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/register", body)
 				return c.Build()
 			},
 			want:    RegisterResponse{Email: "email"},
@@ -183,16 +183,16 @@ func Test_httpEndpoint_Register(t *testing.T) {
 func Test_httpEndpoint_RefreshToken(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -204,9 +204,9 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"refresh_token":"token"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -226,9 +226,9 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"refresh_token":"token"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/refresh-token", body)
 				return c.Build()
 			},
 			want: RefreshTokenResponse{
@@ -272,16 +272,16 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -292,9 +292,9 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -314,9 +314,9 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"email":"email"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/forgot-password", body)
 				return c.Build()
 			},
 			want: ForgotPasswordResponse{
@@ -356,16 +356,16 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 func Test_httpEndpoint_ResetPassword(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/reset-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/reset-password", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -377,9 +377,9 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"token":"token","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/reset-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/reset-password", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -399,9 +399,9 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"token":"token","password":"password"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/auth/reset-password", body)
+				c := framework.NewTestContext(http.MethodPost, "/auth/reset-password", body)
 				return c.Build()
 			},
 			want:    ResetPasswordResponse{Message: "message"},

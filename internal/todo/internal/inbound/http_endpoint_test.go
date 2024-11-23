@@ -8,23 +8,23 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_httpEndpoint_Create(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPost, "/todos", body)
+				c := framework.NewTestContext(http.MethodPost, "/todos", body)
 
 				return c.Build()
 			},
@@ -36,9 +36,9 @@ func Test_httpEndpoint_Create(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"title":"title","description":"description"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/todos", body)
+				c := framework.NewTestContext(http.MethodPost, "/todos", body)
 
 				return c.Build()
 			},
@@ -59,9 +59,9 @@ func Test_httpEndpoint_Create(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"title":"title","description":"description"}`)
-				c := httpserver.NewTestContext(http.MethodPost, "/todos", body)
+				c := framework.NewTestContext(http.MethodPost, "/todos", body)
 
 				return c.Build()
 			},
@@ -97,15 +97,15 @@ func Test_httpEndpoint_Create(t *testing.T) {
 func Test_httpEndpoint_Delete(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorParseToUint",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodDelete, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodDelete, "/todos/1", nil)
 				c.SetParam("id", "n/a")
 
 				return c.Build()
@@ -121,8 +121,8 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodPost, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodPost, "/todos/1", nil)
 				c.SetParam("id", "1")
 
 				return c.Build()
@@ -144,8 +144,8 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodPost, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodPost, "/todos/1", nil)
 				c.SetParam("id", "1")
 
 				return c.Build()
@@ -182,15 +182,15 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 func Test_httpEndpoint_Find(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorParseToUint",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodGet, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodGet, "/todos/1", nil)
 				c.SetParam("id", "n/a")
 
 				return c.Build()
@@ -203,8 +203,8 @@ func Test_httpEndpoint_Find(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodGet, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodGet, "/todos/1", nil)
 				c.SetParam("id", "11")
 
 				return c.Build()
@@ -226,8 +226,8 @@ func Test_httpEndpoint_Find(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodGet, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodGet, "/todos/1", nil)
 				c.SetParam("id", "11")
 
 				return c.Build()
@@ -274,15 +274,15 @@ func Test_httpEndpoint_Find(t *testing.T) {
 func Test_httpEndpoint_Fetch(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodGet, "/todos", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodGet, "/todos", nil)
 				c.SetQuery("id", "11")
 				c.SetQuery("title", "title")
 				c.SetQuery("description", "description")
@@ -312,8 +312,8 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodGet, "/todos", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodGet, "/todos", nil)
 				c.SetQuery("id", "11")
 				c.SetQuery("title", "title")
 				c.SetQuery("description", "description")
@@ -368,15 +368,15 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorParseToUint",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodPatch, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodPatch, "/todos/1", nil)
 				c.SetParam("id", "n/a")
 
 				return c.Build()
@@ -392,9 +392,9 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 		},
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPatch, "/todos/1", body)
+				c := framework.NewTestContext(http.MethodPatch, "/todos/1", body)
 				c.SetParam("id", "2")
 
 				return c.Build()
@@ -407,9 +407,9 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"status":"done"}`)
-				c := httpserver.NewTestContext(http.MethodPatch, "/todos/2", body)
+				c := framework.NewTestContext(http.MethodPatch, "/todos/2", body)
 				c.SetParam("id", "2")
 
 				return c.Build()
@@ -431,9 +431,9 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"status":"done"}`)
-				c := httpserver.NewTestContext(http.MethodPatch, "/todos/2", body)
+				c := framework.NewTestContext(http.MethodPatch, "/todos/2", body)
 				c.SetParam("id", "2")
 
 				return c.Build()
@@ -470,15 +470,15 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 func Test_httpEndpoint_Update(t *testing.T) {
 	tests := []struct {
 		name    string
-		c       func() httpserver.Context
+		c       func() framework.Context
 		want    any
 		wantErr error
 		mockFn  func(ctx context.Context) *httpEndpoint
 	}{
 		{
 			name: "ErrorParseToUint",
-			c: func() httpserver.Context {
-				c := httpserver.NewTestContext(http.MethodPut, "/todos/1", nil)
+			c: func() framework.Context {
+				c := framework.NewTestContext(http.MethodPut, "/todos/1", nil)
 				c.SetParam("id", "n/a")
 
 				return c.Build()
@@ -494,9 +494,9 @@ func Test_httpEndpoint_Update(t *testing.T) {
 		},
 		{
 			name: "ErrorDecodeBody",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := httpserver.NewTestContext(http.MethodPut, "/todos/2", body)
+				c := framework.NewTestContext(http.MethodPut, "/todos/2", body)
 				c.SetParam("id", "2")
 
 				return c.Build()
@@ -509,9 +509,9 @@ func Test_httpEndpoint_Update(t *testing.T) {
 		},
 		{
 			name: "ErrorCallUC",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"title":"title","description":"description","status":"done"}`)
-				c := httpserver.NewTestContext(http.MethodPut, "/todos/2", body)
+				c := framework.NewTestContext(http.MethodPut, "/todos/2", body)
 				c.SetParam("id", "2")
 
 				return c.Build()
@@ -538,9 +538,9 @@ func Test_httpEndpoint_Update(t *testing.T) {
 		},
 		{
 			name: "Success",
-			c: func() httpserver.Context {
+			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"title":"title","description":"description","status":"done"}`)
-				c := httpserver.NewTestContext(http.MethodPut, "/todos/2", body)
+				c := framework.NewTestContext(http.MethodPut, "/todos/2", body)
 				c.SetParam("id", "2")
 
 				return c.Build()

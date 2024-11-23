@@ -38,10 +38,9 @@ type tokenGenSaver struct {
 }
 
 type tokenGenSaverIn struct {
-	ctx     context.Context
 	email   string
-	tokenId uint64
-	userId  uint64
+	tokenID uint64
+	userID  uint64
 }
 
 type tokenGenSaverOut struct {
@@ -51,13 +50,13 @@ type tokenGenSaverOut struct {
 	refreshExpiresIn int64 // in seconds
 }
 
-func (tgs *tokenGenSaver) do(in tokenGenSaverIn) (*tokenGenSaverOut, error) {
+func (tgs *tokenGenSaver) do(ctx context.Context, in tokenGenSaverIn) (*tokenGenSaverOut, error) {
 	now := tgs.clock.Now()
 
 	acClaim := jwt.NewClaim(in.email, time.Hour, now, []string{"gostarter.access.token"})
 	accToken, err := tgs.jwt.Generate(acClaim)
 	if err != nil {
-		tgs.tel.Logger().Error(in.ctx, "failed to generate access token", err)
+		tgs.tel.Logger().Error(ctx, "failed to generate access token", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
@@ -65,35 +64,35 @@ func (tgs *tokenGenSaver) do(in tokenGenSaverIn) (*tokenGenSaverOut, error) {
 	refClaim := jwt.NewClaim(in.email, time.Hour*24, now, []string{"gostarter.refresh.token"})
 	refToken, err := tgs.jwt.Generate(refClaim)
 	if err != nil {
-		tgs.tel.Logger().Error(in.ctx, "failed to generate refresh token", err)
+		tgs.tel.Logger().Error(ctx, "failed to generate refresh token", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	acHash, err := tgs.secHash.Hash(accToken)
 	if err != nil {
-		tgs.tel.Logger().Error(in.ctx, "failed to hash access token", err)
+		tgs.tel.Logger().Error(ctx, "failed to hash access token", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	refHash, err := tgs.secHash.Hash(refToken)
 	if err != nil {
-		tgs.tel.Logger().Error(in.ctx, "failed to hash refresh token", err)
+		tgs.tel.Logger().Error(ctx, "failed to hash refresh token", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	token := domain.Token{
-		ID:               in.tokenId,
-		UserID:           in.userId,
+		ID:               in.tokenID,
+		UserID:           in.userID,
 		AccessToken:      string(acHash),
 		RefreshToken:     string(refHash),
 		AccessExpiredAt:  acClaim.ExpiresAt.Time,
 		RefreshExpiredAt: refClaim.ExpiresAt.Time,
 	}
-	if err := tgs.ts.SaveToken(in.ctx, token); err != nil {
-		tgs.tel.Logger().Error(in.ctx, "failed to save tokens", err, logger.KeyVal("email", in.email))
+	if err := tgs.ts.SaveToken(ctx, token); err != nil {
+		tgs.tel.Logger().Error(ctx, "failed to save tokens", err, logger.KeyVal("email", in.email))
 
 		return nil, goerror.NewServerInternal(err)
 	}

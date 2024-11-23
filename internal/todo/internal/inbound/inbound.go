@@ -9,19 +9,20 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/framework/gql"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
-	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"google.golang.org/grpc"
 )
 
-var errFailedParseToUint = goerror.NewInvalidFormat("failed parse id to uint")
-var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
+var (
+	errFailedParseToUint = goerror.NewInvalidFormat("failed parse id to uint")
+	errInvalidBody       = goerror.NewInvalidFormat("invalid request body")
+)
 
 type Inbound struct {
 	Config     config.Config
-	Router     *httpserver.Router
+	Router     *framework.Router
+	GQLRouter  *framework.Router
 	GRPCServer *grpc.Server
 	CodecJSON  codec.Codec
 	//
@@ -75,18 +76,18 @@ func (in Inbound) RegisterTodoServiceServer() {
 	in.Router.Endpoint(http.MethodDelete, "/todos/:id", he.Delete)
 
 	//
-	in.Router.Native(http.MethodGet, "/events", http.HandlerFunc(se.HandleEvent), middleware.Recovery)
-	in.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(se.HandleEvent), middleware.Recovery)
+	in.Router.Native(http.MethodGet, "/events", http.HandlerFunc(se.HandleEvent), framework.Recovery)
+	in.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(se.HandleEvent), framework.Recovery)
 
 	//
 	pb.RegisterTodoServiceServer(in.GRPCServer, ge)
 
 	//
-	gqlServer := gql.Handler(ql.NewExecutableSchema(ql.Config{Resolvers: gqe}))
-	in.Router.Native(http.MethodPost, "/graphql", gqlServer)
+	gqlServer := framework.HandlerGQL(ql.NewExecutableSchema(ql.Config{Resolvers: gqe}))
+	in.GQLRouter.Native(http.MethodPost, "/graphql", gqlServer)
 
 	if in.Config.GetBool("feature.flag.graphql.playground") {
-		in.Router.Native(http.MethodGet, "/graphql/playground",
+		in.GQLRouter.Native(http.MethodGet, "/graphql/playground",
 			playground.Handler("GraphQL playground", "/graphql"))
 	}
 }

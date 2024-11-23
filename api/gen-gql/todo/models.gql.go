@@ -40,13 +40,6 @@ type UpdateInput struct {
 	Status      Status `json:"status"`
 }
 
-type UpdateOutput struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Status      Status `json:"status"`
-}
-
 type UpdateStatusInput struct {
 	ID     string `json:"id"`
 	Status Status `json:"status"`

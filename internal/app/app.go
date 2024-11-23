@@ -18,7 +18,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -49,8 +49,10 @@ type App struct {
 	redisDB        *redis.Client
 	messaging      messaging.Client
 	httpServer     *http.Server
+	gqlServer      *http.Server
 	grpcServer     *grpc.Server
-	httpRouter     *httpserver.Router
+	httpRouter     *framework.Router
+	gqlRouter      *framework.Router
 	goroutine      *goroutine.Manager
 	hash           hash.Hash
 	secHash        hash.Hash
@@ -75,6 +77,7 @@ func New() *App {
 	app.initRedis()
 	app.initMessaging()
 	app.initHTTPServer()
+	app.initGQLServer()
 	app.initGRPCServer()
 	app.initModules()
 	app.initTasks()

@@ -451,7 +451,7 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *ql.UpdateOutput
+		want    *ql.Todo
 		wantErr error
 		mockFn  func(a args) *gqlEndpoint
 	}{
@@ -514,7 +514,7 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 					Status:      ql.StatusInProgress,
 				},
 			},
-			want: &ql.UpdateOutput{
+			want: &ql.Todo{
 				ID:          "10",
 				Title:       "title",
 				Description: "description",

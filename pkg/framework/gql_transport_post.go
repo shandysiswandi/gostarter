@@ -1,9 +1,7 @@
-package gql
+package framework
 
 import (
 	"encoding/json"
-	"io"
-	"log"
 	"mime"
 	"net/http"
 
@@ -12,14 +10,20 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// transportPOST implements a transport layer for handling POST requests
+// in a GraphQL server. It supports JSON-encoded GraphQL queries and manages
+// request execution.
 type transportPOST struct{}
 
+// Supports determines if the transport supports the incoming HTTP request.
+// It checks if the method is POST, the "Upgrade" header is absent, and
+// the Content-Type is "application/json".
 func (transportPOST) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
 	}
 
-	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	mediaType, _, err := mime.ParseMediaType(r.Header.Get(keyContentType))
 	if err != nil {
 		return false
 	}
@@ -27,10 +31,14 @@ func (transportPOST) Supports(r *http.Request) bool {
 	return r.Method == http.MethodPost && mediaType == "application/json"
 }
 
+// Do executes the GraphQL request using the provided executor. It reads the
+// request body, decodes it into GraphQL parameters, and processes the operation
+// context and response. Errors during decoding or execution are handled and
+// written as JSON responses.
 func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set(keyContentType, valAppJSONCT)
 
 	params := &graphql.RawParams{}
 	start := graphql.Now()
@@ -61,17 +69,12 @@ func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.Gra
 	responseFunc, ctx := exec.DispatchOperation(ctx, rc)
 	resp := responseFunc(ctx)
 
+	code := http.StatusOK
 	var goErr *goerror.GoError
 	if resp.Errors.As(&goErr) {
-		w.WriteHeader(goErr.StatusCode())
+		code = goErr.StatusCode()
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(code)
 	writeJSON(w, resp)
-}
-
-func writeJSON(w io.Writer, data *graphql.Response) {
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Println("gql.server.json.NewEncoder(w).Encode", err)
-	}
 }

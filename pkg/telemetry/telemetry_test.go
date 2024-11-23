@@ -56,7 +56,7 @@ func TestTelemetry_Close(t *testing.T) {
 			name:    "ErrorWithZapLogger",
 			wantErr: errors.New("sync /dev/stderr: invalid argument"),
 			mockFn: func() *Telemetry {
-				return NewTelemetry(WithZapLogger())
+				return NewTelemetry(WithZapLogger(logger.InfoLevel))
 			},
 		},
 	}
@@ -116,6 +116,56 @@ func TestTelemetry_Tracer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tr := tt.mockFn().Tracer()
+			assert.Equal(t, tt.want(), tr)
+		})
+	}
+}
+
+func TestTelemetry_TracerProvider(t *testing.T) {
+	tests := []struct {
+		name   string
+		want   func() trace.TracerProvider
+		mockFn func() *Telemetry
+	}{
+		{
+			name: "SuccessNoopTracer",
+			want: func() trace.TracerProvider {
+				return noop.NewTracerProvider()
+			},
+			mockFn: func() *Telemetry {
+				return NewTelemetry()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tr := tt.mockFn().TracerProvider()
+			assert.Equal(t, tt.want(), tr)
+		})
+	}
+}
+
+func TestTelemetry_TracerCollector(t *testing.T) {
+	tests := []struct {
+		name   string
+		want   func() Collector
+		mockFn func() *Telemetry
+	}{
+		{
+			name: "SuccessNoopTracer",
+			want: func() Collector {
+				return NOOP
+			},
+			mockFn: func() *Telemetry {
+				return NewTelemetry()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tr := tt.mockFn().TracerCollector()
 			assert.Equal(t, tt.want(), tr)
 		})
 	}

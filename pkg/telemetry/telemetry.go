@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/filter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
@@ -20,6 +21,7 @@ const (
 
 type Telemetry struct {
 	name            string
+	filter          *filter.Filter
 	logger          logger.Logger
 	tracer          trace.TracerProvider
 	tracerCollector Collector
@@ -32,6 +34,7 @@ func NewTelemetry(opts ...func(*Telemetry)) *Telemetry {
 
 	tel := &Telemetry{
 		name:            "telemetry",
+		filter:          filter.NewFilter(),
 		logger:          logger.NewNoopLogger(),
 		tracer:          noop.NewTracerProvider(),
 		tracerCollector: NOOP,

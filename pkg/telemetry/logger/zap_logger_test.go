@@ -6,162 +6,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap/zapcore"
 )
-
-func TestZapWithVerbose(t *testing.T) {
-	type args struct {
-		isVerbose bool
-	}
-	tests := []struct {
-		name   string
-		args   args
-		want   bool
-		mockFn func(a args) *ZapLogger
-	}{
-		{
-			name: "Success",
-			args: args{isVerbose: true},
-			want: true,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithVerbose(a.isVerbose)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			z := tt.mockFn(tt.args)
-
-			assert.Equal(t, tt.want, z.option.isVerbose)
-		})
-	}
-}
-
-func TestZapWithFilteredKeys(t *testing.T) {
-	type args struct {
-		keys []string
-	}
-	tests := []struct {
-		name   string
-		args   args
-		want   int
-		mockFn func(a args) *ZapLogger
-	}{
-		{
-			name: "Success",
-			args: args{keys: []string{"header", "auth"}},
-			want: 2,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithFilteredKeys(a.keys)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			z := tt.mockFn(tt.args)
-
-			assert.Len(t, z.option.filteredKeys, tt.want)
-		})
-	}
-}
-
-func TestZapWithLevel(t *testing.T) {
-	type args struct {
-		lvl Level
-	}
-	tests := []struct {
-		name   string
-		args   args
-		want   zapcore.Level
-		mockFn func(a args) *ZapLogger
-	}{
-		{
-			name: "Debug",
-			args: args{lvl: DebugLevel},
-			want: zapcore.DebugLevel,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithLevel(a.lvl)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-		{
-			name: "Info",
-			args: args{lvl: InfoLevel},
-			want: zapcore.InfoLevel,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithLevel(a.lvl)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-		{
-			name: "Warn",
-			args: args{lvl: WarnLevel},
-			want: zapcore.WarnLevel,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithLevel(a.lvl)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-		{
-			name: "Error",
-			args: args{lvl: ErrorLevel},
-			want: zapcore.ErrorLevel,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithLevel(a.lvl)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-		{
-			name: "Default",
-			args: args{lvl: DebugLevel - 1},
-			want: zapcore.InfoLevel,
-			mockFn: func(a args) *ZapLogger {
-				o := ZapWithLevel(a.lvl)
-
-				z, _ := NewZapLogger(o)
-
-				return z
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			z := tt.mockFn(tt.args)
-
-			assert.Equal(t, tt.want, z.option.level)
-		})
-	}
-}
 
 func TestNewZapLogger(t *testing.T) {
 	type args struct {
-		opts []func(*ZapOption)
+		lvl  Level
+		keys []string
 	}
 	tests := []struct {
 		name    string
@@ -170,23 +20,17 @@ func TestNewZapLogger(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "Success",
-			args: args{},
-			want: &ZapLogger{
-				option: &ZapOption{
-					level:        zapcore.InfoLevel,
-					filteredKeys: make([]string, 0),
-					isVerbose:    true,
-				},
-			},
+			name:    "Success",
+			args:    args{},
+			want:    &ZapLogger{},
 			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewZapLogger(tt.args.opts...)
+			got, err := NewZapLogger(tt.args.lvl, tt.args.keys...)
 			assert.Equal(t, tt.wantErr, err)
-			assert.Equal(t, tt.want.option, got.option)
+			assert.Equal(t, tt.want.filteredKeys, got.filteredKeys)
 		})
 	}
 }
@@ -210,7 +54,7 @@ func TestZapLogger_Debug(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger()
+				z, _ := NewZapLogger(DebugLevel)
 				return z
 			},
 		},
@@ -222,7 +66,7 @@ func TestZapLogger_Debug(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger()
+				z, _ := NewZapLogger(DebugLevel)
 				return z
 			},
 		},
@@ -255,7 +99,7 @@ func TestZapLogger_Info(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger()
+				z, _ := NewZapLogger(InfoLevel)
 				return z
 			},
 		},
@@ -288,7 +132,7 @@ func TestZapLogger_Warn(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger()
+				z, _ := NewZapLogger(WarnLevel)
 				return z
 			},
 		},
@@ -323,7 +167,7 @@ func TestZapLogger_Error(t *testing.T) {
 				fields:  []Field{{key: "a", value: "a"}, {key: "b", value: "b"}},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(ZapWithFilteredKeys([]string{"b"}))
+				z, _ := NewZapLogger(ErrorLevel, "b")
 				return z
 			},
 		},
@@ -338,7 +182,7 @@ func TestZapLogger_Error(t *testing.T) {
 }
 
 func TestZapLogger_WithFields(t *testing.T) {
-	z, _ := NewZapLogger()
+	z, _ := NewZapLogger(InfoLevel)
 
 	type args struct {
 		fields []Field
@@ -378,7 +222,7 @@ func TestZapLogger_Close(t *testing.T) {
 			name:    "Error",
 			wantErr: errors.New("sync /dev/stderr: invalid argument"),
 			mockFn: func() *ZapLogger {
-				z, _ := NewZapLogger()
+				z, _ := NewZapLogger(InfoLevel)
 
 				return z
 			},

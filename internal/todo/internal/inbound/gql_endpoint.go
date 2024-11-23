@@ -129,7 +129,7 @@ func (e *gqlEndpoint) UpdateStatus(ctx context.Context, in ql.UpdateStatusInput)
 	}, nil
 }
 
-func (e *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.UpdateOutput, error) {
+func (e *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.Todo, error) {
 	idu64, err := strconv.ParseUint(in.ID, 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
@@ -145,7 +145,7 @@ func (e *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.Update
 		return nil, err
 	}
 
-	return &ql.UpdateOutput{
+	return &ql.Todo{
 		ID:          strconv.FormatUint(resp.ID, 10),
 		Title:       resp.Title,
 		Description: resp.Description,

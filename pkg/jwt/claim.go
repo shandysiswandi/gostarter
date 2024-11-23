@@ -18,7 +18,6 @@ type Claim struct {
 }
 
 func NewClaim(email string, exp time.Duration, now time.Time, aud []string) *Claim {
-
 	return &Claim{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{

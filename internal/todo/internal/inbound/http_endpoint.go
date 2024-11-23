@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 )
 
 type httpEndpoint struct {
@@ -17,7 +17,7 @@ type httpEndpoint struct {
 	updateUC       domain.Update
 }
 
-func (e *httpEndpoint) Create(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Create(c framework.Context) (any, error) {
 	var req CreateRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -34,7 +34,7 @@ func (e *httpEndpoint) Create(c httpserver.Context) (any, error) {
 	return CreateResponse{ID: resp.ID}, nil
 }
 
-func (e *httpEndpoint) Delete(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Delete(c framework.Context) (any, error) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
@@ -48,7 +48,7 @@ func (e *httpEndpoint) Delete(c httpserver.Context) (any, error) {
 	return DeleteResponse{ID: resp.ID}, nil
 }
 
-func (e *httpEndpoint) Find(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Find(c framework.Context) (any, error) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
@@ -67,7 +67,7 @@ func (e *httpEndpoint) Find(c httpserver.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) Fetch(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Fetch(c framework.Context) (any, error) {
 	resp, err := e.fetchUC.Call(c.Context(), domain.FetchInput{
 		ID:          c.Query("id"),
 		Title:       c.Query("title"),
@@ -91,7 +91,7 @@ func (e *httpEndpoint) Fetch(c httpserver.Context) (any, error) {
 	return FetchResponse{Todos: todos}, nil
 }
 
-func (e *httpEndpoint) UpdateStatus(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) UpdateStatus(c framework.Context) (any, error) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
@@ -110,7 +110,7 @@ func (e *httpEndpoint) UpdateStatus(c httpserver.Context) (any, error) {
 	return UpdateStatusResponse{ID: id, Status: resp.Status.String()}, nil
 }
 
-func (e *httpEndpoint) Update(c httpserver.Context) (any, error) {
+func (e *httpEndpoint) Update(c framework.Context) (any, error) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint

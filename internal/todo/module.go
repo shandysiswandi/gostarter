@@ -11,7 +11,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/messaging"
@@ -36,13 +36,13 @@ type Dependency struct {
 	CodecJSON    codec.Codec
 	Validator    validation.Validator
 	JWT          jwt.JWT
-	Router       *httpserver.Router
+	Router       *framework.Router
+	GQLRouter    *framework.Router
 	GRPCServer   *grpc.Server
 	Telemetry    *telemetry.Telemetry
 	Goroutine    *goroutine.Manager
 }
 
-//nolint:funlen // it's long line because it format param dependency
 func New(dep Dependency) (*Expose, error) {
 	// This block initializes outbound services: Database, HTTP client, gRPC client, Redis, etc.
 	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.QueryBuilder)
@@ -69,6 +69,7 @@ func New(dep Dependency) (*Expose, error) {
 	inbound := inbound.Inbound{
 		Config:     dep.Config,
 		Router:     dep.Router,
+		GQLRouter:  dep.GQLRouter,
 		GRPCServer: dep.GRPCServer,
 		CodecJSON:  dep.CodecJSON,
 		//

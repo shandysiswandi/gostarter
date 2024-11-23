@@ -18,17 +18,17 @@ var (
 	ErrScanRow = errors.New("failed to scan column into field type")
 )
 
-func prepare(qp QueryProvider) (query string, args []any, err error) {
-	query, args, err = qp()
+func prepare(qp QueryProvider) (string, []any, error) {
+	q, args, err := qp()
 	if err != nil {
 		if verbose {
-			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", query, args, err)
+			log.Printf("Exec:queryProvider query: %s, args: %v, err: %v \n", q, args, err)
 		}
 
 		return "", nil, err
 	}
 
-	return query, args, err
+	return q, args, nil
 }
 
 // Exec executes a query and handles the result.

@@ -40,6 +40,14 @@ func (a *App) Start() <-chan struct{} {
 	}()
 
 	go func() {
+		log.Println("gql server listening", "address", a.gqlServer.Addr)
+		err := a.gqlServer.ListenAndServe()
+		if !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalln("gql server:", err)
+		}
+	}()
+
+	go func() {
 		grpcPort := a.config.GetString("server.address.grpc")
 		listener, err := net.Listen("tcp", grpcPort)
 		if err != nil {

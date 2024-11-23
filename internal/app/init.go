@@ -24,9 +24,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
-	"github.com/shandysiswandi/gostarter/pkg/framework/interceptor"
-	"github.com/shandysiswandi/gostarter/pkg/framework/middleware"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -59,21 +57,13 @@ func (a *App) initConfig() {
 // with the specified logging level. This enables logging and monitoring capabilities
 // across the application, allowing tracking of application metrics and logs for observability.
 func (a *App) initTelemetry() {
+	filterKeys := []string{"authorization", "password", "access_token", "refresh_token"}
+
 	a.telemetry = telemetry.NewTelemetry(
 		telemetry.WithServiceName(a.config.GetString("telemetry.name")),
-		telemetry.WithZapLogger(
-			logger.ZapWithVerbose(true),
-			logger.ZapWithLevel(logger.InfoLevel),
-			logger.ZapWithFilteredKeys([]string{
-				"authorization",
-				"password",
-				"access_token",
-				"refresh_token",
-			}),
-		),
-		telemetry.WithOTLPTracer(
-			a.config.GetString("telemetry.otlp.address"),
-		),
+		telemetry.WithLogFilter(filterKeys...),
+		telemetry.WithZapLogger(logger.InfoLevel, filterKeys...),
+		telemetry.WithOTLPTracer(a.config.GetString("telemetry.otlp.address")),
 	)
 }
 
@@ -227,16 +217,34 @@ func (a *App) initMessaging() {
 // This method should be called after initializing the router to ensure the server
 // is ready to handle incoming requests.
 func (a *App) initHTTPServer() {
-	a.httpRouter = httpserver.New()
+	a.httpRouter = framework.New()
 	a.httpServer = &http.Server{
 		Addr: a.config.GetString("server.address.http"),
-		Handler: middleware.Chain(
+		Handler: framework.Chain(
 			a.httpRouter,
-			middleware.Recovery,
+			framework.Recovery,
 			// next-mr: Need to create a custom CORS implementation to standardize error messages
 			cors.AllowAll().Handler,
 			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
-			middleware.JWT(a.jwt, "gostarter.access.token", "/auth"),
+			framework.JWT(a.jwt, "gostarter.access.token", "/auth", "/graphql/playground"),
+		),
+		ReadTimeout:       5 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+	}
+}
+
+func (a *App) initGQLServer() {
+	a.gqlRouter = framework.New()
+	a.gqlServer = &http.Server{
+		Addr: a.config.GetString("server.address.gql"),
+		Handler: framework.Chain(
+			a.gqlRouter,
+			framework.Recovery,
+			cors.AllowAll().Handler,
+			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
+			framework.JWT(a.jwt, "gostarter.access.token", "/graphql/playground"),
 		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
@@ -246,12 +254,12 @@ func (a *App) initHTTPServer() {
 }
 
 func (a *App) initGRPCServer() {
-	opts := []grpc.ServerOption{grpc.ChainUnaryInterceptor(interceptor.UnaryServerRecovery())}
+	opts := []grpc.ServerOption{grpc.ChainUnaryInterceptor(framework.UnaryServerRecovery)}
 	opts = append(opts, instrument.UnaryTelemetryServerInterceptor(a.telemetry, a.uuid.Generate)...)
 	opts = append(opts, grpc.ChainUnaryInterceptor(
-		interceptor.UnaryServerError(),
-		interceptor.UnaryServerJWT(a.jwt, "gostarter.access.token", "/gostarter.api.auth.AuthService"),
-		interceptor.UnaryServerProtoValidate(a.protoValidator),
+		framework.UnaryServerError,
+		framework.UnaryServerJWT(a.jwt, "gostarter.access.token", "/gostarter.api.auth.AuthService"),
+		framework.UnaryServerProtoValidate(a.protoValidator),
 	))
 
 	server := grpc.NewServer(opts...)
@@ -278,6 +286,9 @@ func (a *App) initClosers() {
 	a.closerFn = map[string]func(context.Context) error{
 		"HTTP Server": func(ctx context.Context) error {
 			return a.httpServer.Shutdown(ctx)
+		},
+		"GQL Server": func(ctx context.Context) error {
+			return a.gqlServer.Shutdown(ctx)
 		},
 		"GRPC Server": func(_ context.Context) error { //nolint:unparam // its ok
 			a.grpcServer.GracefulStop()

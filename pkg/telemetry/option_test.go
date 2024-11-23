@@ -3,6 +3,7 @@ package telemetry
 import (
 	"testing"
 
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/filter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,6 +40,38 @@ func TestWithServiceName(t *testing.T) {
 	}
 }
 
+func TestWithLogFilter(t *testing.T) {
+	type args struct {
+		keys []string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		want   *filter.Filter
+		mockFn func(a args) *Telemetry
+	}{
+		{
+			name: "Success",
+			args: args{keys: []string{"token"}},
+			want: filter.NewFilter(filter.WithHeaders("token")),
+			mockFn: func(a args) *Telemetry {
+				tel := NewTelemetry()
+
+				WithLogFilter(a.keys...)(tel)
+
+				return tel
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tel := tt.mockFn(tt.args)
+			assert.Equal(t, tel.filter, tt.want)
+		})
+	}
+}
+
 func TestWithZapLogger(t *testing.T) {
 	type args struct {
 		level   logger.Level
@@ -58,7 +91,7 @@ func TestWithZapLogger(t *testing.T) {
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithZapLogger()(tel)
+				WithZapLogger(logger.InfoLevel)(tel)
 
 				return tel
 			},

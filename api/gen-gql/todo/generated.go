@@ -64,13 +64,6 @@ type ComplexityRoot struct {
 		Title       func(childComplexity int) int
 	}
 
-	UpdateOutput struct {
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Status      func(childComplexity int) int
-		Title       func(childComplexity int) int
-	}
-
 	UpdateStatusOutput struct {
 		ID     func(childComplexity int) int
 		Status func(childComplexity int) int
@@ -81,7 +74,7 @@ type MutationResolver interface {
 	Create(ctx context.Context, in CreateInput) (string, error)
 	Delete(ctx context.Context, id string) (string, error)
 	UpdateStatus(ctx context.Context, in UpdateStatusInput) (*UpdateStatusOutput, error)
-	Update(ctx context.Context, in UpdateInput) (*UpdateOutput, error)
+	Update(ctx context.Context, in UpdateInput) (*Todo, error)
 }
 type QueryResolver interface {
 	Fetch(ctx context.Context, in *FetchInput) ([]Todo, error)
@@ -206,34 +199,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.Title(childComplexity), true
-
-	case "UpdateOutput.description":
-		if e.complexity.UpdateOutput.Description == nil {
-			break
-		}
-
-		return e.complexity.UpdateOutput.Description(childComplexity), true
-
-	case "UpdateOutput.id":
-		if e.complexity.UpdateOutput.ID == nil {
-			break
-		}
-
-		return e.complexity.UpdateOutput.ID(childComplexity), true
-
-	case "UpdateOutput.status":
-		if e.complexity.UpdateOutput.Status == nil {
-			break
-		}
-
-		return e.complexity.UpdateOutput.Status(childComplexity), true
-
-	case "UpdateOutput.title":
-		if e.complexity.UpdateOutput.Title == nil {
-			break
-		}
-
-		return e.complexity.UpdateOutput.Title(childComplexity), true
 
 	case "UpdateStatusOutput.id":
 		if e.complexity.UpdateStatusOutput.ID == nil {
@@ -369,7 +334,7 @@ type Mutation {
   create(in: CreateInput!): String!
   delete(id: String!): String!
   updateStatus(in: UpdateStatusInput!): UpdateStatusOutput!
-  update(in: UpdateInput!): UpdateOutput!
+  update(in: UpdateInput!): Todo!
 }
 
 # type ...........................
@@ -419,13 +384,6 @@ input UpdateInput {
 
 type UpdateStatusOutput {
   id: String!
-  status: Status!
-}
-
-type UpdateOutput {
-  id: String!
-  title: String!
-  description: String!
   status: Status!
 }
 `, BuiltIn: false},
@@ -929,9 +887,9 @@ func (ec *executionContext) _Mutation_update(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*UpdateOutput)
+	res := resTmp.(*Todo)
 	fc.Result = res
-	return ec.marshalNUpdateOutput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateOutput(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_update(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -943,15 +901,15 @@ func (ec *executionContext) fieldContext_Mutation_update(ctx context.Context, fi
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_UpdateOutput_id(ctx, field)
+				return ec.fieldContext_Todo_id(ctx, field)
 			case "title":
-				return ec.fieldContext_UpdateOutput_title(ctx, field)
+				return ec.fieldContext_Todo_title(ctx, field)
 			case "description":
-				return ec.fieldContext_UpdateOutput_description(ctx, field)
+				return ec.fieldContext_Todo_description(ctx, field)
 			case "status":
-				return ec.fieldContext_UpdateOutput_status(ctx, field)
+				return ec.fieldContext_Todo_status(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UpdateOutput", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
 	}
 	defer func() {
@@ -1390,182 +1348,6 @@ func (ec *executionContext) _Todo_status(ctx context.Context, field graphql.Coll
 func (ec *executionContext) fieldContext_Todo_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Status does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateOutput_id(ctx context.Context, field graphql.CollectedField, obj *UpdateOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateOutput_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateOutput_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateOutput",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateOutput_title(ctx context.Context, field graphql.CollectedField, obj *UpdateOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateOutput_title(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateOutput_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateOutput",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateOutput_description(ctx context.Context, field graphql.CollectedField, obj *UpdateOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateOutput_description(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateOutput_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateOutput",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateOutput_status(ctx context.Context, field graphql.CollectedField, obj *UpdateOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateOutput_status(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(Status)
-	fc.Result = res
-	return ec.marshalNStatus2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateOutput_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateOutput",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3824,60 +3606,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var updateOutputImplementors = []string{"UpdateOutput"}
-
-func (ec *executionContext) _UpdateOutput(ctx context.Context, sel ast.SelectionSet, obj *UpdateOutput) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, updateOutputImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UpdateOutput")
-		case "id":
-			out.Values[i] = ec._UpdateOutput_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "title":
-			out.Values[i] = ec._UpdateOutput_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "description":
-			out.Values[i] = ec._UpdateOutput_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "status":
-			out.Values[i] = ec._UpdateOutput_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var updateStatusOutputImplementors = []string{"UpdateStatusOutput"}
 
 func (ec *executionContext) _UpdateStatusOutput(ctx context.Context, sel ast.SelectionSet, obj *UpdateStatusOutput) graphql.Marshaler {
@@ -4341,23 +4069,19 @@ func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋshandysiswandiᚋgost
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUpdateInput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateInput(ctx context.Context, v interface{}) (UpdateInput, error) {
-	res, err := ec.unmarshalInputUpdateInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUpdateOutput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateOutput(ctx context.Context, sel ast.SelectionSet, v UpdateOutput) graphql.Marshaler {
-	return ec._UpdateOutput(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUpdateOutput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateOutput(ctx context.Context, sel ast.SelectionSet, v *UpdateOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodo(ctx context.Context, sel ast.SelectionSet, v *Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._UpdateOutput(ctx, sel, v)
+	return ec._Todo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUpdateInput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateInput(ctx context.Context, v interface{}) (UpdateInput, error) {
+	res, err := ec.unmarshalInputUpdateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateStatusInput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐUpdateStatusInput(ctx context.Context, v interface{}) (UpdateStatusInput, error) {

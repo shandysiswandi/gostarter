@@ -45,6 +45,7 @@
     "Koanf",
     "mockz",
     "otlp",
+    "Postgre",
     "protovalidate",
     "qualitygate",
     "redismock",

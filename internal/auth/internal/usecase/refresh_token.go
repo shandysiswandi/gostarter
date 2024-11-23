@@ -96,8 +96,8 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
-	tgsIn := tokenGenSaverIn{ctx: ctx, email: clm.Email, tokenId: refToken.ID, userId: refToken.UserID}
-	tgso, err := s.tgs.do(tgsIn)
+	tgsIn := tokenGenSaverIn{email: clm.Email, tokenID: refToken.ID, userID: refToken.UserID}
+	tgso, err := s.tgs.do(ctx, tgsIn)
 	if err != nil {
 		return nil, err
 	}

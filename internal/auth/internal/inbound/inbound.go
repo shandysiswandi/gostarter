@@ -5,12 +5,12 @@ import (
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/framework/httpserver"
+	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"google.golang.org/grpc"
 )
 
 type Inbound struct {
-	Router     *httpserver.Router
+	Router     *framework.Router
 	GRPCServer *grpc.Server
 	//
 	LoginUC          domain.Login

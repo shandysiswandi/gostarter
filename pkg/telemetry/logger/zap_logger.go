@@ -17,59 +17,27 @@ const (
 	spanIDLabel        = "span-id"
 )
 
-type ZapOption struct {
-	level        zapcore.Level
-	filteredKeys []string
-	isVerbose    bool
-}
-
 type ZapLogger struct {
-	logger *zap.Logger
-	option *ZapOption
+	logger       *zap.Logger
+	filteredKeys []string
 }
 
-func ZapWithVerbose(isVerbose bool) func(*ZapOption) {
-	return func(zo *ZapOption) {
-		zo.isVerbose = isVerbose
-	}
-}
-
-func ZapWithFilteredKeys(keys []string) func(*ZapOption) {
-	return func(zo *ZapOption) {
-		zo.filteredKeys = append(zo.filteredKeys, keys...)
-	}
-}
-
-func ZapWithLevel(lvl Level) func(*ZapOption) {
-	return func(zo *ZapOption) {
-		var level zapcore.Level
-		switch lvl {
-		case DebugLevel:
-			level = zap.DebugLevel
-		case InfoLevel:
-			level = zap.InfoLevel
-		case WarnLevel:
-			level = zap.WarnLevel
-		case ErrorLevel:
-			level = zap.ErrorLevel
-		default:
-			level = zap.InfoLevel
-		}
-
-		zo.level = level
-	}
-}
-
-func NewZapLogger(opts ...func(*ZapOption)) (*ZapLogger, error) {
-	zopt := &ZapOption{level: zap.InfoLevel, isVerbose: true, filteredKeys: make([]string, 0)}
-
-	for _, opt := range opts {
-		opt(zopt)
+func NewZapLogger(lvl Level, keys ...string) (*ZapLogger, error) {
+	var level zapcore.Level
+	switch lvl {
+	case DebugLevel:
+		level = zap.DebugLevel
+	case InfoLevel:
+		level = zap.InfoLevel
+	case WarnLevel:
+		level = zap.WarnLevel
+	case ErrorLevel:
+		level = zap.ErrorLevel
 	}
 
 	z := zap.NewProductionConfig()
 	z.DisableCaller = true
-	z.Level = zap.NewAtomicLevelAt(zopt.level)
+	z.Level = zap.NewAtomicLevelAt(level)
 	z.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	z.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	z.EncoderConfig.LevelKey = "severity"
@@ -78,10 +46,9 @@ func NewZapLogger(opts ...func(*ZapOption)) (*ZapLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	logger = zap.New(logger.Core(), zap.AddCaller(), zap.AddCallerSkip(1))
 
-	return &ZapLogger{logger: logger, option: zopt}, nil
+	return &ZapLogger{filteredKeys: keys, logger: logger}, nil
 }
 
 func (z *ZapLogger) Debug(ctx context.Context, message string, fields ...Field) {
@@ -111,8 +78,8 @@ func (z *ZapLogger) Error(ctx context.Context, message string, err error, fields
 
 func (z *ZapLogger) WithFields(fields ...Field) Logger {
 	return &ZapLogger{
-		logger: z.logger.With(z.convertFields(fields)...),
-		option: z.option,
+		logger:       z.logger.With(z.convertFields(fields)...),
+		filteredKeys: z.filteredKeys,
 	}
 }
 
@@ -147,7 +114,7 @@ func (z *ZapLogger) withTelemetry(ctx context.Context) []zap.Field {
 func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
 	zapFields := make([]zapcore.Field, len(fields))
 	for i, field := range fields {
-		if ok := slices.Contains(z.option.filteredKeys, strings.ToLower(field.key)); ok {
+		if ok := slices.Contains(z.filteredKeys, strings.ToLower(field.key)); ok {
 			zapFields[i] = zap.String(field.key, "***")
 
 			continue

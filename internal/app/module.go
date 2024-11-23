@@ -52,6 +52,7 @@ func (a *App) moduleTodo() {
 			CodecJSON:    a.codecJSON,
 			Validator:    a.validator,
 			Router:       a.httpRouter,
+			GQLRouter:    a.gqlRouter,
 			GRPCServer:   a.grpcServer,
 			Telemetry:    a.telemetry,
 			Goroutine:    a.goroutine,

@@ -25,7 +25,7 @@ func (r *mutationResolver) UpdateStatus(ctx context.Context, in UpdateStatusInpu
 }
 
 // Update is the resolver for the update field.
-func (r *mutationResolver) Update(ctx context.Context, in UpdateInput) (*UpdateOutput, error) {
+func (r *mutationResolver) Update(ctx context.Context, in UpdateInput) (*Todo, error) {
 	panic(fmt.Errorf("not implemented: Update - update"))
 }
 

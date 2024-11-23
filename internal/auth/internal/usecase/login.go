@@ -93,8 +93,8 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 		tid = token.ID
 	}
 
-	tgsIn := tokenGenSaverIn{ctx: ctx, email: in.Email, tokenId: tid, userId: u.ID}
-	tgso, err := s.tgs.do(tgsIn)
+	tgsIn := tokenGenSaverIn{email: in.Email, tokenID: tid, userID: u.ID}
+	tgso, err := s.tgs.do(ctx, tgsIn)
 	if err != nil {
 		return nil, err
 	}
