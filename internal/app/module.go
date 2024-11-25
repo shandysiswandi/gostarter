@@ -12,10 +12,12 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/auth"
 	"github.com/shandysiswandi/gostarter/internal/todo"
+	"github.com/shandysiswandi/gostarter/internal/user"
 )
 
 func (a *App) initModules() {
 	a.moduleAuth()
+	a.moduleUser()
 	a.moduleTodo()
 }
 
@@ -37,6 +39,25 @@ func (a *App) moduleAuth() {
 		})
 		if err != nil {
 			log.Fatalln("failed to init module auth", err)
+		}
+	}
+}
+
+func (a *App) moduleUser() {
+	if a.config.GetBool("module.flag.user") {
+		_, err := user.New(user.Dependency{
+			Database:     a.database,
+			QueryBuilder: a.queryBuilder,
+			RedisDB:      a.redisDB,
+			Config:       a.config,
+			CodecJSON:    a.codecJSON,
+			Validator:    a.validator,
+			Router:       a.httpRouter,
+			GRPCServer:   a.grpcServer,
+			Telemetry:    a.telemetry,
+		})
+		if err != nil {
+			log.Fatalln("failed to init module user", err)
 		}
 	}
 }

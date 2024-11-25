@@ -136,10 +136,7 @@ func (r *Router) Handler(method, path string, handler http.Handler) {
 	r.addRoute(method, path, handler)
 }
 
-func (r *Router) addRoute(method, path string, handler http.Handler) {
-	segments := splitPath(path)
-	current := r.root
-
+func (r *Router) calcParams(path string) {
 	paramsCount := countParams(path)
 	if paramsCount > r.maxParams {
 		r.maxParams = paramsCount
@@ -152,6 +149,12 @@ func (r *Router) addRoute(method, path string, handler http.Handler) {
 			return &ps
 		}
 	}
+}
+
+func (r *Router) addRoute(method, path string, handler http.Handler) {
+	segments := splitPath(path)
+	current := r.root
+	r.calcParams(path)
 
 	for _, segment := range segments {
 		switch {

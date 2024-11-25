@@ -119,6 +119,10 @@ func (tc *TestCtx) SetHeader(key string, values ...string) {
 	tc.headers[key] = append(tc.headers[key], values...)
 }
 
+func (tc *TestCtx) SetContext(ctx context.Context) {
+	tc.r = tc.r.WithContext(ctx)
+}
+
 // Build constructs a RouterCtx instance from the configured TestDefault.
 // It sets the query parameters, headers, and route parameters on the HTTP request.
 func (tc *TestCtx) Build() *RouterCtx {

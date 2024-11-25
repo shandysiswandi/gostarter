@@ -1,0 +1,40 @@
+package outbound
+
+import (
+	"context"
+	"database/sql"
+
+	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+)
+
+type SQLUser struct {
+	db        *sql.DB
+	qu        goqu.DialectWrapper
+	telemetry *telemetry.Telemetry
+}
+
+func NewSQLUser(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *SQLUser {
+	return &SQLUser{
+		db:        db,
+		qu:        qu,
+		telemetry: tel,
+	}
+}
+
+func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SQLUser.FindUserByEmail")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Select("id", "email", "password").
+			From("users").
+			Where(goqu.Ex{"email": email}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.SQLGet[domain.User](ctx, st.db, query)
+}

@@ -88,6 +88,14 @@ packages:
       filename: "mock_{{ .InterfaceName | snakecase }}.go"
       dir: internal/auth/internal/mockz
 
+  github.com/shandysiswandi/gostarter/internal/user:
+    config:
+      all: True
+      recursive: True
+      outpkg: "mockz"
+      filename: "mock_{{ .InterfaceName | snakecase }}.go"
+      dir: internal/user/internal/mockz
+
   github.com/shandysiswandi/gostarter/internal/todo:
     config:
       all: True

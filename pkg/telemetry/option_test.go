@@ -141,7 +141,7 @@ func TestWithOTLPTracer(t *testing.T) {
 			tel := tt.mockFn(tt.args)
 			defer tel.Close()
 
-			assert.Len(t, tel.flushers, 1)
+			assert.Len(t, tel.flushers, 2)
 			assert.NotNil(t, tel.Tracer())
 		})
 	}
