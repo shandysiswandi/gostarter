@@ -53,7 +53,11 @@ func TestWithLogFilter(t *testing.T) {
 		{
 			name: "Success",
 			args: args{keys: []string{"token"}},
-			want: filter.NewFilter(filter.WithHeaders("token")),
+			want: filter.NewFilter(
+				filter.WithHeaders("token"),
+				filter.WithQueries("token"),
+				filter.WithFields("token"),
+			),
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
@@ -124,7 +128,7 @@ func TestWithOTLPTracer(t *testing.T) {
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithOTLPTracer(a.address)(tel)
+				WithOTLP(a.address)(tel)
 
 				return tel
 			},

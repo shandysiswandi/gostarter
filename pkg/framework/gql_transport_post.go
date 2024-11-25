@@ -37,9 +37,6 @@ func (transportPOST) Supports(r *http.Request) bool {
 // written as JSON responses.
 func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
-
-	w.Header().Set(keyContentType, valAppJSONCT)
-
 	params := &graphql.RawParams{}
 	start := graphql.Now()
 	params.Headers = r.Header
@@ -51,17 +48,16 @@ func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.Gra
 	dec := json.NewDecoder(r.Body)
 	dec.UseNumber()
 	if err := dec.Decode(params); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		gqlErr := gqlerror.Errorf("invalid request body")
-		writeJSON(w, exec.DispatchError(ctx, gqlerror.List{gqlErr}))
+		data := exec.DispatchError(ctx, gqlerror.List{gqlerror.Errorf("invalid request body")})
+		writeJSON(w, data, http.StatusBadRequest)
 
 		return
 	}
 
 	rc, err := exec.CreateOperationContext(ctx, params)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		writeJSON(w, exec.DispatchError(graphql.WithOperationContext(ctx, rc), err))
+		data := exec.DispatchError(graphql.WithOperationContext(ctx, rc), err)
+		writeJSON(w, data, http.StatusUnprocessableEntity)
 
 		return
 	}
@@ -75,6 +71,5 @@ func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.Gra
 		code = goErr.StatusCode()
 	}
 
-	w.WriteHeader(code)
-	writeJSON(w, resp)
+	writeJSON(w, resp, code)
 }

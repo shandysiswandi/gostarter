@@ -26,8 +26,8 @@ func TestNew(t *testing.T) {
 
 				return Dependency{
 					Config:     mc,
-					Router:     framework.New(),
-					GQLRouter:  framework.New(),
+					Router:     framework.NewRouter(),
+					GQLRouter:  framework.NewRouter(),
 					GRPCServer: grpc.NewServer(),
 				}
 			},

@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 // Context defines an interface for working with HTTP requests and their context.
@@ -74,7 +72,7 @@ func (rc *RouterCtx) Queries(key string) []string {
 
 // Param retrieves the value of a route parameter by its key.
 func (rc *RouterCtx) Param(key string) string {
-	return httprouter.ParamsFromContext(rc.Request().Context()).ByName(key)
+	return GetParams(rc.Request().Context()).Key(key)
 }
 
 // TestCtx is a helper type for testing HTTP requests and contexts.
@@ -141,14 +139,14 @@ func (tc *TestCtx) Build() *RouterCtx {
 	}
 
 	// Set route parameters
-	var params httprouter.Params
+	var params Params
 	for key, value := range tc.param {
-		params = append(params, httprouter.Param{
+		params = append(params, Param{
 			Key:   key,
 			Value: value,
 		})
 	}
-	ctx := context.WithValue(tc.r.Context(), httprouter.ParamsKey, params)
+	ctx := context.WithValue(tc.r.Context(), paramContextKey{}, params)
 
 	return &RouterCtx{r: tc.r.WithContext(ctx)}
 }

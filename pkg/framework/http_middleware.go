@@ -99,32 +99,32 @@ func (mj *middlewareJWT) handle(h http.Handler) http.Handler {
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			mj.jsonResponse(w, "authorization header missing")
+			writeJSON(w, map[string]string{"error": "authorization header missing"}, http.StatusUnauthorized)
 
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			mj.jsonResponse(w, "invalid format")
+			writeJSON(w, map[string]string{"error": "invalid format"}, http.StatusUnauthorized)
 
 			return
 		}
 
 		clm, err := mj.jwte.Verify(strings.TrimPrefix(authHeader, "Bearer "))
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			mj.jsonResponse(w, "expired token")
+			writeJSON(w, map[string]string{"error": "expired token"}, http.StatusUnauthorized)
 
 			return
 		}
 
 		if err != nil {
-			mj.jsonResponse(w, "invalid token")
+			writeJSON(w, map[string]string{"error": "invalid token"}, http.StatusUnauthorized)
 
 			return
 		}
 
 		if !clm.VerifyAudience(mj.audience, true) {
-			mj.jsonResponse(w, "invalid token audience")
+			writeJSON(w, map[string]string{"error": "invalid token audience"}, http.StatusUnauthorized)
 
 			return
 		}
@@ -141,12 +141,4 @@ func (mj *middlewareJWT) shouldSkipPath(path string) bool {
 	}
 
 	return false
-}
-
-func (mj *middlewareJWT) jsonResponse(w http.ResponseWriter, msg string) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusUnauthorized)
-	if err := json.NewEncoder(w).Encode(map[string]string{"error": msg}); err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-	}
 }

@@ -24,8 +24,8 @@ func TestInbound_RegisterTodoServiceServer(t *testing.T) {
 
 				return Inbound{
 					Config:         configMock,
-					Router:         framework.New(),
-					GQLRouter:      framework.New(),
+					Router:         framework.NewRouter(),
+					GQLRouter:      framework.NewRouter(),
 					GRPCServer:     grpc.NewServer(),
 					CodecJSON:      nil,
 					CreateUC:       nil,

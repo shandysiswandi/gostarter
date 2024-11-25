@@ -76,18 +76,18 @@ func (in Inbound) RegisterTodoServiceServer() {
 	in.Router.Endpoint(http.MethodDelete, "/todos/:id", he.Delete)
 
 	//
-	in.Router.Native(http.MethodGet, "/events", http.HandlerFunc(se.HandleEvent), framework.Recovery)
-	in.Router.Native(http.MethodGet, "/trigger-event", http.HandlerFunc(se.HandleEvent), framework.Recovery)
+	in.Router.HandleFunc(http.MethodGet, "/events", se.HandleEvent)
+	in.Router.HandleFunc(http.MethodGet, "/trigger-event", se.HandleEvent)
 
 	//
 	pb.RegisterTodoServiceServer(in.GRPCServer, ge)
 
 	//
 	gqlServer := framework.HandlerGQL(ql.NewExecutableSchema(ql.Config{Resolvers: gqe}))
-	in.GQLRouter.Native(http.MethodPost, "/graphql", gqlServer)
+	in.GQLRouter.Handler(http.MethodPost, "/graphql", gqlServer)
 
 	if in.Config.GetBool("feature.flag.graphql.playground") {
-		in.GQLRouter.Native(http.MethodGet, "/graphql/playground",
+		in.GQLRouter.Handler(http.MethodGet, "/graphql/playground",
 			playground.Handler("GraphQL playground", "/graphql"))
 	}
 }

@@ -37,6 +37,8 @@ func Exec(ctx context.Context, exec Execer, qp QueryProvider, feedback ...bool) 
 	if err != nil {
 		return err
 	}
+	log.Println("query", query)
+	log.Println("args", args)
 
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {

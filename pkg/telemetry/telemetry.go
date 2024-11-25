@@ -8,37 +8,40 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/filter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"go.opentelemetry.io/otel/metric"
+	mnoop "go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/trace"
-	"go.opentelemetry.io/otel/trace/noop"
+	tnoop "go.opentelemetry.io/otel/trace/noop"
 )
 
-type Collector int
+type Vendor int
 
 const (
-	NOOP Collector = iota
+	NOOP Vendor = iota
 	OPENTELEMETRY
 )
 
 type Telemetry struct {
-	name            string
-	filter          *filter.Filter
-	logger          logger.Logger
-	tracer          trace.TracerProvider
-	tracerCollector Collector
-	flushers        []func() error
+	name      string
+	filter    *filter.Filter
+	logger    logger.Logger
+	tracer    trace.TracerProvider
+	meter     metric.MeterProvider
+	collector Vendor
+	flushers  []func() error
 }
 
-func NewTelemetry(opts ...func(*Telemetry)) *Telemetry {
+func NewTelemetry(opts ...Option) *Telemetry {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.SetOutput(os.Stdout)
 
 	tel := &Telemetry{
-		name:            "telemetry",
-		filter:          filter.NewFilter(),
-		logger:          logger.NewNoopLogger(),
-		tracer:          noop.NewTracerProvider(),
-		tracerCollector: NOOP,
-		flushers:        make([]func() error, 0),
+		name:      "telemetry",
+		filter:    nil,
+		logger:    logger.NewNoopLogger(),
+		tracer:    tnoop.NewTracerProvider(),
+		meter:     mnoop.NewMeterProvider(),
+		collector: NOOP,
+		flushers:  make([]func() error, 0),
 	}
 
 	for _, opt := range opts {
@@ -72,10 +75,14 @@ func (t *Telemetry) TracerProvider() trace.TracerProvider {
 	return t.tracer
 }
 
-func (t *Telemetry) TracerCollector() Collector {
-	return t.tracerCollector
+func (t *Telemetry) Collector() Vendor {
+	return t.collector
 }
 
 func (t *Telemetry) Meter() metric.Meter {
-	return nil
+	return t.meter.Meter(t.name)
+}
+
+func (t *Telemetry) Filter() *filter.Filter {
+	return t.filter
 }

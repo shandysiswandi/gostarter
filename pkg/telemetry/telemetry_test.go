@@ -4,16 +4,18 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/shandysiswandi/gostarter/pkg/telemetry/filter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/metric"
+	mnoop "go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/trace"
-	"go.opentelemetry.io/otel/trace/noop"
+	tnoop "go.opentelemetry.io/otel/trace/noop"
 )
 
 func TestNewTelemetry(t *testing.T) {
 	type args struct {
-		opts []func(*Telemetry)
+		opts []Option
 	}
 	tests := []struct {
 		name string
@@ -23,9 +25,7 @@ func TestNewTelemetry(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				opts: []func(*Telemetry){
-					func(t *Telemetry) {},
-				},
+				opts: []Option{func(t *Telemetry) {}},
 			},
 			want: NewTelemetry(),
 		},
@@ -105,7 +105,7 @@ func TestTelemetry_Tracer(t *testing.T) {
 		{
 			name: "SuccessNoopTracer",
 			want: func() trace.Tracer {
-				return noop.NewTracerProvider().Tracer("telemetry")
+				return tnoop.NewTracerProvider().Tracer("telemetry")
 			},
 			mockFn: func() *Telemetry {
 				return NewTelemetry()
@@ -128,9 +128,9 @@ func TestTelemetry_TracerProvider(t *testing.T) {
 		mockFn func() *Telemetry
 	}{
 		{
-			name: "SuccessNoopTracer",
+			name: "Success",
 			want: func() trace.TracerProvider {
-				return noop.NewTracerProvider()
+				return tnoop.NewTracerProvider()
 			},
 			mockFn: func() *Telemetry {
 				return NewTelemetry()
@@ -149,12 +149,12 @@ func TestTelemetry_TracerProvider(t *testing.T) {
 func TestTelemetry_TracerCollector(t *testing.T) {
 	tests := []struct {
 		name   string
-		want   func() Collector
+		want   func() Vendor
 		mockFn func() *Telemetry
 	}{
 		{
-			name: "SuccessNoopTracer",
-			want: func() Collector {
+			name: "Success",
+			want: func() Vendor {
 				return NOOP
 			},
 			mockFn: func() *Telemetry {
@@ -165,7 +165,7 @@ func TestTelemetry_TracerCollector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			tr := tt.mockFn().TracerCollector()
+			tr := tt.mockFn().Collector()
 			assert.Equal(t, tt.want(), tr)
 		})
 	}
@@ -180,7 +180,7 @@ func TestTelemetry_Meter(t *testing.T) {
 		{
 			name: "SuccessNoopMeter",
 			want: func() metric.Meter {
-				return nil
+				return mnoop.NewMeterProvider().Meter("telemetry")
 			},
 			mockFn: func() *Telemetry {
 				return NewTelemetry()
@@ -191,6 +191,31 @@ func TestTelemetry_Meter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tr := tt.mockFn().Meter()
+			assert.Equal(t, tt.want(), tr)
+		})
+	}
+}
+
+func TestTelemetry_Filter(t *testing.T) {
+	tests := []struct {
+		name   string
+		want   func() *filter.Filter
+		mockFn func() *Telemetry
+	}{
+		{
+			name: "Success",
+			want: func() *filter.Filter {
+				return nil
+			},
+			mockFn: func() *Telemetry {
+				return NewTelemetry()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tr := tt.mockFn().Filter()
 			assert.Equal(t, tt.want(), tr)
 		})
 	}

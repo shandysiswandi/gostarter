@@ -63,7 +63,7 @@ func (a *App) initTelemetry() {
 		telemetry.WithServiceName(a.config.GetString("telemetry.name")),
 		telemetry.WithLogFilter(filterKeys...),
 		telemetry.WithZapLogger(logger.InfoLevel, filterKeys...),
-		telemetry.WithOTLPTracer(a.config.GetString("telemetry.otlp.address")),
+		telemetry.WithOTLP(a.config.GetString("telemetry.otlp.grpc.address")),
 	)
 }
 
@@ -171,6 +171,7 @@ func (a *App) initDatabase() {
 	database.SetConnMaxLifetime(time.Duration(maxLifetime) * time.Minute)
 	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
+	dbops.SetVerbose(true)
 	a.database = database
 	a.queryBuilder = queryBuilder
 	a.transaction = dbops.NewTransaction(database)
@@ -217,7 +218,7 @@ func (a *App) initMessaging() {
 // This method should be called after initializing the router to ensure the server
 // is ready to handle incoming requests.
 func (a *App) initHTTPServer() {
-	a.httpRouter = framework.New()
+	a.httpRouter = framework.NewRouter()
 	a.httpServer = &http.Server{
 		Addr: a.config.GetString("server.address.http"),
 		Handler: framework.Chain(
@@ -236,7 +237,7 @@ func (a *App) initHTTPServer() {
 }
 
 func (a *App) initGQLServer() {
-	a.gqlRouter = framework.New()
+	a.gqlRouter = framework.NewRouter()
 	a.gqlServer = &http.Server{
 		Addr: a.config.GetString("server.address.gql"),
 		Handler: framework.Chain(

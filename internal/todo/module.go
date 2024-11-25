@@ -11,6 +11,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goroutine"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -28,6 +29,7 @@ type Expose struct {
 
 type Dependency struct {
 	Database     *sql.DB
+	Transaction  dbops.Tx
 	QueryBuilder goqu.DialectWrapper
 	RedisDB      *redis.Client
 	Messaging    messaging.Client

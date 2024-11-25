@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string) []grpc.ServerOption {
@@ -17,7 +19,7 @@ func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string
 
 	ins := &grpcServer{uuid: sid, tel: tel}
 
-	switch tel.TracerCollector() {
+	switch tel.Collector() {
 	case telemetry.OPENTELEMETRY:
 		tracerProvider := tel.TracerProvider()
 
@@ -46,13 +48,35 @@ func (ins *grpcServer) log(ctx context.Context, req any, info *grpc.UnaryServerI
 	any, error,
 ) {
 	ctx = ins.requestID(ctx)
-
+	md, _ := metadata.FromIncomingContext(ctx)
 	resp, err := h(ctx, req)
+	filter := ins.tel.Filter()
+
+	opts := protojson.MarshalOptions{UseProtoNames: true}
+
+	var body []byte
+	if actual, ok := req.(proto.Message); ok {
+		bt, err := opts.Marshal(actual)
+		if err == nil {
+			body = bt
+		}
+	}
+
+	var result []byte
+	if actual, ok := resp.(proto.Message); ok {
+		bt, err := opts.Marshal(actual)
+		if err == nil {
+			result = bt
+		}
+	}
 
 	ins.tel.Logger().Info(ctx, "grpc request response",
 		logger.KeyVal("rpc.method", info.FullMethod),
 		logger.KeyVal("rpc.status.code", int32(status.Code(err))),
 		logger.KeyVal("rpc.status.name", status.Code(err).String()),
+		logger.KeyVal("rpc.request", filter.Body(body)),
+		logger.KeyVal("rpc.response", filter.Body(result)),
+		logger.KeyVal("rpc.metadata", filter.Header(md)),
 	)
 
 	return resp, err

@@ -8,6 +8,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -21,6 +22,7 @@ type Expose struct{}
 
 type Dependency struct {
 	Database     *sql.DB
+	Transaction  dbops.Tx
 	QueryBuilder goqu.DialectWrapper
 	Telemetry    *telemetry.Telemetry
 	Router       *framework.Router

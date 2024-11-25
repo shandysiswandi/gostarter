@@ -15,7 +15,7 @@ func TestInbound_RegisterAuthServiceServer(t *testing.T) {
 		{
 			name: "Success",
 			in: Inbound{
-				Router:           framework.New(),
+				Router:           framework.NewRouter(),
 				GRPCServer:       grpc.NewServer(),
 				LoginUC:          nil,
 				RegisterUC:       nil,

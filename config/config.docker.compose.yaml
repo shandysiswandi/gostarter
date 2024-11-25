@@ -3,8 +3,8 @@ server.address.gql: :8181
 server.address.grpc: :50001
 
 telemetry.name: gostarter
-telemetry.otlp.address: localhost:4318
-
+telemetry.otlp.grpc.address: localhost:4317
+telemetry.otlp.http.address: localhost:4318
 tz: "Asia/Jakarta"
 
 pubsub.project.id: "google project id"

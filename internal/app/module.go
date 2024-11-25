@@ -23,6 +23,7 @@ func (a *App) moduleAuth() {
 	if a.config.GetBool("module.flag.auth") {
 		_, err := auth.New(auth.Dependency{
 			Database:     a.database,
+			Transaction:  a.transaction,
 			QueryBuilder: a.queryBuilder,
 			Telemetry:    a.telemetry,
 			Router:       a.httpRouter,
@@ -45,6 +46,7 @@ func (a *App) moduleTodo() {
 		expTodo, err := todo.New(todo.Dependency{
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
+			Transaction:  a.transaction,
 			RedisDB:      a.redisDB,
 			Messaging:    a.messaging,
 			Config:       a.config,
