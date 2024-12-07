@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"slices"
@@ -19,13 +18,14 @@ import (
 )
 
 const (
-	xRequestID = "X-Request-ID"
+	xRequestID  = "x-request-id"
+	xActualPath = "X-Actual-Path"
 )
 
-func UseTelemetryServer(tel *telemetry.Telemetry, sid func() string) func(http.Handler) http.Handler {
+func UseTelemetryServer(tel *telemetry.Telemetry) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ihs := &instarumentHTTPServer{tel: tel, uuid: sid, next: h}
+			ihs := &instarumentHTTPServer{tel: tel, next: h}
 
 			switch tel.Collector() {
 			case telemetry.OPENTELEMETRY:
@@ -80,23 +80,13 @@ func (srw *statusResponseWriter) Flush() {
 
 type instarumentHTTPServer struct {
 	next http.Handler
-	uuid func() string
 	tel  *telemetry.Telemetry
 }
 
 func (ihs *instarumentHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if rid := r.Header.Get(xRequestID); rid == "" {
-		r.Header.Set(xRequestID, ihs.uuid())
-	}
-
-	r = r.WithContext(requestid.Set(r.Context(), r.Header.Get(xRequestID)))
-
 	srw := &statusResponseWriter{ResponseWriter: w}
 	filter := ihs.tel.Filter()
-	fields := []logger.Field{
-		logger.KeyVal("http.method", r.Method),
-		logger.KeyVal("http.path", r.URL.Path),
-	}
+	verbose := ihs.tel.Verbose()
 
 	var okBody bool
 	var rwBody []byte
@@ -109,32 +99,40 @@ func (ihs *instarumentHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	ihs.next.ServeHTTP(srw, r)
-	ctx := r.Context()
-	fields = append(fields, logger.KeyVal("http.status", srw.statusCode))
+	ctx := requestid.Set(r.Context(), r.Header.Get(xRequestID))
+	ihs.next.ServeHTTP(srw, r.WithContext(ctx))
 
-	if okBody {
+	path := r.Header.Get(xActualPath)
+	if path == "" {
+		path = r.URL.Path
+	}
+
+	fields := []logger.Field{
+		logger.KeyVal("http.method", r.Method),
+		logger.KeyVal("http.path", path),
+		logger.KeyVal("http.status", srw.statusCode),
+	}
+
+	if okBody && verbose {
 		fields = append(fields, logger.KeyVal("http.body", filter.Body(rwBody)))
 	}
 
-	if r.Method == http.MethodGet {
+	if r.Method == http.MethodGet && verbose {
 		fields = append(fields, logger.KeyVal("http.query", filter.Query(r.URL.RawQuery)))
 	}
 
-	fields = append(fields, logger.KeyVal("http.response", filter.Body(srw.responseBody)))
-	fields = append(fields, logger.KeyVal("http.header", filter.Header(r.Header)))
-
-	log.Println("middle", ctx)
+	if verbose {
+		fields = append(fields, logger.KeyVal("http.response", filter.Body(srw.responseBody)))
+		fields = append(fields, logger.KeyVal("http.header", filter.Header(r.Header)))
+	}
 
 	ic, err := ihs.tel.Meter().Int64Counter("http_requests")
 	if err == nil {
 		ic.Add(ctx, 1, metric.WithAttributes(
 			attribute.Int("status", srw.statusCode),
-			attribute.String("path", r.URL.Path),
+			attribute.String("path", r.Header.Get(xActualPath)),
 			attribute.String("method", strings.ToLower(r.Method)),
 		))
-	} else {
-		log.Println("sudahlah", err)
 	}
 
 	ihs.tel.Logger().Info(ctx, "http request response", fields...)

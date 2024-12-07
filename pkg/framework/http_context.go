@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 // Context defines an interface for working with HTTP requests and their context.
@@ -72,7 +74,7 @@ func (rc *RouterCtx) Queries(key string) []string {
 
 // Param retrieves the value of a route parameter by its key.
 func (rc *RouterCtx) Param(key string) string {
-	return GetParams(rc.Request().Context()).Key(key)
+	return httprouter.ParamsFromContext(rc.Request().Context()).ByName(key)
 }
 
 // TestCtx is a helper type for testing HTTP requests and contexts.
@@ -88,10 +90,8 @@ type TestCtx struct {
 // NewTestContext creates a new TestDefault instance with a given HTTP method,
 // target URL, and optional body.
 func NewTestContext(method string, target string, body io.Reader) *TestCtx {
-	r := httptest.NewRequest(method, target, body)
-
 	return &TestCtx{
-		r:       r,
+		r:       httptest.NewRequest(method, target, body),
 		param:   make(map[string]string),
 		queries: make(map[string][]string),
 		headers: make(map[string][]string),
@@ -119,6 +119,7 @@ func (tc *TestCtx) SetHeader(key string, values ...string) {
 	tc.headers[key] = append(tc.headers[key], values...)
 }
 
+// SetContext adds or updates a context with the given key and values.
 func (tc *TestCtx) SetContext(ctx context.Context) {
 	tc.r = tc.r.WithContext(ctx)
 }
@@ -143,14 +144,13 @@ func (tc *TestCtx) Build() *RouterCtx {
 	}
 
 	// Set route parameters
-	var params Params
+	var params httprouter.Params
 	for key, value := range tc.param {
-		params = append(params, Param{
+		params = append(params, httprouter.Param{
 			Key:   key,
 			Value: value,
 		})
 	}
-	ctx := context.WithValue(tc.r.Context(), paramContextKey{}, params)
 
-	return &RouterCtx{r: tc.r.WithContext(ctx)}
+	return &RouterCtx{r: tc.r.WithContext(context.WithValue(tc.r.Context(), httprouter.ParamsKey, params))}
 }

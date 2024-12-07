@@ -43,7 +43,12 @@ import (
 // will log a fatal error and terminate. This method should be called early in the application's
 // initialization process.
 func (a *App) initConfig() {
-	cfg, err := config.NewViperConfig("config/config.yaml")
+	path := "/config/config.yaml"
+	if os.Getenv("LOCAL") == "true" {
+		path = "./config/config.yaml"
+	}
+
+	cfg, err := config.NewViperConfig(path)
 	if err != nil {
 		log.Fatalln("failed to init config", err)
 	}
@@ -61,8 +66,9 @@ func (a *App) initTelemetry() {
 
 	a.telemetry = telemetry.NewTelemetry(
 		telemetry.WithServiceName(a.config.GetString("telemetry.name")),
+		telemetry.WithVerbose(),
 		telemetry.WithLogFilter(filterKeys...),
-		telemetry.WithZapLogger(logger.InfoLevel, filterKeys...),
+		telemetry.WithZapLogger(a.config.GetString("telemetry.name"), logger.InfoLevel),
 		telemetry.WithOTLP(a.config.GetString("telemetry.otlp.grpc.address")),
 	)
 }
@@ -193,12 +199,9 @@ func (a *App) initRedis() {
 }
 
 func (a *App) initMessaging() {
-	// msg, err := redispubsub.NewClient(
-	// 	"",
-	// 	redispubsub.WithExistingClient(a.redisDB),
-	// 	redispubsub.WithLogger(a.telemetry.Logger()),
-	// 	redispubsub.WithSyncPublisher(),
-	// )
+	if !a.config.GetBool("init.flag.messaging") {
+		return
+	}
 
 	msg, err := googlepubsub.NewClient(
 		context.Background(),
@@ -226,8 +229,8 @@ func (a *App) initHTTPServer() {
 			framework.Recovery,
 			// next-mr: Need to create a custom CORS implementation to standardize error messages
 			cors.AllowAll().Handler,
-			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
-			framework.JWT(a.jwt, "gostarter.access.token", "/auth", "/graphql/playground"),
+			instrument.UseTelemetryServer(a.telemetry),
+			framework.JWT("gostarter.access.token", "/auth"),
 		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
@@ -244,8 +247,8 @@ func (a *App) initGQLServer() {
 			a.gqlRouter,
 			framework.Recovery,
 			cors.AllowAll().Handler,
-			instrument.UseTelemetryServer(a.telemetry, a.uuid.Generate),
-			framework.JWT(a.jwt, "gostarter.access.token", "/graphql/playground"),
+			instrument.UseTelemetryServer(a.telemetry),
+			framework.JWT("gostarter.access.token", "/graphql/playground"),
 		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
@@ -259,7 +262,7 @@ func (a *App) initGRPCServer() {
 	opts = append(opts, instrument.UnaryTelemetryServerInterceptor(a.telemetry, a.uuid.Generate)...)
 	opts = append(opts, grpc.ChainUnaryInterceptor(
 		framework.UnaryServerError,
-		framework.UnaryServerJWT(a.jwt, "gostarter.access.token", "/gostarter.api.auth.AuthService"),
+		framework.UnaryServerJWT("gostarter.access.token", "/gostarter.api.auth.AuthService"),
 		framework.UnaryServerProtoValidate(a.protoValidator),
 	))
 

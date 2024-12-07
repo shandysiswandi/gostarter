@@ -26,8 +26,10 @@ jwt.public.key: base64ofpublickey
 jwt.private.key: base64ofprivatekey
 jwt.hash.secret: secret
 
+init.flag.messaging: false
+
 feature.flag.graphql.playground: false
-feature.flag.todo.job: true
+feature.flag.todo.job: false
 
 module.flag.auth: true
 module.flag.user: true

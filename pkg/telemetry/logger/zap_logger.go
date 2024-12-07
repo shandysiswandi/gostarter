@@ -2,13 +2,14 @@ package logger
 
 import (
 	"context"
-	"slices"
-	"strings"
+	"errors"
+	"os"
 
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/requestid"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
@@ -18,11 +19,11 @@ const (
 )
 
 type ZapLogger struct {
-	logger       *zap.Logger
-	filteredKeys []string
+	logger *zap.Logger
+	luja   *lumberjack.Logger
 }
 
-func NewZapLogger(lvl Level, keys ...string) (*ZapLogger, error) {
+func NewZapLogger(serviceName string, lvl Level) *ZapLogger {
 	var level zapcore.Level
 	switch lvl {
 	case DebugLevel:
@@ -36,19 +37,40 @@ func NewZapLogger(lvl Level, keys ...string) (*ZapLogger, error) {
 	}
 
 	z := zap.NewProductionConfig()
-	z.DisableCaller = true
-	z.Level = zap.NewAtomicLevelAt(level)
 	z.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	z.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	z.EncoderConfig.LevelKey = "severity"
 
-	logger, err := z.Build()
-	if err != nil {
-		return nil, err
+	cores := []zapcore.Core{
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(z.EncoderConfig),
+			zapcore.AddSync(os.Stdout),
+			zap.NewAtomicLevelAt(level),
+		),
 	}
-	logger = zap.New(logger.Core(), zap.AddCaller(), zap.AddCallerSkip(1))
 
-	return &ZapLogger{filteredKeys: keys, logger: logger}, nil
+	var luja *lumberjack.Logger
+
+	if serviceName != "" {
+		luja = &lumberjack.Logger{
+			Filename:   "logs/" + serviceName, // Log file location
+			MaxSize:    10,                    // Max megabytes before log is rotated
+			MaxBackups: 3,                     // Max number of old log files to keep
+			MaxAge:     7,                     // Max number of days to retain old files
+			Compress:   true,
+		}
+
+		cores = append(cores, zapcore.NewCore(
+			zapcore.NewJSONEncoder(z.EncoderConfig),
+			zapcore.AddSync(luja),
+			zap.NewAtomicLevelAt(level),
+		))
+	}
+
+	return &ZapLogger{
+		logger: zap.New(zapcore.NewTee(cores...), zap.AddCaller(), zap.AddCallerSkip(1)),
+		luja:   luja,
+	}
 }
 
 func (z *ZapLogger) Debug(ctx context.Context, message string, fields ...Field) {
@@ -78,13 +100,17 @@ func (z *ZapLogger) Error(ctx context.Context, message string, err error, fields
 
 func (z *ZapLogger) WithFields(fields ...Field) Logger {
 	return &ZapLogger{
-		logger:       z.logger.With(z.convertFields(fields)...),
-		filteredKeys: z.filteredKeys,
+		logger: z.logger.With(z.convertFields(fields)...),
 	}
 }
 
 func (z *ZapLogger) Close() error {
-	return z.logger.Sync()
+	var err error
+	if z.luja != nil {
+		err = errors.Join(z.luja.Close())
+	}
+
+	return errors.Join(err, z.logger.Sync())
 }
 
 func (z *ZapLogger) withTelemetry(ctx context.Context) []zap.Field {
@@ -114,12 +140,6 @@ func (z *ZapLogger) withTelemetry(ctx context.Context) []zap.Field {
 func (z *ZapLogger) convertFields(fields []Field) []zapcore.Field {
 	zapFields := make([]zapcore.Field, len(fields))
 	for i, field := range fields {
-		if ok := slices.Contains(z.filteredKeys, strings.ToLower(field.key)); ok {
-			zapFields[i] = zap.String(field.key, "***")
-
-			continue
-		}
-
 		zapFields[i] = zap.Any(field.key, field.value)
 	}
 

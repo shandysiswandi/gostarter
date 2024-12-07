@@ -5,11 +5,14 @@ services:
       context: .
     ports:
       - "8081:8081"
+      - "8082:8082"
       - "50001:50001"
     environment:
       - TZ=Asia/Jakarta
     volumes:
-      - ./config/config.docker.compose.yaml:/config/config.yaml
+      - ./config/config.yaml:/config/config.yaml
+    networks:
+      - gostarter-network
     depends_on:
       mysql:
         condition: service_healthy
@@ -21,12 +24,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: secret_root_password
       MYSQL_DATABASE: gostarter
-      MYSQL_USER: developer
-      MYSQL_PASSWORD: secret_password
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - gostarter-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
       interval: 10s
@@ -39,6 +44,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - gostarter-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -48,3 +55,7 @@ services:
 volumes:
   mysql_data:
   redis_data:
+
+networks:
+  gostarter-network:
+    driver: bridge

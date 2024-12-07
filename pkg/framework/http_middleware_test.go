@@ -7,9 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	libjwt "github.com/golang-jwt/jwt/v4"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/jwt/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +20,11 @@ func TestChain(t *testing.T) {
 	}{
 		{
 			name: "Success",
-			mws:  []Middleware{Recovery},
+			mws: []Middleware{func(h http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					h.ServeHTTP(w, r)
+				})
+			}},
 			handlerFunc: func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("OK"))
 			},
@@ -125,19 +126,15 @@ func TestJWT(t *testing.T) {
 		name            string
 		opts            []string
 		path            string
-		jwte            func() jwt.JWT
 		handlerFunc     http.HandlerFunc
 		expectedStatus  int
 		expectedMessage string
 		mockFn          func(r *http.Request)
 	}{
 		{
-			name: "SkipPath",
-			path: "/skip",
-			opts: []string{"/skip"},
-			jwte: func() jwt.JWT {
-				return &mocker.MockJWT{}
-			},
+			name:   "SkipPath",
+			path:   "/skip",
+			opts:   []string{"/skip"},
 			mockFn: nil,
 			handlerFunc: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
@@ -147,75 +144,10 @@ func TestJWT(t *testing.T) {
 			expectedMessage: "OK",
 		},
 		{
-			name: "ErrorNoHeaderAuthorization",
-			path: "/continue",
-			jwte: func() jwt.JWT {
-				return &mocker.MockJWT{}
-			},
-			mockFn:          nil,
-			handlerFunc:     nil,
-			expectedStatus:  http.StatusUnauthorized,
-			expectedMessage: "{\"error\":\"authorization header missing\"}\n",
-		},
-		{
-			name: "ErrorNoPrefixBearer",
-			path: "/continue",
-			jwte: func() jwt.JWT {
-				return &mocker.MockJWT{}
-			},
-			mockFn: func(r *http.Request) {
-				r.Header.Set("Authorization", "zzz")
-			},
-			handlerFunc:     nil,
-			expectedStatus:  http.StatusUnauthorized,
-			expectedMessage: "{\"error\":\"invalid format\"}\n",
-		},
-		{
-			name: "ErrorTokenExpired",
-			path: "/continue",
-			jwte: func() jwt.JWT {
-				mjwt := &mocker.MockJWT{}
-
-				mjwt.EXPECT().Verify("ay").Return(nil, jwt.ErrTokenExpired)
-
-				return mjwt
-			},
-			mockFn: func(r *http.Request) {
-				r.Header.Set("Authorization", "Bearer ay")
-			},
-			handlerFunc:     nil,
-			expectedStatus:  http.StatusUnauthorized,
-			expectedMessage: "{\"error\":\"expired token\"}\n",
-		},
-		{
-			name: "ErrorJWTVerify",
-			path: "/continue",
-			jwte: func() jwt.JWT {
-				mjwt := &mocker.MockJWT{}
-
-				mjwt.EXPECT().Verify("ay").Return(nil, assert.AnError)
-
-				return mjwt
-			},
-			mockFn: func(r *http.Request) {
-				r.Header.Set("Authorization", "Bearer ay")
-			},
-			handlerFunc:     nil,
-			expectedStatus:  http.StatusUnauthorized,
-			expectedMessage: "{\"error\":\"invalid token\"}\n",
-		},
-		{
 			name: "ErrorInvalidAudience",
 			path: "/continue",
-			jwte: func() jwt.JWT {
-				mjwt := &mocker.MockJWT{}
-
-				mjwt.EXPECT().Verify("ay").Return(&jwt.Claim{}, nil)
-
-				return mjwt
-			},
 			mockFn: func(r *http.Request) {
-				r.Header.Set("Authorization", "Bearer ay")
+				r.Header.Set("Authorization", "Bearer a.eyJhdWQiOlsiZ29zdGFydGVyLmFjY2Vzcy50b2FrZW4iXX0.a")
 			},
 			handlerFunc:     nil,
 			expectedStatus:  http.StatusUnauthorized,
@@ -224,19 +156,8 @@ func TestJWT(t *testing.T) {
 		{
 			name: "Success",
 			path: "/continue",
-			jwte: func() jwt.JWT {
-				mjwt := &mocker.MockJWT{}
-
-				mjwt.EXPECT().Verify("ay").Return(&jwt.Claim{
-					RegisteredClaims: libjwt.RegisteredClaims{
-						Audience: []string{"gostarter.access.token"},
-					},
-				}, nil)
-
-				return mjwt
-			},
 			mockFn: func(r *http.Request) {
-				r.Header.Set("Authorization", "Bearer ay")
+				r.Header.Set("Authorization", "Bearer a.eyJhdWQiOlsiZ29zdGFydGVyLmFjY2Vzcy50b2tlbiJdfQ.a")
 			},
 			handlerFunc: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
@@ -250,7 +171,7 @@ func TestJWT(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			handler := JWT(tt.jwte(), "gostarter.access.token", tt.opts...)(tt.handlerFunc)
+			handler := JWT("gostarter.access.token", tt.opts...)(tt.handlerFunc)
 
 			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
 

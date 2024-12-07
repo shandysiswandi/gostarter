@@ -54,9 +54,9 @@ func TestTelemetry_Close(t *testing.T) {
 		},
 		{
 			name:    "ErrorWithZapLogger",
-			wantErr: errors.New("sync /dev/stderr: invalid argument"),
+			wantErr: errors.New("sync /dev/stdout: invalid argument"),
 			mockFn: func() *Telemetry {
-				return NewTelemetry(WithZapLogger(logger.InfoLevel))
+				return NewTelemetry(WithZapLogger("", logger.InfoLevel))
 			},
 		},
 	}
@@ -217,6 +217,29 @@ func TestTelemetry_Filter(t *testing.T) {
 			t.Parallel()
 			tr := tt.mockFn().Filter()
 			assert.Equal(t, tt.want(), tr)
+		})
+	}
+}
+
+func TestTelemetry_Verbose(t *testing.T) {
+	tests := []struct {
+		name   string
+		want   bool
+		mockFn func() *Telemetry
+	}{
+		{
+			name: "Success",
+			want: false,
+			mockFn: func() *Telemetry {
+				return NewTelemetry()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tr := tt.mockFn().Verbose()
+			assert.Equal(t, tt.want, tr)
 		})
 	}
 }

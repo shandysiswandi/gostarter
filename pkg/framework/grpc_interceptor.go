@@ -56,7 +56,7 @@ func UnaryServerError(ctx context.Context, req any, _ *grpc.UnaryServerInfo, nex
 	return resp, nil
 }
 
-func UnaryServerJWT(jwte jwt.JWT, audience string, skipMethods ...string) grpc.UnaryServerInterceptor {
+func UnaryServerJWT(audience string, skipMethods ...string) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, next grpc.UnaryHandler) (any, error) {
 		if len(skipMethods) > 0 {
 			for _, prefix := range skipMethods {
@@ -66,11 +66,11 @@ func UnaryServerJWT(jwte jwt.JWT, audience string, skipMethods ...string) grpc.U
 			}
 		}
 
-		return doUnaryServerJWT(ctx, req, next, jwte, audience)
+		return doUnaryServerJWT(ctx, req, next, audience)
 	}
 }
 
-func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler, jwte jwt.JWT,
+func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler,
 	audience string,
 ) (any, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -78,24 +78,7 @@ func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler, jwte
 		return nil, goerror.NewServer("internal server error", nil)
 	}
 
-	authHeader, ok := md["authorization"]
-	if !ok {
-		return nil, goerror.NewBusiness("authorization header missing", goerror.CodeUnauthorized)
-	}
-
-	if !strings.HasPrefix(authHeader[0], "Bearer ") {
-		return nil, goerror.NewBusiness("invalid format", goerror.CodeUnauthorized)
-	}
-
-	clm, err := jwte.Verify(strings.TrimPrefix(authHeader[0], "Bearer "))
-	if errors.Is(err, jwt.ErrTokenExpired) {
-		return nil, goerror.NewBusiness("expired token", goerror.CodeUnauthorized)
-	}
-
-	if err != nil {
-		return nil, goerror.NewBusiness("invalid token", goerror.CodeUnauthorized)
-	}
-
+	clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(md["authorization"][0], "Bearer "))
 	if !clm.VerifyAudience(audience, true) {
 		return nil, goerror.NewBusiness("invalid token audience", goerror.CodeUnauthorized)
 	}

@@ -22,6 +22,7 @@ const (
 
 type Telemetry struct {
 	name      string
+	verbose   bool
 	filter    *filter.Filter
 	logger    logger.Logger
 	tracer    trace.TracerProvider
@@ -37,6 +38,7 @@ func NewTelemetry(opts ...Option) *Telemetry {
 	tel := &Telemetry{
 		name:      "telemetry",
 		filter:    nil,
+		verbose:   false,
 		logger:    logger.NewNoopLogger(),
 		tracer:    tnoop.NewTracerProvider(),
 		meter:     mnoop.NewMeterProvider(),
@@ -85,4 +87,8 @@ func (t *Telemetry) Meter() metric.Meter {
 
 func (t *Telemetry) Filter() *filter.Filter {
 	return t.filter
+}
+
+func (t *Telemetry) Verbose() bool {
+	return t.verbose
 }

@@ -1,50 +1,227 @@
 package framework
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/stretchr/testify/assert"
 )
 
-func BenchmarkNewRouter(b *testing.B) {
-	router := NewRouter()
+type testResult struct{}
 
-	// Set up routes
-	router.HandleFunc("GET", "/home", func(w http.ResponseWriter, r *http.Request) {})
-	router.HandleFunc("POST", "/user/:id", func(w http.ResponseWriter, r *http.Request) {})
-	router.HandleFunc("GET", "/files/*", func(w http.ResponseWriter, r *http.Request) {})
-	router.HandleFunc("DELETE", "/user/:id", func(w http.ResponseWriter, r *http.Request) {})
-	router.HandleFunc("GET", "/deep/nested/path", func(w http.ResponseWriter, r *http.Request) {})
+func (testResult) StatusCode() int { return 200 }
 
-	// Define test cases for route lookups
-	testCases := []struct {
+func TestNewRouter(t *testing.T) {
+	tests := []struct {
+		name string
+		want *Router
+	}{
+		{
+			name: "Success",
+			want: NewRouter(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := NewRouter()
+			assert.NotNil(t, got.hr)
+			assert.NotNil(t, got.resultCodec)
+			assert.NotNil(t, got.errorCodec)
+		})
+	}
+}
+
+func TestRouter_Endpoint(t *testing.T) {
+	type args struct {
 		method string
 		path   string
-	}{
-		{"GET", "/home"},              // Static route
-		{"POST", "/user/123"},         // Dynamic route
-		{"GET", "/files/images/img1"}, // Wildcard route
-		{"GET", "/deep/nested/path"},  // Deep static route
-		{"DELETE", "/user/456"},       // Dynamic with different method
-		//
-		{"GET", "/home"},              // Static route
-		{"POST", "/user/123"},         // Dynamic route
-		{"GET", "/files/images/img1"}, // Wildcard route
-		{"GET", "/deep/nested/path"},  // Deep static route
-		{"DELETE", "/user/456"},       // Dynamic with different method
-		//
-		{"GET", "/user/456"},       // method not allowed
-		{"POST", "/not-found/456"}, // path not found
+		h      Handler
+		body   io.Reader
+		mws    []Middleware
 	}
+	tests := []struct {
+		name           string
+		args           args
+		wantStatusCode int
+		mockFn         func(a args) *Router
+	}{
+		{
+			name: "Error",
+			args: args{
+				method: "GET",
+				path:   "/",
+				h: func(Context) (any, error) {
+					return nil, goerror.NewServerInternal(assert.AnError)
+				},
+				body: nil,
+				mws:  nil,
+			},
+			wantStatusCode: 500,
+			mockFn: func(a args) *Router {
+				return NewRouter()
+			},
+		},
+		{
+			name: "NoContent",
+			args: args{
+				method: "GET",
+				path:   "/users/:id",
+				h: func(Context) (any, error) {
+					return nil, nil
+				},
+				body: nil,
+				mws:  nil,
+			},
+			wantStatusCode: 204,
+			mockFn: func(a args) *Router {
+				return NewRouter()
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				method: "GET",
+				path:   "/users/:id",
+				h: func(Context) (any, error) {
+					return testResult{}, nil
+				},
+				body: nil,
+				mws:  nil,
+			},
+			wantStatusCode: 200,
+			mockFn: func(a args) *Router {
+				return NewRouter()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			r := tt.mockFn(tt.args)
+			r.Endpoint(tt.args.method, tt.args.path, tt.args.h, tt.args.mws...)
+			req := httptest.NewRequest(tt.args.method, tt.args.path, tt.args.body)
+			resp := httptest.NewRecorder()
+			r.ServeHTTP(resp, req)
+			assert.Equal(t, tt.wantStatusCode, resp.Code)
+		})
+	}
+}
 
-	for _, tc := range testCases {
-		b.Run(tc.method+" "+tc.path, func(b *testing.B) {
-			req := httptest.NewRequest(tc.method, tc.path, nil)
-			rec := httptest.NewRecorder()
+func TestRouter_HandleFunc(t *testing.T) {
+	type args struct {
+		method string
+		path   string
+		h      http.HandlerFunc
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantStatusCode int
+		mockFn         func() *Router
+	}{
+		{
+			name: "Error",
+			args: args{
+				method: "GET",
+				path:   "/",
+				h:      defaultNotFound,
+			},
+			wantStatusCode: 404,
+			mockFn: func() *Router {
+				return NewRouter()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			r := tt.mockFn()
 
-			for i := 0; i < b.N; i++ {
-				router.ServeHTTP(rec, req)
-			}
+			r.HandleFunc(tt.args.method, tt.args.path, tt.args.h)
+
+			req := httptest.NewRequest(tt.args.method, tt.args.path, nil)
+			resp := httptest.NewRecorder()
+			r.ServeHTTP(resp, req)
+			assert.Equal(t, tt.wantStatusCode, resp.Code)
+		})
+	}
+}
+
+func TestRouter_Handler(t *testing.T) {
+	type args struct {
+		method string
+		path   string
+		h      http.Handler
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantStatusCode int
+		mockFn         func() *Router
+	}{
+		{
+			name: "Error",
+			args: args{
+				method: "GET",
+				path:   "/",
+				h:      http.HandlerFunc(defaultMethodNotAllowed),
+			},
+			wantStatusCode: 405,
+			mockFn: func() *Router {
+				return NewRouter()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			r := tt.mockFn()
+
+			r.Handler(tt.args.method, tt.args.path, tt.args.h)
+
+			req := httptest.NewRequest(tt.args.method, tt.args.path, nil)
+			resp := httptest.NewRecorder()
+			r.ServeHTTP(resp, req)
+			assert.Equal(t, tt.wantStatusCode, resp.Code)
+		})
+	}
+}
+
+func Test_writeJSON(t *testing.T) {
+	type args struct {
+		w    http.ResponseWriter
+		data any
+		code int
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Error",
+			args: args{
+				w:    httptest.NewRecorder(),
+				data: make(chan string),
+				code: 500,
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				w:    httptest.NewRecorder(),
+				data: "success",
+				code: 200,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			writeJSON(tt.args.w, tt.args.data, tt.args.code)
 		})
 	}
 }

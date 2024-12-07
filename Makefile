@@ -17,11 +17,11 @@ endif
 # ***** *****
 # install: Installs CLI tools necessary for development (mockery, buf, goose, reflex, golangci-lint).
 install:
-	@go install github.com/vektra/mockery/v2@v2.46.3
-	@go install github.com/bufbuild/buf/cmd/buf@v1.46.0
+	@go install github.com/vektra/mockery/v2@v2.49.2
+	@go install github.com/bufbuild/buf/cmd/buf@v1.47.2
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
 	@go install github.com/cespare/reflex@latest
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.62.2
 
 # run: Watches for changes in '.go' files, recompiling and rerunning the main application with reflex for hot reloading.
 run:
@@ -30,16 +30,6 @@ run:
 # lint: Runs golangci-lint for static analysis, ensuring Go code quality and adherence to best practices.
 lint:
 	@golangci-lint run
-
-# load: Sends concurrent gRPC requests for load testing
-load:
-	@k6 run -e PASSWORD=password script/k6/index.js
-
-# Code Quality
-scan: test-unit
-	@sonar-scanner \
-	-Dsonar.projectVersion=$(shell git rev-parse --abbrev-ref HEAD)-$(shell git rev-parse --short HEAD)
-
 
 # ***** *****
 # TESTING
@@ -121,13 +111,6 @@ migration-reset:
 docker-build:
 	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
 
-# docker-run: Runs the Docker container named 'gostarter-container', mapping ports 8081 and 50001, and mounts the config file.
-docker-run:
-	@docker run --name gostarter-container \
-	-p 8081:8081 -p 50001:50001 \
-	-v ./config/config.docker.yaml:/config/config.yaml \
-	gostarter
-
-# docker-rm: Removes the Docker container named 'gostarter-container'.
-docker-rm:
-	@docker rm gostarter-container
+# docker-compose: Builds a Docker image for the application with a timezone argument, tagging the image as 'gostarter' and running it.
+docker-compose:
+	@docker compose build && docker compose up

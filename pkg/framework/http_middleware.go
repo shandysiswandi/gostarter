@@ -2,7 +2,6 @@ package framework
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -73,9 +72,8 @@ func Recovery(h http.Handler) http.Handler {
 	})
 }
 
-func JWT(jwte jwt.JWT, audience string, skipPaths ...string) Middleware {
+func JWT(audience string, skipPaths ...string) Middleware {
 	mj := &middlewareJWT{
-		jwte:      jwte,
 		audience:  audience,
 		skipPaths: skipPaths,
 	}
@@ -84,45 +82,21 @@ func JWT(jwte jwt.JWT, audience string, skipPaths ...string) Middleware {
 }
 
 type middlewareJWT struct {
-	jwte      jwt.JWT
 	audience  string
 	skipPaths []string
 }
 
 func (mj *middlewareJWT) handle(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if mj.shouldSkipPath(r.URL.Path) {
-			h.ServeHTTP(w, r)
+		for _, prefix := range mj.skipPaths {
+			if strings.HasPrefix(r.URL.Path, prefix) {
+				h.ServeHTTP(w, r)
 
-			return
+				return
+			}
 		}
 
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			writeJSON(w, map[string]string{"error": "authorization header missing"}, http.StatusUnauthorized)
-
-			return
-		}
-
-		if !strings.HasPrefix(authHeader, "Bearer ") {
-			writeJSON(w, map[string]string{"error": "invalid format"}, http.StatusUnauthorized)
-
-			return
-		}
-
-		clm, err := mj.jwte.Verify(strings.TrimPrefix(authHeader, "Bearer "))
-		if errors.Is(err, jwt.ErrTokenExpired) {
-			writeJSON(w, map[string]string{"error": "expired token"}, http.StatusUnauthorized)
-
-			return
-		}
-
-		if err != nil {
-			writeJSON(w, map[string]string{"error": "invalid token"}, http.StatusUnauthorized)
-
-			return
-		}
-
+		clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
 		if !clm.VerifyAudience(mj.audience, true) {
 			writeJSON(w, map[string]string{"error": "invalid token audience"}, http.StatusUnauthorized)
 
@@ -131,14 +105,4 @@ func (mj *middlewareJWT) handle(h http.Handler) http.Handler {
 
 		h.ServeHTTP(w, r.WithContext(jwt.SetClaim(r.Context(), clm)))
 	})
-}
-
-func (mj *middlewareJWT) shouldSkipPath(path string) bool {
-	for _, prefix := range mj.skipPaths {
-		if strings.HasPrefix(path, prefix) {
-			return true
-		}
-	}
-
-	return false
 }

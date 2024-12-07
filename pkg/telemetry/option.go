@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/filter"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
@@ -25,6 +26,12 @@ func WithServiceName(serviceName string) Option {
 	}
 }
 
+func WithVerbose() Option {
+	return func(t *Telemetry) {
+		t.verbose = true
+	}
+}
+
 func WithLogFilter(keys ...string) Option {
 	return func(t *Telemetry) {
 		values := make([]string, 0, len(keys))
@@ -40,15 +47,9 @@ func WithLogFilter(keys ...string) Option {
 	}
 }
 
-func WithZapLogger(lvl logger.Level, fKeys ...string) Option {
+func WithZapLogger(serviceName string, lvl logger.Level) Option {
 	return func(t *Telemetry) {
-		lo, err := logger.NewZapLogger(lvl, fKeys...)
-		if err != nil {
-			log.Printf("error while initialize zap logger %v", err)
-
-			return
-		}
-
+		lo := logger.NewZapLogger(serviceName, lvl)
 		t.logger = lo
 		t.flushers = append(t.flushers, lo.Close)
 	}
@@ -56,7 +57,8 @@ func WithZapLogger(lvl logger.Level, fKeys ...string) Option {
 
 func WithOTLP(address string) Option {
 	return func(t *Telemetry) {
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+		defer cancel()
 
 		conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
@@ -106,6 +108,7 @@ func WithOTLP(address string) Option {
 		t.flushers = append(t.flushers,
 			func() error { return tracerProvider.Shutdown(ctx) },
 			func() error { return meterProvider.Shutdown(ctx) },
+			func() error { return conn.Close() },
 		)
 	}
 }

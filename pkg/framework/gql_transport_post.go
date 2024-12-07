@@ -23,7 +23,7 @@ func (transportPOST) Supports(r *http.Request) bool {
 		return false
 	}
 
-	mediaType, _, err := mime.ParseMediaType(r.Header.Get(keyContentType))
+	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		return false
 	}

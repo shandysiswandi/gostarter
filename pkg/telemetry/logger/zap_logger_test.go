@@ -10,27 +10,22 @@ import (
 
 func TestNewZapLogger(t *testing.T) {
 	type args struct {
-		lvl  Level
-		keys []string
+		filename string
+		lvl      Level
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *ZapLogger
-		wantErr error
+		name string
+		args args
 	}{
 		{
-			name:    "Success",
-			args:    args{},
-			want:    &ZapLogger{},
-			wantErr: nil,
+			name: "Success",
+			args: args{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewZapLogger(tt.args.lvl, tt.args.keys...)
-			assert.Equal(t, tt.wantErr, err)
-			assert.Equal(t, tt.want.filteredKeys, got.filteredKeys)
+			got := NewZapLogger(tt.args.filename, tt.args.lvl)
+			assert.NotNil(t, got)
 		})
 	}
 }
@@ -54,8 +49,7 @@ func TestZapLogger_Debug(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(DebugLevel)
-				return z
+				return NewZapLogger("", DebugLevel)
 			},
 		},
 		{
@@ -66,8 +60,7 @@ func TestZapLogger_Debug(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(DebugLevel)
-				return z
+				return NewZapLogger("", DebugLevel)
 			},
 		},
 	}
@@ -99,8 +92,7 @@ func TestZapLogger_Info(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(InfoLevel)
-				return z
+				return NewZapLogger("", InfoLevel)
 			},
 		},
 	}
@@ -132,8 +124,7 @@ func TestZapLogger_Warn(t *testing.T) {
 				fields:  []Field{},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(WarnLevel)
-				return z
+				return NewZapLogger("", WarnLevel)
 			},
 		},
 	}
@@ -167,8 +158,7 @@ func TestZapLogger_Error(t *testing.T) {
 				fields:  []Field{{key: "a", value: "a"}, {key: "b", value: "b"}},
 			},
 			mockFn: func(a args) *ZapLogger {
-				z, _ := NewZapLogger(ErrorLevel, "b")
-				return z
+				return NewZapLogger("", ErrorLevel)
 			},
 		},
 	}
@@ -182,7 +172,7 @@ func TestZapLogger_Error(t *testing.T) {
 }
 
 func TestZapLogger_WithFields(t *testing.T) {
-	z, _ := NewZapLogger(InfoLevel)
+	z := NewZapLogger("", InfoLevel)
 
 	type args struct {
 		fields []Field
@@ -220,11 +210,16 @@ func TestZapLogger_Close(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			wantErr: errors.New("sync /dev/stderr: invalid argument"),
+			wantErr: errors.New("sync /dev/stdout: invalid argument"),
 			mockFn: func() *ZapLogger {
-				z, _ := NewZapLogger(InfoLevel)
-
-				return z
+				return NewZapLogger("", InfoLevel)
+			},
+		},
+		{
+			name:    "ErrorFile",
+			wantErr: errors.New("sync /dev/stdout: invalid argument"),
+			mockFn: func() *ZapLogger {
+				return NewZapLogger("./.out", InfoLevel)
 			},
 		},
 	}

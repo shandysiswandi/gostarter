@@ -78,8 +78,8 @@ func TestWithLogFilter(t *testing.T) {
 
 func TestWithZapLogger(t *testing.T) {
 	type args struct {
-		level   logger.Level
-		filters []string
+		serviceName string
+		level       logger.Level
 	}
 	tests := []struct {
 		name   string
@@ -89,13 +89,13 @@ func TestWithZapLogger(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				level:   logger.InfoLevel,
-				filters: []string{"token"},
+				serviceName: "gostarter",
+				level:       logger.InfoLevel,
 			},
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithZapLogger(logger.InfoLevel)(tel)
+				WithZapLogger("", logger.InfoLevel)(tel)
 
 				return tel
 			},
@@ -141,7 +141,7 @@ func TestWithOTLPTracer(t *testing.T) {
 			tel := tt.mockFn(tt.args)
 			defer tel.Close()
 
-			assert.Len(t, tel.flushers, 2)
+			assert.Len(t, tel.flushers, 3)
 			assert.NotNil(t, tel.Tracer())
 		})
 	}
