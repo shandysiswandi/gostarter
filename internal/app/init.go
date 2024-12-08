@@ -102,7 +102,7 @@ func (a *App) initLibraries() {
 	a.clock = clock.New()
 	a.uuid = uid.NewUUIDString()
 	a.hash = hash.NewBcryptHash(10)
-	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("jwt.hash.secret"))
+	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("secret.hash.sha256"))
 	a.codecJSON = codec.NewJSONCodec()
 	a.goroutine = goroutine.NewManager(100)
 	a.codecMsgPack = codec.NewMsgPackCodec()
@@ -177,7 +177,7 @@ func (a *App) initDatabase() {
 	database.SetConnMaxLifetime(time.Duration(maxLifetime) * time.Minute)
 	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
-	dbops.SetVerbose(true)
+	dbops.SetVerbose(false)
 	a.database = database
 	a.queryBuilder = queryBuilder
 	a.transaction = dbops.NewTransaction(database)

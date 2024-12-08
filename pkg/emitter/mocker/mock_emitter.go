@@ -68,7 +68,7 @@ func (_c *MockEmitter_AddListener_Call) RunAndReturn(run func(string) <-chan emi
 	return _c
 }
 
-// Close provides a mock function with given fields:
+// Close provides a mock function with no fields
 func (_m *MockEmitter) Close() error {
 	ret := _m.Called()
 
@@ -114,7 +114,7 @@ func (_c *MockEmitter_Close_Call) RunAndReturn(run func() error) *MockEmitter_Cl
 }
 
 // Emit provides a mock function with given fields: topic, args
-func (_m *MockEmitter) Emit(topic string, args ...any) error {
+func (_m *MockEmitter) Emit(topic string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, topic)
 	_ca = append(_ca, args...)
@@ -125,7 +125,7 @@ func (_m *MockEmitter) Emit(topic string, args ...any) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, ...any) error); ok {
+	if rf, ok := ret.Get(0).(func(string, ...interface{}) error); ok {
 		r0 = rf(topic, args...)
 	} else {
 		r0 = ret.Error(0)
@@ -141,18 +141,18 @@ type MockEmitter_Emit_Call struct {
 
 // Emit is a helper method to define mock.On call
 //   - topic string
-//   - args ...any
+//   - args ...interface{}
 func (_e *MockEmitter_Expecter) Emit(topic interface{}, args ...interface{}) *MockEmitter_Emit_Call {
 	return &MockEmitter_Emit_Call{Call: _e.mock.On("Emit",
 		append([]interface{}{topic}, args...)...)}
 }
 
-func (_c *MockEmitter_Emit_Call) Run(run func(topic string, args ...any)) *MockEmitter_Emit_Call {
+func (_c *MockEmitter_Emit_Call) Run(run func(topic string, args ...interface{})) *MockEmitter_Emit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]any, len(args)-1)
+		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
-				variadicArgs[i] = a.(any)
+				variadicArgs[i] = a.(interface{})
 			}
 		}
 		run(args[0].(string), variadicArgs...)
@@ -165,7 +165,7 @@ func (_c *MockEmitter_Emit_Call) Return(_a0 error) *MockEmitter_Emit_Call {
 	return _c
 }
 
-func (_c *MockEmitter_Emit_Call) RunAndReturn(run func(string, ...any) error) *MockEmitter_Emit_Call {
+func (_c *MockEmitter_Emit_Call) RunAndReturn(run func(string, ...interface{}) error) *MockEmitter_Emit_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -214,7 +214,7 @@ func (_c *MockEmitter_RemoveListener_Call) Return() *MockEmitter_RemoveListener_
 }
 
 func (_c *MockEmitter_RemoveListener_Call) RunAndReturn(run func(string, ...<-chan emitter.Event)) *MockEmitter_RemoveListener_Call {
-	_c.Call.Return(run)
+	_c.Run(run)
 	return _c
 }
 

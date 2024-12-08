@@ -17,6 +17,7 @@ import (
 type RefreshTokenStore interface {
 	FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error)
 	SaveToken(ctx context.Context, token domain.Token) error
+	UpdateToken(ctx context.Context, token domain.Token) error
 }
 
 type RefreshToken struct {
@@ -38,11 +39,12 @@ func NewRefreshToken(dep Dependency, s RefreshTokenStore) *RefreshToken {
 		clock:     dep.Clock,
 		store:     s,
 		tgs: &tokenGenSaver{
-			jwt:     dep.JWT,
-			tel:     dep.Telemetry,
-			secHash: dep.SecHash,
-			clock:   dep.Clock,
-			ts:      s,
+			uidnumber: dep.UIDNumber,
+			jwt:       dep.JWT,
+			tel:       dep.Telemetry,
+			secHash:   dep.SecHash,
+			clock:     dep.Clock,
+			ts:        s,
 		},
 	}
 }
@@ -96,7 +98,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
 	}
 
-	tgsIn := tokenGenSaverIn{email: clm.Email, tokenID: refToken.ID, userID: refToken.UserID}
+	tgsIn := tokenGenSaverIn{email: clm.Email, token: refToken, userID: refToken.UserID}
 	tgso, err := s.tgs.do(ctx, tgsIn)
 	if err != nil {
 		return nil, err

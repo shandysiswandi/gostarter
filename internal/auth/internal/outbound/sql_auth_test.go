@@ -743,14 +743,6 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 						a.t.AccessExpiredAt,
 						a.t.RefreshExpiredAt,
 					}).
-					OnConflict(
-						goqu.DoUpdate("user_id", goqu.Record{
-							"access_token":       a.t.AccessToken,
-							"refresh_token":      a.t.RefreshToken,
-							"access_expires_at":  a.t.AccessExpiredAt,
-							"refresh_expires_at": a.t.RefreshExpiredAt,
-						}),
-					).
 					Prepared(true).
 					ToSQL()
 
@@ -793,14 +785,6 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 						a.t.AccessExpiredAt,
 						a.t.RefreshExpiredAt,
 					}).
-					OnConflict(
-						goqu.DoUpdate("user_id", goqu.Record{
-							"access_token":       a.t.AccessToken,
-							"refresh_token":      a.t.RefreshToken,
-							"access_expires_at":  a.t.AccessExpiredAt,
-							"refresh_expires_at": a.t.RefreshExpiredAt,
-						}),
-					).
 					Prepared(true).
 					ToSQL()
 
@@ -843,14 +827,6 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 						a.t.AccessExpiredAt,
 						a.t.RefreshExpiredAt,
 					}).
-					OnConflict(
-						goqu.DoUpdate("user_id", goqu.Record{
-							"access_token":       a.t.AccessToken,
-							"refresh_token":      a.t.RefreshToken,
-							"access_expires_at":  a.t.AccessExpiredAt,
-							"refresh_expires_at": a.t.RefreshExpiredAt,
-						}),
-					).
 					Prepared(true).
 					ToSQL()
 
@@ -873,6 +849,98 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 			defer dbMockCloser()
 
 			err := s.SaveToken(tt.args.ctx, tt.args.t)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
+func TestSQLAuth_UpdateToken(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		t   domain.Token
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLAuth, func() error)
+	}{
+		{
+			name: "ErrorWhenExec",
+			args: args{
+				ctx: context.Background(),
+				t:   domain.Token{},
+			},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLAuth, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("tokens").
+					Set(map[string]any{
+						"user_id":            a.t.UserID,
+						"access_token":       a.t.AccessToken,
+						"refresh_token":      a.t.RefreshToken,
+						"access_expires_at":  a.t.AccessExpiredAt,
+						"refresh_expires_at": a.t.RefreshExpiredAt,
+					}).
+					Where(goqu.Ex{"id": a.t.ID}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLAuth{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				t:   domain.Token{},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLAuth, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("tokens").
+					Set(map[string]any{
+						"user_id":            a.t.UserID,
+						"access_token":       a.t.AccessToken,
+						"refresh_token":      a.t.RefreshToken,
+						"access_expires_at":  a.t.AccessExpiredAt,
+						"refresh_expires_at": a.t.RefreshExpiredAt,
+					}).
+					Where(goqu.Ex{"id": a.t.ID}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLAuth{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.UpdateToken(tt.args.ctx, tt.args.t)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}

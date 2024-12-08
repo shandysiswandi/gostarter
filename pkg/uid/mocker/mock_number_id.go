@@ -17,7 +17,7 @@ func (_m *MockNumberID) EXPECT() *MockNumberID_Expecter {
 	return &MockNumberID_Expecter{mock: &_m.Mock}
 }
 
-// Generate provides a mock function with given fields:
+// Generate provides a mock function with no fields
 func (_m *MockNumberID) Generate() uint64 {
 	ret := _m.Called()
 

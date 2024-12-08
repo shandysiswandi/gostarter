@@ -70,7 +70,7 @@ func (_c *MockClient_BulkPublish_Call) RunAndReturn(run func(context.Context, st
 	return _c
 }
 
-// Close provides a mock function with given fields:
+// Close provides a mock function with no fields
 func (_m *MockClient) Close() error {
 	ret := _m.Called()
 

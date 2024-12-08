@@ -357,7 +357,7 @@ func TestRefreshToken_Call(t *testing.T) {
 					RefreshExpiredAt: time.Time{}.Add(time.Hour * 24),
 				}
 				storeMock.EXPECT().
-					SaveToken(ctx, tokenIn).
+					UpdateToken(ctx, tokenIn).
 					Return(assert.AnError)
 
 				return &RefreshToken{
@@ -457,7 +457,7 @@ func TestRefreshToken_Call(t *testing.T) {
 					RefreshExpiredAt: time.Time{}.Add(time.Hour * 24),
 				}
 				storeMock.EXPECT().
-					SaveToken(ctx, tokenIn).
+					UpdateToken(ctx, tokenIn).
 					Return(nil)
 
 				return &RefreshToken{

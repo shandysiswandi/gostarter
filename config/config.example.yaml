@@ -24,7 +24,7 @@ redis.addr: localhost:6379
 
 jwt.public.key: base64ofpublickey
 jwt.private.key: base64ofprivatekey
-jwt.hash.secret: secret
+secret.hash.sha256: secret
 
 init.flag.messaging: false
 

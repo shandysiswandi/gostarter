@@ -141,14 +141,6 @@ func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
 				t.AccessExpiredAt,
 				t.RefreshExpiredAt,
 			}).
-			OnConflict(
-				goqu.DoUpdate("user_id", goqu.Record{
-					"access_token":       t.AccessToken,
-					"refresh_token":      t.RefreshToken,
-					"access_expires_at":  t.AccessExpiredAt,
-					"refresh_expires_at": t.RefreshExpiredAt,
-				}),
-			).
 			Prepared(true).
 			ToSQL()
 	}
@@ -159,6 +151,27 @@ func (st *SQLAuth) SaveToken(ctx context.Context, t domain.Token) error {
 	}
 
 	return err
+}
+
+func (st *SQLAuth) UpdateToken(ctx context.Context, t domain.Token) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.UpdateToken")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Update("tokens").
+			Set(map[string]any{
+				"user_id":            t.UserID,
+				"access_token":       t.AccessToken,
+				"refresh_token":      t.RefreshToken,
+				"access_expires_at":  t.AccessExpiredAt,
+				"refresh_expires_at": t.RefreshExpiredAt,
+			}).
+			Where(goqu.Ex{"id": t.ID}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.Exec(ctx, st.db, query)
 }
 
 func (st *SQLAuth) FindPasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error) {

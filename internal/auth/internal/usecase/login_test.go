@@ -78,7 +78,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: nil,
 					hash:      nil,
 					secHash:   nil,
 					jwt:       nil,
@@ -116,7 +115,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: nil,
 					hash:      nil,
 					secHash:   nil,
 					jwt:       nil,
@@ -154,7 +152,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: nil,
 					hash:      nil,
 					secHash:   nil,
 					jwt:       nil,
@@ -202,7 +199,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: nil,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       nil,
@@ -254,7 +250,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: nil,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       nil,
@@ -279,7 +274,6 @@ func TestLogin_Call(t *testing.T) {
 				storeMock := new(mockz.MockLoginStore)
 				hashMock := new(mockHash.MockHash)
 				secHashMock := new(mockHash.MockHash)
-				idnumMock := new(mockUID.MockNumberID)
 				clockMock := new(mockClock.MockClocker)
 				jwtMock := new(mockJwt.MockJWT)
 
@@ -303,12 +297,9 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
-					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
+					Return(nil, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -324,7 +315,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,
@@ -357,7 +347,6 @@ func TestLogin_Call(t *testing.T) {
 				storeMock := new(mockz.MockLoginStore)
 				hashMock := new(mockHash.MockHash)
 				secHashMock := new(mockHash.MockHash)
-				idnumMock := new(mockUID.MockNumberID)
 				clockMock := new(mockClock.MockClocker)
 				jwtMock := new(mockJwt.MockJWT)
 
@@ -381,12 +370,9 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
-					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
+					Return(nil, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -408,7 +394,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,
@@ -441,7 +426,6 @@ func TestLogin_Call(t *testing.T) {
 				storeMock := new(mockz.MockLoginStore)
 				hashMock := new(mockHash.MockHash)
 				secHashMock := new(mockHash.MockHash)
-				idnumMock := new(mockUID.MockNumberID)
 				clockMock := new(mockClock.MockClocker)
 				jwtMock := new(mockJwt.MockJWT)
 
@@ -465,12 +449,9 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
-					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
+					Return(nil, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -497,7 +478,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,
@@ -530,7 +510,6 @@ func TestLogin_Call(t *testing.T) {
 				storeMock := new(mockz.MockLoginStore)
 				hashMock := new(mockHash.MockHash)
 				secHashMock := new(mockHash.MockHash)
-				idnumMock := new(mockUID.MockNumberID)
 				clockMock := new(mockClock.MockClocker)
 				jwtMock := new(mockJwt.MockJWT)
 
@@ -554,12 +533,9 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
-					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
+					Return(nil, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -591,7 +567,6 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,
@@ -648,12 +623,9 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
-					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
+					Return(nil, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -682,8 +654,10 @@ func TestLogin_Call(t *testing.T) {
 					Return([]byte("hash_refresh_token"), nil).
 					Once()
 
+				idnumMock.EXPECT().Generate().Return(111)
+
 				tokenIn := domain.Token{
-					ID:               90,
+					ID:               111,
 					UserID:           10,
 					AccessToken:      "hash_access_token",
 					RefreshToken:     "hash_refresh_token",
@@ -697,18 +671,18 @@ func TestLogin_Call(t *testing.T) {
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,
 					store:     storeMock,
 					clock:     clockMock,
 					tgs: &tokenGenSaver{
-						jwt:     jwtMock,
-						tel:     tel,
-						secHash: secHashMock,
-						clock:   clockMock,
-						ts:      storeMock,
+						uidnumber: idnumMock,
+						jwt:       jwtMock,
+						tel:       tel,
+						secHash:   secHashMock,
+						clock:     clockMock,
+						ts:        storeMock,
 					},
 				}
 			},
@@ -735,7 +709,6 @@ func TestLogin_Call(t *testing.T) {
 				storeMock := new(mockz.MockLoginStore)
 				hashMock := new(mockHash.MockHash)
 				secHashMock := new(mockHash.MockHash)
-				idnumMock := new(mockUID.MockNumberID)
 				clockMock := new(mockClock.MockClocker)
 				jwtMock := new(mockJwt.MockJWT)
 
@@ -759,12 +732,10 @@ func TestLogin_Call(t *testing.T) {
 					Verify(user.Password, a.in.Password).
 					Return(true)
 
-				token := &domain.Token{ID: 90}
+				token := &domain.Token{ID: 90, UserID: user.ID}
 				storeMock.EXPECT().
 					FindTokenByUserID(ctx, user.ID).
 					Return(token, nil)
-
-				idnumMock.EXPECT().Generate().Return(111)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -802,13 +773,12 @@ func TestLogin_Call(t *testing.T) {
 					RefreshExpiredAt: time.Time{}.Add(time.Hour * 24),
 				}
 				storeMock.EXPECT().
-					SaveToken(ctx, tokenIn).
+					UpdateToken(ctx, tokenIn).
 					Return(nil)
 
 				return &Login{
 					tel:       tel,
 					validator: validatorMock,
-					uidnumber: idnumMock,
 					hash:      hashMock,
 					secHash:   nil,
 					jwt:       jwtMock,

@@ -21,7 +21,7 @@ func (_m *MockClocker) EXPECT() *MockClocker_Expecter {
 	return &MockClocker_Expecter{mock: &_m.Mock}
 }
 
-// Now provides a mock function with given fields:
+// Now provides a mock function with no fields
 func (_m *MockClocker) Now() time.Time {
 	ret := _m.Called()
 

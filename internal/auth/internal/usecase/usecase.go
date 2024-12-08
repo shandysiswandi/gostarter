@@ -27,20 +27,22 @@ type Dependency struct {
 
 type tokenSaver interface {
 	SaveToken(ctx context.Context, token domain.Token) error
+	UpdateToken(ctx context.Context, token domain.Token) error
 }
 
 type tokenGenSaver struct {
-	jwt     jwt.JWT
-	tel     *telemetry.Telemetry
-	secHash hash.Hash
-	clock   clock.Clocker
-	ts      tokenSaver
+	jwt       jwt.JWT
+	tel       *telemetry.Telemetry
+	secHash   hash.Hash
+	uidnumber uid.NumberID
+	clock     clock.Clocker
+	ts        tokenSaver
 }
 
 type tokenGenSaverIn struct {
-	email   string
-	tokenID uint64
-	userID  uint64
+	email  string
+	userID uint64
+	token  *domain.Token
 }
 
 type tokenGenSaverOut struct {
@@ -83,18 +85,8 @@ func (tgs *tokenGenSaver) do(ctx context.Context, in tokenGenSaverIn) (*tokenGen
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	token := domain.Token{
-		ID:               in.tokenID,
-		UserID:           in.userID,
-		AccessToken:      string(acHash),
-		RefreshToken:     string(refHash),
-		AccessExpiredAt:  acClaim.ExpiresAt.Time,
-		RefreshExpiredAt: refClaim.ExpiresAt.Time,
-	}
-	if err := tgs.ts.SaveToken(ctx, token); err != nil {
-		tgs.tel.Logger().Error(ctx, "failed to save tokens", err, logger.KeyVal("email", in.email))
-
-		return nil, goerror.NewServerInternal(err)
+	if err := tgs.upsert(ctx, in, string(acHash), string(refHash), now); err != nil {
+		return nil, err
 	}
 
 	return &tokenGenSaverOut{
@@ -103,4 +95,33 @@ func (tgs *tokenGenSaver) do(ctx context.Context, in tokenGenSaverIn) (*tokenGen
 		accessExpiresIn:  acClaim.ExpiresAt.Time.Unix() - now.Unix(),
 		refreshExpiresIn: refClaim.ExpiresAt.Time.Unix() - now.Unix(),
 	}, nil
+}
+
+func (tgs *tokenGenSaver) upsert(ctx context.Context, in tokenGenSaverIn, ac, re string, n time.Time) error {
+	token := domain.Token{
+		AccessToken:      ac,
+		RefreshToken:     re,
+		AccessExpiredAt:  n.Add(time.Hour),
+		RefreshExpiredAt: n.Add(time.Hour * 24),
+	}
+
+	if in.token != nil {
+		token.ID = in.token.ID
+		token.UserID = in.token.UserID
+		if err := tgs.ts.UpdateToken(ctx, token); err != nil {
+			tgs.tel.Logger().Error(ctx, "failed to update tokens", err, logger.KeyVal("email", in.email))
+
+			return goerror.NewServerInternal(err)
+		}
+	} else {
+		token.ID = tgs.uidnumber.Generate()
+		token.UserID = in.userID
+		if err := tgs.ts.SaveToken(ctx, token); err != nil {
+			tgs.tel.Logger().Error(ctx, "failed to save tokens", err, logger.KeyVal("email", in.email))
+
+			return goerror.NewServerInternal(err)
+		}
+	}
+
+	return nil
 }

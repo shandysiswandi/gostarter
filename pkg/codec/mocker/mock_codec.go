@@ -18,7 +18,7 @@ func (_m *MockCodec) EXPECT() *MockCodec_Expecter {
 }
 
 // Decode provides a mock function with given fields: data, v
-func (_m *MockCodec) Decode(data []byte, v any) error {
+func (_m *MockCodec) Decode(data []byte, v interface{}) error {
 	ret := _m.Called(data, v)
 
 	if len(ret) == 0 {
@@ -26,7 +26,7 @@ func (_m *MockCodec) Decode(data []byte, v any) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func([]byte, any) error); ok {
+	if rf, ok := ret.Get(0).(func([]byte, interface{}) error); ok {
 		r0 = rf(data, v)
 	} else {
 		r0 = ret.Error(0)
@@ -42,14 +42,14 @@ type MockCodec_Decode_Call struct {
 
 // Decode is a helper method to define mock.On call
 //   - data []byte
-//   - v any
+//   - v interface{}
 func (_e *MockCodec_Expecter) Decode(data interface{}, v interface{}) *MockCodec_Decode_Call {
 	return &MockCodec_Decode_Call{Call: _e.mock.On("Decode", data, v)}
 }
 
-func (_c *MockCodec_Decode_Call) Run(run func(data []byte, v any)) *MockCodec_Decode_Call {
+func (_c *MockCodec_Decode_Call) Run(run func(data []byte, v interface{})) *MockCodec_Decode_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]byte), args[1].(any))
+		run(args[0].([]byte), args[1].(interface{}))
 	})
 	return _c
 }
@@ -59,13 +59,13 @@ func (_c *MockCodec_Decode_Call) Return(_a0 error) *MockCodec_Decode_Call {
 	return _c
 }
 
-func (_c *MockCodec_Decode_Call) RunAndReturn(run func([]byte, any) error) *MockCodec_Decode_Call {
+func (_c *MockCodec_Decode_Call) RunAndReturn(run func([]byte, interface{}) error) *MockCodec_Decode_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Encode provides a mock function with given fields: v
-func (_m *MockCodec) Encode(v any) ([]byte, error) {
+func (_m *MockCodec) Encode(v interface{}) ([]byte, error) {
 	ret := _m.Called(v)
 
 	if len(ret) == 0 {
@@ -74,10 +74,10 @@ func (_m *MockCodec) Encode(v any) ([]byte, error) {
 
 	var r0 []byte
 	var r1 error
-	if rf, ok := ret.Get(0).(func(any) ([]byte, error)); ok {
+	if rf, ok := ret.Get(0).(func(interface{}) ([]byte, error)); ok {
 		return rf(v)
 	}
-	if rf, ok := ret.Get(0).(func(any) []byte); ok {
+	if rf, ok := ret.Get(0).(func(interface{}) []byte); ok {
 		r0 = rf(v)
 	} else {
 		if ret.Get(0) != nil {
@@ -85,7 +85,7 @@ func (_m *MockCodec) Encode(v any) ([]byte, error) {
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(any) error); ok {
+	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
 		r1 = rf(v)
 	} else {
 		r1 = ret.Error(1)
@@ -100,14 +100,14 @@ type MockCodec_Encode_Call struct {
 }
 
 // Encode is a helper method to define mock.On call
-//   - v any
+//   - v interface{}
 func (_e *MockCodec_Expecter) Encode(v interface{}) *MockCodec_Encode_Call {
 	return &MockCodec_Encode_Call{Call: _e.mock.On("Encode", v)}
 }
 
-func (_c *MockCodec_Encode_Call) Run(run func(v any)) *MockCodec_Encode_Call {
+func (_c *MockCodec_Encode_Call) Run(run func(v interface{})) *MockCodec_Encode_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(any))
+		run(args[0].(interface{}))
 	})
 	return _c
 }
@@ -117,7 +117,7 @@ func (_c *MockCodec_Encode_Call) Return(_a0 []byte, _a1 error) *MockCodec_Encode
 	return _c
 }
 
-func (_c *MockCodec_Encode_Call) RunAndReturn(run func(any) ([]byte, error)) *MockCodec_Encode_Call {
+func (_c *MockCodec_Encode_Call) RunAndReturn(run func(interface{}) ([]byte, error)) *MockCodec_Encode_Call {
 	_c.Call.Return(run)
 	return _c
 }
