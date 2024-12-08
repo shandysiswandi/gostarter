@@ -14,15 +14,36 @@ services:
     networks:
       - gostarter-network
     depends_on:
+      postgres:
+        condition: service_healthy
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
 
-  mysql:
-    image: mysql:8.0
+  postgres:
+    image: postgres:17-alpine
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gostarter-network
     environment:
-      MYSQL_ROOT_PASSWORD: secret_root_password
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: gostarter
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=user --dbname=gostarter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.0-debian
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: gostarter
       MYSQL_USER: user
       MYSQL_PASSWORD: password
@@ -33,13 +54,13 @@ services:
     networks:
       - gostarter-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      test: ["CMD-SHELL", "mysqladmin ping --silent -uuser -ppassword"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:7.0
+    image: redis:7.4-alpine
     ports:
       - "6379:6379"
     volumes:
@@ -53,6 +74,7 @@ services:
       retries: 5
 
 volumes:
+  postgres_data:
   mysql_data:
   redis_data:
 
