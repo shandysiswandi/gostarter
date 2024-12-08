@@ -21,7 +21,7 @@ install:
 	@go install github.com/bufbuild/buf/cmd/buf@v1.47.2
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
 	@go install github.com/cespare/reflex@latest
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.62.2
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin latest
 
 # run: Watches for changes in '.go' files, recompiling and rerunning the main application with reflex for hot reloading.
 run:
@@ -37,7 +37,7 @@ lint:
 # test-unit: Runs unit tests excluding directories like mocker, mockz, and app. Produces a coverage report and detects concurrency issues.
 test-unit:
 	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
-	-coverprofile=coverage.out -parallel 4 -race
+	-coverprofile=coverage.out -race
 	@go tool cover -func=coverage.out | grep total
 	@if [ "$(HTML)" = "true" ]; then \
 		go tool cover -html=coverage.out -o=cover.html; \

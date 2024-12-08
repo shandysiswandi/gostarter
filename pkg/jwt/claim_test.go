@@ -63,7 +63,7 @@ func TestExtractClaimFromToken(t *testing.T) {
 	}{
 		{
 			name: "Success",
-			args: args{token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.UOQFRvx2JwT1PcDKqbfj9f_WN66Gs_giUMGv3bgVcE8"},
+			args: args{token: "a.eyJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.a"},
 			want: &Claim{
 				Email: "email@email.com",
 				RegisteredClaims: jwt.RegisteredClaims{
