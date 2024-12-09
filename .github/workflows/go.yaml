@@ -13,6 +13,46 @@ jobs:
       matrix:
         go: ["1.23"]
 
+    services:
+      postgres:
+        image: postgres:17-alpine
+        options: >-
+          --health-cmd="pg_isready --username=user --dbname=gostarter" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: gostarter
+        ports:
+          - 5432:5432
+
+      mysql:
+        image: mysql:8.0-debian
+        options: >-
+          --health-cmd="mysqladmin ping --silent -uuser -ppassword" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: gostarter
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+
+      redis:
+        image: redis:7.4-alpine
+        options: >-
+          --health-cmd="redis-cli ping" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,3 +101,19 @@ jobs:
             echo "Coverage ($COVERAGE%) is below the threshold ($COVERAGE_THRESHOLD%)."
             exit 1
           fi
+
+      - name: Build Binary and Run
+        run: |
+          CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
+          ./server & # Run the app in the background
+          APP_PID=$!
+
+          # Ensure app is running
+          if ! ps -p $APP_PID > /dev/null; then
+            echo "App failed to start."
+            exit 1
+          fi
+
+      - name: Test HTTP
+        run: |
+          curl --fail -X POST http://localhost:8081/auth/login || exit 1
