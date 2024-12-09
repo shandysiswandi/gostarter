@@ -11,6 +11,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 	"google.golang.org/grpc"
@@ -25,6 +26,7 @@ type Dependency struct {
 	Config       config.Config
 	CodecJSON    codec.Codec
 	Validator    validation.Validator
+	SecHash      hash.Hash
 	Router       *framework.Router
 	GRPCServer   *grpc.Server
 	Telemetry    *telemetry.Telemetry
@@ -38,8 +40,10 @@ func New(dep Dependency) (*Expose, error) {
 	ucDep := usecase.Dependency{
 		Telemetry: dep.Telemetry,
 		Validator: dep.Validator,
+		SecHash:   dep.SecHash,
 	}
 	profile := usecase.NewProfile(ucDep, sqlUser)
+	logout := usecase.NewLogout(ucDep, sqlUser)
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
 	inbound := inbound.Inbound{
@@ -47,6 +51,7 @@ func New(dep Dependency) (*Expose, error) {
 		GRPCServer: dep.GRPCServer,
 		//
 		ProfileUC: profile,
+		LogoutUC:  logout,
 	}
 	inbound.RegisterUserServiceServer()
 

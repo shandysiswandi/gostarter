@@ -8,6 +8,7 @@ import (
 
 type httpEndpoint struct {
 	profileUC domain.Profile
+	logoutUC  domain.Logout
 }
 
 func (e *httpEndpoint) Profile(c framework.Context) (any, error) {
@@ -26,4 +27,14 @@ func (e *httpEndpoint) Profile(c framework.Context) (any, error) {
 		ID:    resp.ID,
 		Email: resp.Email,
 	}, nil
+}
+
+func (e *httpEndpoint) Logout(c framework.Context) (any, error) {
+	ac := c.Header().Get("Authorization")
+	resp, err := e.logoutUC.Call(c.Context(), domain.LogoutInput{AccessToken: ac})
+	if err != nil {
+		return nil, err
+	}
+
+	return LogoutResponse{Message: resp.Message}, nil
 }

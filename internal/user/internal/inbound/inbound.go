@@ -13,12 +13,15 @@ type Inbound struct {
 	GRPCServer *grpc.Server
 	//
 	ProfileUC domain.Profile
+	LogoutUC  domain.Logout
 }
 
 func (in Inbound) RegisterUserServiceServer() {
 	he := &httpEndpoint{
 		profileUC: in.ProfileUC,
+		logoutUC:  in.LogoutUC,
 	}
 
 	in.Router.Endpoint(http.MethodGet, "/users/profile", he.Profile)
+	in.Router.Endpoint(http.MethodPost, "/users/logout", he.Logout)
 }

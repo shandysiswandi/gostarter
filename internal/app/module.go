@@ -52,6 +52,7 @@ func (a *App) moduleUser() {
 			Config:       a.config,
 			CodecJSON:    a.codecJSON,
 			Validator:    a.validator,
+			SecHash:      a.secHash,
 			Router:       a.httpRouter,
 			GRPCServer:   a.grpcServer,
 			Telemetry:    a.telemetry,

@@ -24,7 +24,7 @@ func testconvertArgs(args []any) []driver.Value {
 	return driverArgs
 }
 
-func TestNewSQLAuth(t *testing.T) {
+func TestNewSQLUser(t *testing.T) {
 	type args struct {
 		db  *sql.DB
 		qu  goqu.DialectWrapper
@@ -73,7 +73,7 @@ func TestNewSQLAuth(t *testing.T) {
 	}
 }
 
-func TestSQLAuth_FindUserByEmail(t *testing.T) {
+func TestSQLUser_FindUserByEmail(t *testing.T) {
 	type args struct {
 		ctx   context.Context
 		email string
@@ -190,6 +190,78 @@ func TestSQLAuth_FindUserByEmail(t *testing.T) {
 			got, err := s.FindUserByEmail(tt.args.ctx, tt.args.email)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSQLUser_DeleteTokenByAccess(t *testing.T) {
+	type args struct {
+		ctx   context.Context
+		token string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLUser, func() error)
+	}{
+		{
+			name:    "ErrorWhenExec",
+			args:    args{ctx: context.Background(), token: "token"},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLUser, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Delete("tokens").
+					Where(goqu.Ex{"access_token": a.token}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLUser{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name:    "Success",
+			args:    args{ctx: context.Background(), token: "token"},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLUser, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Delete("tokens").
+					Where(goqu.Ex{"access_token": a.token}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLUser{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.DeleteTokenByAccess(tt.args.ctx, tt.args.token)
+			assert.Equal(t, tt.wantErr, err)
 		})
 	}
 }

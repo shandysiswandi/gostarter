@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"runtime/debug"
 	"strings"
 
+	"github.com/shandysiswandi/gostarter/pkg/debugger"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 )
 
@@ -58,7 +58,8 @@ func Recovery(h http.Handler) http.Handler {
 				}
 
 				// Print the stack trace for debugging purposes.
-				debug.PrintStack()
+				// debug.PrintStack()
+				debugger.Stack()
 
 				// Send a default fallback response to the client.
 				_ = json.NewEncoder(w).Encode(map[string]string{
