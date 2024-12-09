@@ -103,7 +103,10 @@ jobs:
           fi
 
       - name: Build Binary and Run
+        env:
+          LOCAL: true
         run: |
+          echo "${{ secrets.CONFIG_FILE }}" > ./config/config.yaml
           CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
           ./server & # Run the app in the background
           APP_PID=$!
