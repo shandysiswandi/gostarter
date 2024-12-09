@@ -13,47 +13,17 @@ jobs:
       matrix:
         go: ["1.23"]
 
-    services:
-      postgres:
-        image: postgres:17-alpine
-        options: >-
-          --health-cmd="pg_isready --username=user --dbname=gostarter" 
-          --health-interval=10s 
-          --health-timeout=5s 
-          --health-retries=5
-        env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: gostarter
-        ports:
-          - 5432:5432
-
-      mysql:
-        image: mysql:8.0-debian
-        options: >-
-          --health-cmd="mysqladmin ping --silent -uuser -ppassword" 
-          --health-interval=10s 
-          --health-timeout=5s 
-          --health-retries=5
-        env:
-          MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_DATABASE: gostarter
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-        ports:
-          - 3306:3306
-
-      redis:
-        image: redis:7.4-alpine
-        options: >-
-          --health-cmd="redis-cli ping" 
-          --health-interval=10s 
-          --health-timeout=5s 
-          --health-retries=5
-        ports:
-          - 6379:6379
-
     steps:
+      - name: Install MySQL, Postgres and Redis Manually
+        run: |
+          sudo systemctl start postgresql.service
+          sudo systemctl start mysql.service
+          sudo apt-get update
+          sudo apt-get install -y redis-server
+          sudo service redis-server start
+          redis-cli ping
+        continue-on-error: false
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -102,12 +72,56 @@ jobs:
             exit 1
           fi
 
+      - name: Create configuration file
+        run: |
+          mkdir -p ${{ github.workspace }}/config
+          cat <<EOF > ${{ github.workspace }}/config/config.yaml
+          server.address.http: localhost:8081
+          server.address.gql: localhost:8082
+          server.address.grpc: localhost:50001
+
+          telemetry.name: gostarter
+          telemetry.otlp.grpc.address: localhost:4317
+          telemetry.otlp.http.address: localhost:4318
+
+          tz: "Asia/Jakarta"
+
+          pubsub.project.id: pubsub-dev
+
+          database.driver: mysql
+          database.user: root
+          database.pass: root
+          database.host: localhost
+          database.port: 3306
+          database.name: gostarter
+          database.max.open: 10
+          database.max.idle: 10
+          database.max.lifetime: 5
+
+          redis.addr: localhost:6379
+
+          jwt.public.key: base64
+          jwt.private.key: base64
+          secret.hash.sha256: secret
+
+          init.flag.messaging: false
+
+          feature.flag.graphql.playground: false
+          feature.flag.todo.job: false
+
+          module.flag.auth: true
+          module.flag.user: true
+          module.flag.todo: true
+          EOF
+
       - name: Build Binary and Run
         env:
           LOCAL: true
+          DB_USR: root
+          DB_PWD: root
         run: |
-          echo "${{ secrets.CONFIG_FILE }}" > ./config/config.yaml
           CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
+
           ./server & # Run the app in the background
           APP_PID=$!
 
