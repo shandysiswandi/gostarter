@@ -19,7 +19,6 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
-	"github.com/rs/cors"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
@@ -227,8 +226,6 @@ func (a *App) initHTTPServer() {
 		Handler: framework.Chain(
 			a.httpRouter,
 			framework.Recovery,
-			// next-mr: Need to create a custom CORS implementation to standardize error messages
-			cors.AllowAll().Handler,
 			instrument.UseTelemetryServer(a.telemetry),
 			framework.JWT("gostarter.access.token", "/auth"),
 		),
@@ -246,7 +243,6 @@ func (a *App) initGQLServer() {
 		Handler: framework.Chain(
 			a.gqlRouter,
 			framework.Recovery,
-			cors.AllowAll().Handler,
 			instrument.UseTelemetryServer(a.telemetry),
 			framework.JWT("gostarter.access.token", "/graphql/playground"),
 		),

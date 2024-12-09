@@ -9,53 +9,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        go: ["1.23"]
+
+    env:
+      DB_NAME: gostarter
+      DB_USER: root
+      DB_PASS: root
+      LOCAL: true
 
     steps:
-      - name: Install MySQL, Postgres and Redis Manually
+      - name: Install MySQL, Postgres and Redis
         run: |
           sudo systemctl start postgresql.service
           sudo systemctl start mysql.service
-          sudo apt-get update
-          sudo apt-get install -y redis-server
-          sudo service redis-server start
+
+          sudo apt-get update && sudo apt-get install -y redis-server && sudo service redis-server start
           redis-cli ping
+
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;" -u$DB_USER -p$DB_PASS
         continue-on-error: false
 
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go ${{ matrix.go }}
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go }}
-
-      - name: Cache Go modules
-        id: cache-go-mod
-        uses: actions/cache@v4
-        with:
-          path: |
-            chmod -R +w ~/go/pkg/mod
-            chmod -R +w ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Install Linter
+      - name: Install Linter and Run It
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-          sudo mv ./bin/golangci-lint /usr/local/bin/golangci-lint
-
-      - name: Cache Linter
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/bin/golangci-lint
-          key: ${{ runner.os }}-golangci-lint
-
-      - name: Run Linter
-        run: golangci-lint run
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+          $(go env GOPATH)/bin/golangci-lint run
 
       - name: Run tests and validate coverage
         env:
@@ -76,9 +55,9 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/config
           cat <<EOF > ${{ github.workspace }}/config/config.yaml
-          server.address.http: localhost:8081
-          server.address.gql: localhost:8082
-          server.address.grpc: localhost:50001
+          server.address.http: :8081
+          server.address.gql: :8082
+          server.address.grpc: :50001
 
           telemetry.name: gostarter
           telemetry.otlp.grpc.address: localhost:4317
@@ -89,8 +68,8 @@ jobs:
           pubsub.project.id: pubsub-dev
 
           database.driver: mysql
-          database.user: root
-          database.pass: root
+          database.user: $DB_USER
+          database.pass: $DB_PASS
           database.host: localhost
           database.port: 3306
           database.name: gostarter
@@ -100,13 +79,13 @@ jobs:
 
           redis.addr: localhost:6379
 
-          jwt.public.key: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZ3d0RRWUpLb1pJaHZjTkFRRUJCUUFEU3dBd1NBSkJBTTZxb29TUm9KekFIeXJOTkw0TXdGcVNWRHYvNDJ3WVF4TnpBZUMrbGpTVnMyUWlnK0wrRHdtanpjUG4wOXpGWnRvNWN3dWFQdkZlNnJvTVkyRTUyYjhDQXdFQUFRPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
-          jwt.private.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlCVkFJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0FUNHdnZ0U2QWdFQUFrRUF6cXFpaEpHZ25NQWZLczAwdmd6QVdwSlVPLy9qYkJoREUzTUI0TDZXTkpXelpDS0Q0djRQQ2FQTncrZlQzTVZtMmpsekM1bys4VjdxdWd4allUblp2d0lEQVFBQkFrQVh5VTN4UWkyaFBQK1pWb3NHZ01NMjZYYW1mVG80dThZa20rMFFaLzh6eC80S0F6TWMyZ3hZVk5UYVVDL1Vjc3ZyVTVrL3lpemgxeUtsb1lxejc2OXBBaUVBOTJtcVlObk93T2pBKzgvRmJwUFhGZ1dpWDFvbUJCcUhuTTR3cVN3dE16MENJUURWMXUxa0dEK0ZiNHpRSm1WMEtaV05yYTNETFdKSmtXK0pmZVB0NFRVZ3F3SWhBSUtwZ0R5RDZ1Z0FSQ0w0bUlrTWROUUJoNzRaeXVmeDV0ck9IZTdLRU5qMUFpQStRS2ExZUJXdCsrNkxmbElVd2pKbW40UXhpTm5QUHdhd2lUUzh3TTVkcHdJZ1lMTHVhTkpwd2pCRmJLOVFKRi9VRjJHR28xL0duVGlSQmtoNy96THRLK3c9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0t
+          jwt.public.key: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZ3d0RRWUpLb1pJaHZjTkFRRUJCUUFEU3dBd1NBSkJBS21LTDhvOFphdFBiSEwxUzRhcGkvTS9LRHI3VEtuK1owVkplVDRTS2xrdWN3NU8wR2JhUUhqWU02eUFNTy9tRDM1OHZkcEsrTWVEbDAyMEhMMGY1emtDQXdFQUFRPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
+          jwt.private.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUJWUUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQVQ4d2dnRTdBZ0VBQWtFQXFZb3Z5anhscTA5c2N2VkxocW1MOHo4b092dE1xZjVuUlVsNVBoSXFXUzV6RGs3UVp0cEFlTmd6cklBdzcrWVBmbnk5MmtyNHg0T1hUYlFjdlIvbk9RSURBUUFCQWtBV1hLUGF0MlpXUWF3VmFrcnpjSmZhZ05rK3Y2MnkwRnVidFI5am5nUVlRMWtKNU96QlZlWGVEZzlrQ1NKblBRUUJ3NE5GaUxjL2xGc2pXRERuWlVNM0FpRUE2SU5IcWlkcjNjVFAxZUZQRzdIbFZ5Y2N4YzlqNWVLcDdLQXJVMW1PNVBzQ0lRQzZxbkRtd1MreG1GSGVTL3V5dkVaeWRLT2lUZ1Z3Mzl0alNMMFZ2K0htV3dJaEFJbWtEV3lBNGEzcXNFNGdqc0FLVTRXQU5kd3pwU09WUnBvNVJ1eVVlNjY1QWlBcW1xZzJJcld1QlNQNlpzRkY1Qzc0QktNc2NqNVBxdWc1MnVvOVFwUmVyUUloQUxVbTJjM29jVWNxSmZKQXIvOFUvSkRwV29IVjZRdExSYm9vd0JxSHZNTUgKLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQ==
           secret.hash.sha256: secret
 
           init.flag.messaging: false
 
-          feature.flag.graphql.playground: false
+          feature.flag.graphql.playground: true
           feature.flag.todo.job: false
 
           module.flag.auth: true
@@ -114,11 +93,7 @@ jobs:
           module.flag.todo: true
           EOF
 
-      - name: Build Binary and Run
-        env:
-          LOCAL: true
-          DB_USR: root
-          DB_PWD: root
+      - name: Build Binary and Run and Test HTTP
         run: |
           CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
 
@@ -131,6 +106,4 @@ jobs:
             exit 1
           fi
 
-      - name: Test HTTP
-        run: |
-          curl --fail -X POST http://localhost:8081/auth/login || exit 1
+          curl --fail http://localhost:8082/graphql/playground || exit 1
