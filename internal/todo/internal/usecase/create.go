@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
@@ -39,9 +40,14 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 	}
 
 	id := s.uidnumber.Generate()
+	userId := uint64(0)
+	if clm := jwt.GetClaim(ctx); clm != nil {
+		userId = clm.AuthID
+	}
 
 	err := s.store.Create(ctx, domain.Todo{
 		ID:          id,
+		UserID:      userId,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      domain.TodoStatusInitiate,

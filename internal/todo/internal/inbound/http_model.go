@@ -2,6 +2,7 @@ package inbound
 
 type Todo struct {
 	ID          uint64 `json:"id,string"`
+	UserID      uint64 `json:"user_id,string"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
@@ -38,6 +39,7 @@ type (
 
 	FindResponse struct {
 		ID          uint64 `json:"id,string"`
+		UserID      uint64 `json:"user_id,string"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Status      string `json:"status"`
@@ -80,6 +82,7 @@ type (
 
 	UpdateResponse struct {
 		ID          uint64 `json:"id,string"`
+		UserID      uint64 `json:"user_id,string"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Status      string `json:"status"`

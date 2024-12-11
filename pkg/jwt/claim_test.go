@@ -11,10 +11,10 @@ import (
 
 func TestNewClaim(t *testing.T) {
 	type args struct {
-		email string
-		exp   time.Duration
-		now   time.Time
-		aud   []string
+		authID uint64
+		email  string
+		exp    time.Time
+		aud    []string
 	}
 	tests := []struct {
 		name string
@@ -24,20 +24,20 @@ func TestNewClaim(t *testing.T) {
 		{
 			name: "Success",
 			args: args{
-				email: "email@email.com",
-				exp:   1,
-				now:   time.Time{},
-				aud:   []string{"aud"},
+				authID: 101,
+				email:  "email@email.com",
+				exp:    time.Time{},
+				aud:    []string{"aud"},
 			},
 			want: &Claim{
-				Email: "email@email.com",
+				AuthID: 101,
 				RegisteredClaims: jwt.RegisteredClaims{
-					Issuer:    "gostarter",
+					Issuer:    "GO_STARTER",
 					Subject:   "email@email.com",
 					Audience:  []string{"aud"},
-					ExpiresAt: jwt.NewNumericDate(time.Time{}.Add(1)),
-					NotBefore: jwt.NewNumericDate(time.Time{}),
-					IssuedAt:  jwt.NewNumericDate(time.Time{}),
+					ExpiresAt: jwt.NewNumericDate(time.Time{}),
+					NotBefore: jwt.NewNumericDate(time.Now()),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
 				},
 			},
 		},
@@ -45,8 +45,8 @@ func TestNewClaim(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewClaim(tt.args.email, tt.args.exp, tt.args.now, tt.args.aud)
-			assert.Equal(t, tt.want.Email, got.Email)
+			got := NewClaim(tt.args.authID, tt.args.email, tt.args.exp, tt.args.aud)
+			assert.Equal(t, tt.want.AuthID, got.AuthID)
 			assert.Equal(t, tt.want.RegisteredClaims, got.RegisteredClaims)
 		})
 	}
@@ -63,12 +63,11 @@ func TestExtractClaimFromToken(t *testing.T) {
 	}{
 		{
 			name: "Success",
-			args: args{token: "a.eyJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.a"},
+			args: args{token: "a.eyJzdWIiOiJ0ZXN0IiwiYXV0aF9pZCI6IjEwMSJ9.a"},
 			want: &Claim{
-				Email: "email@email.com",
+				AuthID: 101,
 				RegisteredClaims: jwt.RegisteredClaims{
-					IssuedAt: jwt.NewNumericDate(time.Date(2018, time.January, 18, 8, 30, 22, 0, time.Local)),
-					ID:       "",
+					Subject: "test",
 				},
 			},
 		},

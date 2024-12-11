@@ -15,7 +15,7 @@ func (e *httpEndpoint) Profile(c framework.Context) (any, error) {
 	var email string
 	clm := jwt.GetClaim(c.Context())
 	if clm != nil {
-		email = clm.Email
+		email = clm.Subject
 	}
 
 	resp, err := e.profileUC.Call(c.Context(), domain.ProfileInput{Email: email})

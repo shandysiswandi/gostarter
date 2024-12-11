@@ -306,7 +306,8 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("", assert.AnError).
@@ -379,13 +380,15 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(a.in.Email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("", assert.AnError).
@@ -458,13 +461,15 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(a.in.Email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -542,13 +547,15 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(a.in.Email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -632,13 +639,15 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(a.in.Email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -742,13 +751,15 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(a.in.Email, time.Hour, now, []string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(a.in.Email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).

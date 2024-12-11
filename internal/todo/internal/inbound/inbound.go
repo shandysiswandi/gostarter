@@ -3,7 +3,6 @@ package inbound
 import (
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/playground"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
@@ -85,9 +84,4 @@ func (in Inbound) RegisterTodoServiceServer() {
 	//
 	gqlServer := framework.HandlerGQL(ql.NewExecutableSchema(ql.Config{Resolvers: gqe}))
 	in.GQLRouter.Handler(http.MethodPost, "/graphql", gqlServer)
-
-	if in.Config.GetBool("feature.flag.graphql.playground") {
-		in.GQLRouter.Handler(http.MethodGet, "/graphql/playground",
-			playground.Handler("GraphQL playground", "/graphql"))
-	}
 }

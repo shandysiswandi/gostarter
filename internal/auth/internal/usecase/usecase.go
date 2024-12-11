@@ -55,7 +55,8 @@ type tokenGenSaverOut struct {
 func (tgs *tokenGenSaver) do(ctx context.Context, in tokenGenSaverIn) (*tokenGenSaverOut, error) {
 	now := tgs.clock.Now()
 
-	acClaim := jwt.NewClaim(in.email, time.Hour, now, []string{"gostarter.access.token"})
+	acClaim := jwt.NewClaim(in.userID, in.email, now.Add(time.Hour),
+		[]string{"gostarter.access.token"})
 	accToken, err := tgs.jwt.Generate(acClaim)
 	if err != nil {
 		tgs.tel.Logger().Error(ctx, "failed to generate access token", err)
@@ -63,7 +64,8 @@ func (tgs *tokenGenSaver) do(ctx context.Context, in tokenGenSaverIn) (*tokenGen
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	refClaim := jwt.NewClaim(in.email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+	refClaim := jwt.NewClaim(in.userID, in.email, now.Add(time.Hour*24),
+		[]string{"gostarter.refresh.token"})
 	refToken, err := tgs.jwt.Generate(refClaim)
 	if err != nil {
 		tgs.tel.Logger().Error(ctx, "failed to generate refresh token", err)

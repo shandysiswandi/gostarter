@@ -1,6 +1,7 @@
 services:
   app:
     image: gostarter
+    pull_policy: missing
     build:
       context: .
     ports:
@@ -14,15 +15,52 @@ services:
     networks:
       - gostarter-network
     depends_on:
+      redis:
+        condition: service_healthy
+      goose:
+        condition: service_completed_successfully
+
+  otelcol:
+    image: otel/opentelemetry-collector:0.115.1
+    pull_policy: missing
+    ports:
+      - 4317:4317
+      - 4318:4318
+      - 13133:13133 # health_check extension
+    volumes:
+      - ./config/otel-config.yaml:/etc/otelcol/config.yaml
+    command: ["--config=/etc/otelcol/config.yaml"]
+    networks:
+      - gostarter-network
+
+  goose:
+    image: alpine
+    pull_policy: missing
+    volumes:
+      - ./migrations:/migrations
+    networks:
+      - gostarter-network
+    depends_on:
       postgres:
         condition: service_healthy
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+    entrypoint: >
+      sh -c "
+      apk add --no-cache curl && \
+      curl -fsSL https://github.com/pressly/goose/releases/download/v3.23.0/goose_linux_x86_64 -o /goose && \
+      chmod +x /goose && \
+
+      /goose -dir /migrations/postgres fix && \
+      /goose -dir /migrations/postgres postgres \"postgres://user:password@postgres:5432/gostarter?sslmode=disable\" up && \
+
+      /goose -dir /migrations/mysql fix && \
+      /goose -dir /migrations/mysql mysql \"user:password@tcp(mysql:3306)/gostarter?parseTime=true\" up
+      "
 
   postgres:
     image: postgres:17-alpine
+    pull_policy: missing
     shm_size: 128mb
     ports:
       - "5432:5432"
@@ -42,6 +80,7 @@ services:
 
   mysql:
     image: mysql:8.0-debian
+    pull_policy: missing
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: gostarter
@@ -61,6 +100,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
+    pull_policy: missing
     ports:
       - "6379:6379"
     volumes:

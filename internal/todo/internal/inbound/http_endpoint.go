@@ -61,6 +61,7 @@ func (e *httpEndpoint) Find(c framework.Context) (any, error) {
 
 	return FindResponse{
 		ID:          resp.ID,
+		UserID:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      resp.Status.String(),
@@ -82,6 +83,7 @@ func (e *httpEndpoint) Fetch(c framework.Context) (any, error) {
 	for _, todo := range resp {
 		todos = append(todos, Todo{
 			ID:          todo.ID,
+			UserID:      todo.UserID,
 			Title:       todo.Title,
 			Description: todo.Description,
 			Status:      todo.Status.String(),
@@ -133,6 +135,7 @@ func (e *httpEndpoint) Update(c framework.Context) (any, error) {
 
 	return UpdateResponse{
 		ID:          id,
+		UserID:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      resp.Status.String(),

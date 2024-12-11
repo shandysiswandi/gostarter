@@ -49,6 +49,7 @@ func (s *Find) Call(ctx context.Context, in domain.FindInput) (*domain.Todo, err
 
 	return &domain.Todo{
 		ID:          todo.ID,
+		UserID:      todo.UserID,
 		Title:       todo.Title,
 		Description: todo.Description,
 		Status:      todo.Status,

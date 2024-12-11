@@ -25,8 +25,8 @@ func NewSQLTodo(db *sql.DB, qu goqu.DialectWrapper) *SQLTodo {
 func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
 	query := func() (string, []any, error) {
 		return st.qu.Insert("todos").
-			Cols("id", "title", "description", "status").
-			Vals([]any{todo.ID, todo.Title, todo.Description, todo.Status}).
+			Cols("id", "user_id", "title", "description", "status").
+			Vals([]any{todo.ID, todo.UserID, todo.Title, todo.Description, todo.Status}).
 			Prepared(true).
 			ToSQL()
 	}
@@ -52,7 +52,7 @@ func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
 
 func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "title", "description", "status").
+		return st.qu.Select("id", "user_id", "title", "description", "status").
 			From("todos").
 			Where(goqu.Ex{"id": id}).
 			Prepared(true).
@@ -64,7 +64,7 @@ func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 
 func (st *SQLTodo) Fetch(ctx context.Context, _ map[string]string) ([]domain.Todo, error) {
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "title", "description", "status").
+		return st.qu.Select("id", "user_id", "title", "description", "status").
 			From("todos").
 			Prepared(true).
 			ToSQL()
@@ -89,6 +89,7 @@ func (st *SQLTodo) Update(ctx context.Context, todo domain.Todo) error {
 	query := func() (string, []any, error) {
 		return st.qu.Update("todos").
 			Set(map[string]any{
+				"user_id":     todo.UserID,
 				"title":       todo.Title,
 				"description": todo.Description,
 				"status":      todo.Status,

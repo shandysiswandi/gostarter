@@ -13,20 +13,20 @@ import (
 type contextKey struct{}
 
 type Claim struct {
-	Email string `json:"email"`
+	AuthID uint64 `json:"auth_id,string"`
 	jwt.RegisteredClaims
 }
 
-func NewClaim(email string, exp time.Duration, now time.Time, aud []string) *Claim {
+func NewClaim(authID uint64, email string, exp time.Time, aud []string) *Claim {
 	return &Claim{
-		Email: email,
+		AuthID: authID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "gostarter",
+			Issuer:    "GO_STARTER",
 			Subject:   email,
 			Audience:  aud,
-			ExpiresAt: jwt.NewNumericDate(now.Add(exp)),
-			NotBefore: jwt.NewNumericDate(now),
-			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(exp),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 }

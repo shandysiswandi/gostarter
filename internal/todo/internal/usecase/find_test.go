@@ -114,6 +114,7 @@ func TestFind_Execute(t *testing.T) {
 			args: args{ctx: context.TODO(), in: domain.FindInput{}},
 			want: &domain.Todo{
 				ID:          10,
+				UserID:      11,
 				Title:       "test 1",
 				Description: "test 2",
 				Status:      domain.TodoStatusDrop,
@@ -128,6 +129,7 @@ func TestFind_Execute(t *testing.T) {
 
 				store.EXPECT().Find(a.ctx, a.in.ID).Return(&domain.Todo{
 					ID:          10,
+					UserID:      11,
 					Title:       "test 1",
 					Description: "test 2",
 					Status:      domain.TodoStatusDrop,

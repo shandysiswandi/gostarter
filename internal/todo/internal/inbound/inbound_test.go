@@ -3,7 +3,6 @@ package inbound
 import (
 	"testing"
 
-	mockConfig "github.com/shandysiswandi/gostarter/pkg/config/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"google.golang.org/grpc"
 )
@@ -16,14 +15,8 @@ func TestInbound_RegisterTodoServiceServer(t *testing.T) {
 		{
 			name: "Success",
 			in: func() Inbound {
-				configMock := mockConfig.NewMockConfig(t)
-
-				configMock.EXPECT().
-					GetBool("feature.flag.graphql.playground").
-					Return(true)
 
 				return Inbound{
-					Config:         configMock,
 					Router:         framework.NewRouter(),
 					GQLRouter:      framework.NewRouter(),
 					GRPCServer:     grpc.NewServer(),

@@ -29,7 +29,7 @@ go.work.sum
 .env
 config/*
 !config/config.example.yaml
-!config/config.docker.compose.yaml
+!config/otel-config.yaml
 *.local
 
 # Ignore IDE/editor files

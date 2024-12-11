@@ -79,8 +79,8 @@ func TestSQLTodo_Create(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
-					Cols("id", "title", "description", "status").
-					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
+					Cols("id", "user_id", "title", "description", "status").
+					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).WillReturnError(assert.AnError)
@@ -96,8 +96,8 @@ func TestSQLTodo_Create(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
-					Cols("id", "title", "description", "status").
-					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
+					Cols("id", "user_id", "title", "description", "status").
+					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
@@ -114,8 +114,8 @@ func TestSQLTodo_Create(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Insert("todos").
-					Cols("id", "title", "description", "status").
-					Vals([]any{a.todo.ID, a.todo.Title, a.todo.Description, a.todo.Status}).
+					Cols("id", "user_id", "title", "description", "status").
+					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
@@ -211,7 +211,7 @@ func TestSQLTodo_Find(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
@@ -225,6 +225,7 @@ func TestSQLTodo_Find(t *testing.T) {
 			args: args{ctx: context.TODO(), id: 1},
 			want: &domain.Todo{
 				ID:          1,
+				UserID:      11,
 				Title:       "title test",
 				Description: "description test",
 				Status:      domain.TodoStatusInProgress,
@@ -233,11 +234,11 @@ func TestSQLTodo_Find(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				row := sqlmock.NewRows([]string{"id", "title", "description", "status"}).
-					AddRow(1, "title test", "description test", "IN_PROGRESS")
+				row := sqlmock.NewRows([]string{"id", "user_id", "title", "description", "status"}).
+					AddRow(1, 11, "title test", "description test", "IN_PROGRESS")
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(row)
@@ -278,7 +279,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Prepared(true).ToSQL()
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
@@ -293,11 +294,13 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			want: []domain.Todo{
 				{
 					ID:          1,
+					UserID:      12,
 					Title:       "title test",
 					Description: "description test",
 					Status:      domain.TodoStatusDrop,
 				}, {
 					ID:          2,
+					UserID:      13,
 					Title:       "title test 2",
 					Description: "description test 2",
 					Status:      domain.TodoStatusInitiate,
@@ -307,12 +310,12 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "title", "description", "status").
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Prepared(true).ToSQL()
 
-				rows := sqlmock.NewRows([]string{"id", "title", "description", "status"}).
-					AddRow(1, "title test", "description test", "DROP").
-					AddRow(2, "title test 2", "description test 2", "INITIATE")
+				rows := sqlmock.NewRows([]string{"id", "user_id", "title", "description", "status"}).
+					AddRow(1, 12, "title test", "description test", "DROP").
+					AddRow(2, 13, "title test 2", "description test 2", "INITIATE")
 
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(rows)
@@ -410,6 +413,7 @@ func TestSQLTodo_Update(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").Set(map[string]any{
+					"user_id":     a.todo.UserID,
 					"title":       a.todo.Title,
 					"description": a.todo.Description,
 					"status":      a.todo.Status,
@@ -429,6 +433,7 @@ func TestSQLTodo_Update(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Update("todos").Set(map[string]any{
+					"user_id":     a.todo.UserID,
 					"title":       a.todo.Title,
 					"description": a.todo.Description,
 					"status":      a.todo.Status,

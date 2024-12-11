@@ -5,6 +5,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
@@ -35,9 +36,14 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 	}
 
 	sts := domain.ParseTodoStatus(in.Status)
+	userId := uint64(0)
+	if clm := jwt.GetClaim(ctx); clm != nil {
+		userId = clm.AuthID
+	}
 
 	err := s.store.Update(ctx, domain.Todo{
 		ID:          in.ID,
+		UserID:      userId,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      sts,
@@ -50,6 +56,7 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 
 	return &domain.Todo{
 		ID:          in.ID,
+		UserID:      userId,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      sts,

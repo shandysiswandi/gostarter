@@ -3,10 +3,12 @@ package usecase
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
@@ -38,6 +40,9 @@ func TestNewUpdate(t *testing.T) {
 }
 
 func TestUpdate_Execute(t *testing.T) {
+	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
+	ctx := jwt.SetClaim(context.Background(), claim)
+
 	type args struct {
 		ctx context.Context
 		in  domain.UpdateInput
@@ -51,7 +56,7 @@ func TestUpdate_Execute(t *testing.T) {
 	}{
 		{
 			name:    "ErrorValidation",
-			args:    args{ctx: context.TODO(), in: domain.UpdateInput{}},
+			args:    args{ctx: ctx, in: domain.UpdateInput{}},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Update {
@@ -69,7 +74,7 @@ func TestUpdate_Execute(t *testing.T) {
 		},
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.UpdateInput{}},
+			args:    args{ctx: ctx, in: domain.UpdateInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to update todo", assert.AnError),
 			mockFn: func(a args) *Update {
@@ -82,6 +87,7 @@ func TestUpdate_Execute(t *testing.T) {
 				sts := domain.ParseTodoStatus(a.in.Status)
 				store.EXPECT().Update(a.ctx, domain.Todo{
 					ID:          a.in.ID,
+					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
 					Status:      sts,
@@ -96,7 +102,7 @@ func TestUpdate_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.TODO(), in: domain.UpdateInput{
+			args: args{ctx: ctx, in: domain.UpdateInput{
 				ID:          120,
 				Title:       "test 1",
 				Description: "test 2",
@@ -104,6 +110,7 @@ func TestUpdate_Execute(t *testing.T) {
 			}},
 			want: &domain.Todo{
 				ID:          120,
+				UserID:      11,
 				Title:       "test 1",
 				Description: "test 2",
 				Status:      domain.TodoStatusDone,
@@ -116,12 +123,12 @@ func TestUpdate_Execute(t *testing.T) {
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
 				store.EXPECT().Update(a.ctx, domain.Todo{
 					ID:          a.in.ID,
+					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      sts,
+					Status:      domain.ParseTodoStatus(a.in.Status),
 				}).Return(nil)
 
 				return &Update{

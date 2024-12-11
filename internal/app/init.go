@@ -17,6 +17,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
@@ -244,12 +245,17 @@ func (a *App) initGQLServer() {
 			a.gqlRouter,
 			framework.Recovery,
 			instrument.UseTelemetryServer(a.telemetry),
-			framework.JWT("gostarter.access.token", "/graphql/playground"),
+			// framework.JWT("gostarter.access.token", "/graphql/playground"),
 		),
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
+	}
+
+	if a.config.GetBool("feature.flag.graphql.playground") {
+		a.gqlRouter.Handler(http.MethodGet, "/graphql/playground",
+			playground.Handler("GraphQL playground", "/graphql"))
 	}
 }
 

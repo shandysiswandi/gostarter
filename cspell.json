@@ -60,6 +60,7 @@
     "mockz",
     "mysqladmin",
     "nonroot",
+    "otelcol",
     "otlp",
     "pkeyopt",
     "Postgre",

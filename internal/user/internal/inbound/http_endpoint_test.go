@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
@@ -24,7 +25,8 @@ func Test_httpEndpoint_Profile(t *testing.T) {
 			name: "ErrorCallUC",
 			c: func() framework.Context {
 				c := framework.NewTestContext(http.MethodGet, "/users/profile", nil)
-				ctx := jwt.SetClaim(context.Background(), &jwt.Claim{Email: "email"})
+				claim := jwt.NewClaim(1, "email", time.Time{}, nil)
+				ctx := jwt.SetClaim(context.Background(), claim)
 				c.SetContext(ctx)
 				return c.Build()
 			},
@@ -47,7 +49,8 @@ func Test_httpEndpoint_Profile(t *testing.T) {
 			name: "Success",
 			c: func() framework.Context {
 				c := framework.NewTestContext(http.MethodGet, "/users/profile", nil)
-				ctx := jwt.SetClaim(context.Background(), &jwt.Claim{Email: "email"})
+				claim := jwt.NewClaim(1, "email", time.Time{}, nil)
+				ctx := jwt.SetClaim(context.Background(), claim)
 				c.SetContext(ctx)
 				return c.Build()
 			},

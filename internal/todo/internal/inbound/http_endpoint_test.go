@@ -234,6 +234,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 			},
 			want: FindResponse{
 				ID:          11,
+				UserID:      89,
 				Title:       "title",
 				Description: "description",
 				Status:      domain.TodoStatusDone.String(),
@@ -245,6 +246,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 				in := domain.FindInput{ID: 11}
 				out := &domain.Todo{
 					ID:          11,
+					UserID:      89,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusDone,
@@ -547,6 +549,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			},
 			want: UpdateResponse{
 				ID:          2,
+				UserID:      12,
 				Title:       "title",
 				Description: "description",
 				Status:      domain.TodoStatusDone.String(),
@@ -563,6 +566,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 				}
 				out := &domain.Todo{
 					ID:          2,
+					UserID:      12,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusDone,

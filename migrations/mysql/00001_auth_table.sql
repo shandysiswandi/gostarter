@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS tokens (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE INDEX tokens_refresh_token_idx ON tokens (refresh_token);
+
 CREATE TABLE IF NOT EXISTS password_resets (
     id BIGINT UNSIGNED PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
@@ -27,6 +29,8 @@ CREATE TABLE IF NOT EXISTS password_resets (
     created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE INDEX password_resets_token_idx ON password_resets (token);
 
 -- +goose Down
 DROP TABLE IF EXISTS password_resets;

@@ -43,7 +43,7 @@ func TestNewRefreshToken(t *testing.T) {
 }
 
 func TestRefreshToken_Call(t *testing.T) {
-	validToken := "none.eyJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.none"
+	validToken := "none.eyJzdWIiOiJ0ZXN0IiwiYXV0aF9pZCI6IjEwMSJ9.none"
 
 	type args struct {
 		ctx context.Context
@@ -56,7 +56,6 @@ func TestRefreshToken_Call(t *testing.T) {
 		wantErr error
 		mockFn  func(a args) *RefreshToken
 	}{
-
 		{
 			name: "ErrorValidationInput",
 			args: args{
@@ -325,14 +324,16 @@ func TestRefreshToken_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				email := "email@email.com"
-				acClaim := jwt.NewClaim(email, time.Hour, now, []string{"gostarter.access.token"})
+				email := "test"
+				acClaim := jwt.NewClaim(10, email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(10, email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -425,14 +426,16 @@ func TestRefreshToken_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				email := "email@email.com"
-				acClaim := jwt.NewClaim(email, time.Hour, now, []string{"gostarter.access.token"})
+				email := "test"
+				acClaim := jwt.NewClaim(10, email, now.Add(time.Hour),
+					[]string{"gostarter.access.token"})
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(email, time.Hour*24, now, []string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(10, email, now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"})
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).

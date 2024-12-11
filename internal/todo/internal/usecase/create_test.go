@@ -3,10 +3,12 @@ package usecase
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	um "github.com/shandysiswandi/gostarter/pkg/uid/mocker"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
@@ -39,6 +41,9 @@ func TestNewCreate(t *testing.T) {
 }
 
 func TestCreate_Execute(t *testing.T) {
+	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
+	ctx := jwt.SetClaim(context.Background(), claim)
+
 	type args struct {
 		ctx context.Context
 		in  domain.CreateInput
@@ -52,7 +57,7 @@ func TestCreate_Execute(t *testing.T) {
 	}{
 		{
 			name:    "ErrorValidation",
-			args:    args{ctx: context.TODO(), in: domain.CreateInput{}},
+			args:    args{ctx: ctx, in: domain.CreateInput{}},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Create {
@@ -71,7 +76,7 @@ func TestCreate_Execute(t *testing.T) {
 		},
 		{
 			name:    "ErrorNotAffected",
-			args:    args{ctx: context.TODO(), in: domain.CreateInput{}},
+			args:    args{ctx: ctx, in: domain.CreateInput{}},
 			want:    nil,
 			wantErr: goerror.NewBusiness("failed to create todo", goerror.CodeUnknown),
 			mockFn: func(a args) *Create {
@@ -86,6 +91,7 @@ func TestCreate_Execute(t *testing.T) {
 
 				input := domain.Todo{
 					ID:          101,
+					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,
@@ -102,7 +108,7 @@ func TestCreate_Execute(t *testing.T) {
 		},
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.CreateInput{}},
+			args:    args{ctx: ctx, in: domain.CreateInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to create todo", assert.AnError),
 			mockFn: func(a args) *Create {
@@ -117,6 +123,7 @@ func TestCreate_Execute(t *testing.T) {
 
 				input := domain.Todo{
 					ID:          101,
+					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,
@@ -133,7 +140,7 @@ func TestCreate_Execute(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), in: domain.CreateInput{}},
+			args:    args{ctx: ctx, in: domain.CreateInput{}},
 			want:    &domain.CreateOutput{ID: 101},
 			wantErr: nil,
 			mockFn: func(a args) *Create {
@@ -148,6 +155,7 @@ func TestCreate_Execute(t *testing.T) {
 
 				input := domain.Todo{
 					ID:          101,
+					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,

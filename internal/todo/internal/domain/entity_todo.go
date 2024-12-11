@@ -11,11 +11,12 @@ var (
 
 type Todo struct {
 	ID          uint64
+	UserID      uint64
 	Title       string
 	Description string
 	Status      TodoStatus
 }
 
 func (t *Todo) ScanColumn() []any {
-	return []any{&t.ID, &t.Title, &t.Description, &t.Status}
+	return []any{&t.ID, &t.UserID, &t.Title, &t.Description, &t.Status}
 }
