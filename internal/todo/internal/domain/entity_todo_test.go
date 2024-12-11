@@ -13,7 +13,7 @@ func TestTodo_ScanColumn(t *testing.T) {
 		tr   *Todo
 		want []any
 	}{
-		{name: "Success", tr: td, want: []any{&td.ID, &td.Title, &td.Description, &td.Status}},
+		{name: "Success", tr: td, want: []any{&td.ID, &td.UserID, &td.Title, &td.Description, &td.Status}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

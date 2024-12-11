@@ -40,14 +40,14 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 	}
 
 	id := s.uidnumber.Generate()
-	userId := uint64(0)
+	userID := uint64(0)
 	if clm := jwt.GetClaim(ctx); clm != nil {
-		userId = clm.AuthID
+		userID = clm.AuthID
 	}
 
 	err := s.store.Create(ctx, domain.Todo{
 		ID:          id,
-		UserID:      userId,
+		UserID:      userID,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      domain.TodoStatusInitiate,

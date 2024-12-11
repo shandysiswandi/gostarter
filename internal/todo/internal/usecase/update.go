@@ -36,14 +36,14 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 	}
 
 	sts := domain.ParseTodoStatus(in.Status)
-	userId := uint64(0)
+	userID := uint64(0)
 	if clm := jwt.GetClaim(ctx); clm != nil {
-		userId = clm.AuthID
+		userID = clm.AuthID
 	}
 
 	err := s.store.Update(ctx, domain.Todo{
 		ID:          in.ID,
-		UserID:      userId,
+		UserID:      userID,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      sts,
@@ -56,7 +56,7 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 
 	return &domain.Todo{
 		ID:          in.ID,
-		UserID:      userId,
+		UserID:      userID,
 		Title:       in.Title,
 		Description: in.Description,
 		Status:      sts,
