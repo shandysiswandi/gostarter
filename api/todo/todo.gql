@@ -1,6 +1,6 @@
 # The query type, represents all of the entry points into our object graph
 type Query {
-  fetch(in: FetchInput): [Todo!]!
+  fetch(in: FetchInput): FetchOutput!
   find(id: String!): Todo
 }
 
@@ -14,8 +14,14 @@ type Mutation {
 
 # type ...........................
 
+type Pagination {
+  next_cursor: String!
+  has_next: Boolean!
+}
+
 type Todo {
   id: String!
+  user_id: String!
   title: String!
   description: String!
   status: Status!
@@ -32,9 +38,8 @@ enum Status {
 # inputs .........................
 
 input FetchInput {
-  id: String
-  title: String
-  description: String
+  cursor: String
+  limit: String
   status: Status
 }
 
@@ -60,4 +65,9 @@ input UpdateInput {
 type UpdateStatusOutput {
   id: String!
   status: Status!
+}
+
+type FetchOutput {
+  todos: [Todo!]!
+  pagination: Pagination!
 }

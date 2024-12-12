@@ -12,7 +12,6 @@ receivers:
 
 exporters:
   debug:
-    verbosity: detailed
 
 processors:
   batch:

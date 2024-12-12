@@ -34,7 +34,7 @@ services:
       - gostarter-network
 
   goose:
-    image: alpine
+    image: goose:v3.23.0
     pull_policy: missing
     volumes:
       - ./migrations:/migrations
@@ -47,15 +47,11 @@ services:
         condition: service_healthy
     entrypoint: >
       sh -c "
-      apk add --no-cache curl && \
-      curl -fsSL https://github.com/pressly/goose/releases/download/v3.23.0/goose_linux_x86_64 -o /goose && \
-      chmod +x /goose && \
+      goose -dir /migrations/postgres fix && \
+      goose -dir /migrations/postgres postgres \"postgres://user:password@postgres:5432/gostarter?sslmode=disable\" up && \
 
-      /goose -dir /migrations/postgres fix && \
-      /goose -dir /migrations/postgres postgres \"postgres://user:password@postgres:5432/gostarter?sslmode=disable\" up && \
-
-      /goose -dir /migrations/mysql fix && \
-      /goose -dir /migrations/mysql mysql \"user:password@tcp(mysql:3306)/gostarter?parseTime=true\" up
+      goose -dir /migrations/mysql fix && \
+      goose -dir /migrations/mysql mysql \"user:password@tcp(mysql:3306)/gostarter?parseTime=true\" up
       "
 
   postgres:

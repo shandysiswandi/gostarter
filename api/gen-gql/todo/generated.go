@@ -45,11 +45,21 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	FetchOutput struct {
+		Pagination func(childComplexity int) int
+		Todos      func(childComplexity int) int
+	}
+
 	Mutation struct {
 		Create       func(childComplexity int, in CreateInput) int
 		Delete       func(childComplexity int, id string) int
 		Update       func(childComplexity int, in UpdateInput) int
 		UpdateStatus func(childComplexity int, in UpdateStatusInput) int
+	}
+
+	Pagination struct {
+		HasNext    func(childComplexity int) int
+		NextCursor func(childComplexity int) int
 	}
 
 	Query struct {
@@ -62,6 +72,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Status      func(childComplexity int) int
 		Title       func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	UpdateStatusOutput struct {
@@ -77,7 +88,7 @@ type MutationResolver interface {
 	Update(ctx context.Context, in UpdateInput) (*Todo, error)
 }
 type QueryResolver interface {
-	Fetch(ctx context.Context, in *FetchInput) ([]Todo, error)
+	Fetch(ctx context.Context, in *FetchInput) (*FetchOutput, error)
 	Find(ctx context.Context, id string) (*Todo, error)
 }
 
@@ -99,6 +110,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "FetchOutput.pagination":
+		if e.complexity.FetchOutput.Pagination == nil {
+			break
+		}
+
+		return e.complexity.FetchOutput.Pagination(childComplexity), true
+
+	case "FetchOutput.todos":
+		if e.complexity.FetchOutput.Todos == nil {
+			break
+		}
+
+		return e.complexity.FetchOutput.Todos(childComplexity), true
 
 	case "Mutation.create":
 		if e.complexity.Mutation.Create == nil {
@@ -147,6 +172,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateStatus(childComplexity, args["in"].(UpdateStatusInput)), true
+
+	case "Pagination.has_next":
+		if e.complexity.Pagination.HasNext == nil {
+			break
+		}
+
+		return e.complexity.Pagination.HasNext(childComplexity), true
+
+	case "Pagination.next_cursor":
+		if e.complexity.Pagination.NextCursor == nil {
+			break
+		}
+
+		return e.complexity.Pagination.NextCursor(childComplexity), true
 
 	case "Query.fetch":
 		if e.complexity.Query.Fetch == nil {
@@ -199,6 +238,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.Title(childComplexity), true
+
+	case "Todo.user_id":
+		if e.complexity.Todo.UserID == nil {
+			break
+		}
+
+		return e.complexity.Todo.UserID(childComplexity), true
 
 	case "UpdateStatusOutput.id":
 		if e.complexity.UpdateStatusOutput.ID == nil {
@@ -325,7 +371,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../../todo/todo.gql", Input: `# The query type, represents all of the entry points into our object graph
 type Query {
-  fetch(in: FetchInput): [Todo!]!
+  fetch(in: FetchInput): FetchOutput!
   find(id: String!): Todo
 }
 
@@ -339,8 +385,14 @@ type Mutation {
 
 # type ...........................
 
+type Pagination {
+  next_cursor: String!
+  has_next: Boolean!
+}
+
 type Todo {
   id: String!
+  user_id: String!
   title: String!
   description: String!
   status: Status!
@@ -357,9 +409,8 @@ enum Status {
 # inputs .........................
 
 input FetchInput {
-  id: String
-  title: String
-  description: String
+  cursor: String
+  limit: String
   status: Status
 }
 
@@ -385,6 +436,11 @@ input UpdateInput {
 type UpdateStatusOutput {
   id: String!
   status: Status!
+}
+
+type FetchOutput {
+  todos: [Todo!]!
+  pagination: Pagination!
 }
 `, BuiltIn: false},
 }
@@ -690,6 +746,112 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _FetchOutput_todos(ctx context.Context, field graphql.CollectedField, obj *FetchOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FetchOutput_todos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Todos, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Todo)
+	fc.Result = res
+	return ec.marshalNTodo2ᚕgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FetchOutput_todos(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FetchOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Todo_id(ctx, field)
+			case "user_id":
+				return ec.fieldContext_Todo_user_id(ctx, field)
+			case "title":
+				return ec.fieldContext_Todo_title(ctx, field)
+			case "description":
+				return ec.fieldContext_Todo_description(ctx, field)
+			case "status":
+				return ec.fieldContext_Todo_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FetchOutput_pagination(ctx context.Context, field graphql.CollectedField, obj *FetchOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FetchOutput_pagination(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pagination, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Pagination)
+	fc.Result = res
+	return ec.marshalNPagination2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐPagination(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FetchOutput_pagination(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FetchOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "next_cursor":
+				return ec.fieldContext_Pagination_next_cursor(ctx, field)
+			case "has_next":
+				return ec.fieldContext_Pagination_has_next(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Pagination", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_create(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_create(ctx, field)
 	if err != nil {
@@ -902,6 +1064,8 @@ func (ec *executionContext) fieldContext_Mutation_update(ctx context.Context, fi
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Todo_id(ctx, field)
+			case "user_id":
+				return ec.fieldContext_Todo_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Todo_title(ctx, field)
 			case "description":
@@ -922,6 +1086,94 @@ func (ec *executionContext) fieldContext_Mutation_update(ctx context.Context, fi
 	if fc.Args, err = ec.field_Mutation_update_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Pagination_next_cursor(ctx context.Context, field graphql.CollectedField, obj *Pagination) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Pagination_next_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NextCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Pagination_next_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Pagination",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Pagination_has_next(ctx context.Context, field graphql.CollectedField, obj *Pagination) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Pagination_has_next(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNext, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Pagination_has_next(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Pagination",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -952,9 +1204,9 @@ func (ec *executionContext) _Query_fetch(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Todo)
+	res := resTmp.(*FetchOutput)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalNFetchOutput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFetchOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_fetch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -965,16 +1217,12 @@ func (ec *executionContext) fieldContext_Query_fetch(ctx context.Context, field 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Todo_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Todo_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Todo_description(ctx, field)
-			case "status":
-				return ec.fieldContext_Todo_status(ctx, field)
+			case "todos":
+				return ec.fieldContext_FetchOutput_todos(ctx, field)
+			case "pagination":
+				return ec.fieldContext_FetchOutput_pagination(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type FetchOutput", field.Name)
 		},
 	}
 	defer func() {
@@ -1029,6 +1277,8 @@ func (ec *executionContext) fieldContext_Query_find(ctx context.Context, field g
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Todo_id(ctx, field)
+			case "user_id":
+				return ec.fieldContext_Todo_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Todo_title(ctx, field)
 			case "description":
@@ -1214,6 +1464,50 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) fieldContext_Todo_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_user_id(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_user_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Todo",
 		Field:      field,
@@ -3260,34 +3554,27 @@ func (ec *executionContext) unmarshalInputFetchInput(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "title", "description", "status"}
+	fieldsInOrder := [...]string{"cursor", "limit", "status"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		case "cursor":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cursor"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ID = data
-		case "title":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Cursor = data
+		case "limit":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Title = data
-		case "description":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
+			it.Limit = data
 		case "status":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
 			data, err := ec.unmarshalOStatus2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐStatus(ctx, v)
@@ -3391,6 +3678,50 @@ func (ec *executionContext) unmarshalInputUpdateStatusInput(ctx context.Context,
 
 // region    **************************** object.gotpl ****************************
 
+var fetchOutputImplementors = []string{"FetchOutput"}
+
+func (ec *executionContext) _FetchOutput(ctx context.Context, sel ast.SelectionSet, obj *FetchOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fetchOutputImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FetchOutput")
+		case "todos":
+			out.Values[i] = ec._FetchOutput_todos(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pagination":
+			out.Values[i] = ec._FetchOutput_pagination(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3435,6 +3766,50 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_update(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var paginationImplementors = []string{"Pagination"}
+
+func (ec *executionContext) _Pagination(ctx context.Context, sel ast.SelectionSet, obj *Pagination) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, paginationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Pagination")
+		case "next_cursor":
+			out.Values[i] = ec._Pagination_next_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "has_next":
+			out.Values[i] = ec._Pagination_has_next(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3565,6 +3940,11 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = graphql.MarshalString("Todo")
 		case "id":
 			out.Values[i] = ec._Todo_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._Todo_user_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3994,6 +4374,30 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 func (ec *executionContext) unmarshalNCreateInput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐCreateInput(ctx context.Context, v interface{}) (CreateInput, error) {
 	res, err := ec.unmarshalInputCreateInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFetchOutput2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFetchOutput(ctx context.Context, sel ast.SelectionSet, v FetchOutput) graphql.Marshaler {
+	return ec._FetchOutput(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFetchOutput2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐFetchOutput(ctx context.Context, sel ast.SelectionSet, v *FetchOutput) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FetchOutput(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPagination2ᚖgithubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐPagination(ctx context.Context, sel ast.SelectionSet, v *Pagination) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Pagination(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋshandysiswandiᚋgostarterᚋapiᚋgenᚑgqlᚋtodoᚐStatus(ctx context.Context, v interface{}) (Status, error) {

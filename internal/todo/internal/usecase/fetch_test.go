@@ -7,6 +7,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/pagination"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,24 +45,24 @@ func TestFetch_Execute(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []domain.Todo
+		want    *domain.FetchOutput
 		wantErr error
 		mockFn  func(a args) *Fetch
 	}{
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.FetchInput{}},
+			args:    args{ctx: context.Background(), in: domain.FetchInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to fetch todo", assert.AnError),
 			mockFn: func(a args) *Fetch {
 				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
-				filter := map[string]string{
-					"id":          a.in.ID,
-					"title":       a.in.Title,
-					"description": a.in.Description,
-					"status":      a.in.Status,
+				cursor, limit := pagination.ParseCursorBased(a.in.Cursor, a.in.Limit)
+
+				filter := map[string]any{
+					"cursor": cursor,
+					"limit":  limit,
 				}
 				store.EXPECT().Fetch(a.ctx, filter).Return(nil, assert.AnError)
 
@@ -73,30 +74,50 @@ func TestFetch_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.TODO(), in: domain.FetchInput{}},
-			want: []domain.Todo{{
-				ID:          91,
-				Title:       "test 1",
-				Description: "test 2",
-				Status:      domain.TodoStatusInitiate,
+			args: args{ctx: context.Background(), in: domain.FetchInput{
+				Cursor: "",
+				Limit:  "1",
+				Status: "done",
 			}},
+			want: &domain.FetchOutput{
+				Todos: []domain.Todo{{
+					ID:          1,
+					UserID:      2,
+					Title:       "test 1",
+					Description: "test 1",
+					Status:      domain.TodoStatusDone,
+				}},
+				NextCursor: "Mg",
+				HasMore:    true,
+			},
 			wantErr: nil,
 			mockFn: func(a args) *Fetch {
 				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
-				filter := map[string]string{
-					"id":          a.in.ID,
-					"title":       a.in.Title,
-					"description": a.in.Description,
-					"status":      a.in.Status,
+				cursor, limit := pagination.ParseCursorBased(a.in.Cursor, a.in.Limit)
+
+				filter := map[string]any{
+					"cursor": cursor,
+					"limit":  limit,
+					"status": a.in.Status,
 				}
-				store.EXPECT().Fetch(a.ctx, filter).Return([]domain.Todo{{
-					ID:          91,
-					Title:       "test 1",
-					Description: "test 2",
-					Status:      domain.TodoStatusInitiate,
-				}}, nil)
+				store.EXPECT().Fetch(a.ctx, filter).Return([]domain.Todo{
+					{
+						ID:          1,
+						UserID:      2,
+						Title:       "test 1",
+						Description: "test 1",
+						Status:      domain.TodoStatusDone,
+					},
+					{
+						ID:          2,
+						UserID:      2,
+						Title:       "test 2",
+						Description: "test 2",
+						Status:      domain.TodoStatusDone,
+					},
+				}, nil)
 
 				return &Fetch{
 					telemetry: mtel,

@@ -73,7 +73,7 @@ func TestSQLTodo_Create(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), todo: domain.Todo{}},
+			args:    args{ctx: context.Background(), todo: domain.Todo{}},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -90,7 +90,7 @@ func TestSQLTodo_Create(t *testing.T) {
 		},
 		{
 			name:    "SuccessButNoAffected",
-			args:    args{ctx: context.TODO(), todo: domain.Todo{}},
+			args:    args{ctx: context.Background(), todo: domain.Todo{}},
 			wantErr: domain.ErrTodoNotCreated,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -108,7 +108,7 @@ func TestSQLTodo_Create(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), todo: domain.Todo{}},
+			args:    args{ctx: context.Background(), todo: domain.Todo{}},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -149,7 +149,7 @@ func TestSQLTodo_Delete(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), id: 1},
+			args:    args{ctx: context.Background(), id: 1},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -165,7 +165,7 @@ func TestSQLTodo_Delete(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), id: 1},
+			args:    args{ctx: context.Background(), id: 1},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -205,7 +205,7 @@ func TestSQLTodo_Find(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), id: 1},
+			args:    args{ctx: context.Background(), id: 1},
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
@@ -222,7 +222,7 @@ func TestSQLTodo_Find(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.TODO(), id: 1},
+			args: args{ctx: context.Background(), id: 1},
 			want: &domain.Todo{
 				ID:          1,
 				UserID:      11,
@@ -262,7 +262,7 @@ func TestSQLTodo_Find(t *testing.T) {
 func TestSQLTodo_Fetch(t *testing.T) {
 	type args struct {
 		ctx context.Context
-		in  map[string]string
+		in  map[string]any
 	}
 	tests := []struct {
 		name    string
@@ -273,7 +273,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), in: make(map[string]string)},
+			args:    args{ctx: context.Background(), in: make(map[string]any)},
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
@@ -289,8 +289,8 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			},
 		},
 		{
-			name: "Success",
-			args: args{ctx: context.TODO(), in: make(map[string]string)},
+			name: "SuccessWithoutFilter",
+			args: args{ctx: context.Background(), in: make(map[string]any)},
 			want: []domain.Todo{
 				{
 					ID:          1,
@@ -323,6 +323,53 @@ func TestSQLTodo_Fetch(t *testing.T) {
 				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
 			},
 		},
+		{
+			name: "SuccessWithFilter",
+			args: args{ctx: context.Background(), in: map[string]any{
+				"cursor": uint64(1),
+				"limit":  int(1),
+				"status": "done",
+			}},
+			want: []domain.Todo{
+				{
+					ID:          1,
+					UserID:      12,
+					Title:       "title test",
+					Description: "description test",
+					Status:      domain.TodoStatusDrop,
+				},
+				{
+					ID:          2,
+					UserID:      13,
+					Title:       "title test 2",
+					Description: "description test 2",
+					Status:      domain.TodoStatusInitiate,
+				},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLTodo, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.PostgresDriver).
+					Select("id", "user_id", "title", "description", "status").
+					From("todos").
+					Where(goqu.Ex{"id": goqu.Op{"gt": 1}}).
+					Where(goqu.Ex{"status": "done"}).
+					Limit(2).
+					Prepared(true).
+					ToSQL()
+
+				rows := sqlmock.NewRows([]string{"id", "user_id", "title", "description", "status"}).
+					AddRow(1, 12, "title test", "description test", "DROP").
+					AddRow(2, 13, "title test 2", "description test 2", "INITIATE")
+
+				mock.ExpectQuery(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnRows(rows)
+
+				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -350,7 +397,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), id: 1, sts: domain.TodoStatusDrop},
+			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDrop},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -367,7 +414,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), id: 1, sts: domain.TodoStatusDone},
+			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDone},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -407,7 +454,7 @@ func TestSQLTodo_Update(t *testing.T) {
 	}{
 		{
 			name:    "Error",
-			args:    args{ctx: context.TODO(), todo: domain.Todo{}},
+			args:    args{ctx: context.Background(), todo: domain.Todo{}},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -427,7 +474,7 @@ func TestSQLTodo_Update(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), todo: domain.Todo{}},
+			args:    args{ctx: context.Background(), todo: domain.Todo{}},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))

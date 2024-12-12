@@ -8,6 +8,11 @@ type Todo struct {
 	Status      string `json:"status"`
 }
 
+type Pagination struct {
+	NextCursor string `json:"next_cursor"`
+	HashMore   bool   `json:"has_more"`
+}
+
 // for request and response Create.
 type (
 	CreateRequest struct {
@@ -56,7 +61,8 @@ type (
 	}
 
 	FetchResponse struct {
-		Todos []Todo `json:"todos"`
+		Todos      []Todo     `json:"todos"`
+		Pagination Pagination `json:"pagination"`
 	}
 )
 

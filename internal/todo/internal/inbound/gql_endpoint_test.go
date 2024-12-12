@@ -53,6 +53,9 @@ func Test_gqlEndpoint_Query(t *testing.T) {
 }
 
 func Test_gqlEndpoint_Fetch(t *testing.T) {
+	cursor := "Mg"
+	limit := "1"
+
 	type args struct {
 		ctx context.Context
 		in  *ql.FetchInput
@@ -60,7 +63,7 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []ql.Todo
+		want    *ql.FetchOutput
 		wantErr error
 		mockFn  func(a args) *gqlEndpoint
 	}{
@@ -68,14 +71,22 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 			name: "ErrorCallUC",
 			args: args{
 				ctx: context.Background(),
-				in:  &ql.FetchInput{},
+				in: &ql.FetchInput{
+					Cursor: &cursor,
+					Limit:  &limit,
+					Status: &ql.AllStatus[0],
+				},
 			},
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
 
-				in := domain.FetchInput{}
+				in := domain.FetchInput{
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: "UNKNOWN",
+				}
 				fetchMock.EXPECT().
 					Call(a.ctx, in).
 					Return(nil, assert.AnError)
@@ -90,29 +101,44 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				in: &ql.FetchInput{
-					ID:          new(string),
-					Title:       new(string),
-					Description: new(string),
-					Status:      &ql.AllStatus[1],
+					Cursor: &cursor,
+					Limit:  &limit,
+					Status: &ql.AllStatus[1],
 				},
 			},
-			want: []ql.Todo{{
-				ID:          "10",
-				Title:       "title",
-				Description: "description",
-				Status:      ql.StatusDone,
-			}},
+			want: &ql.FetchOutput{
+				Todos: []ql.Todo{{
+					ID:          "10",
+					UserID:      "11",
+					Title:       "title",
+					Description: "description",
+					Status:      ql.StatusDone,
+				}},
+				Pagination: &ql.Pagination{
+					NextCursor: "NTY",
+					HasNext:    true,
+				},
+			},
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
 
-				in := domain.FetchInput{Status: a.in.Status.String()}
-				out := []domain.Todo{{
-					ID:          10,
-					Title:       "title",
-					Description: "description",
-					Status:      domain.TodoStatusDone,
-				}}
+				in := domain.FetchInput{
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: a.in.Status.String(),
+				}
+				out := &domain.FetchOutput{
+					Todos: []domain.Todo{{
+						ID:          10,
+						UserID:      11,
+						Title:       "title",
+						Description: "description",
+						Status:      domain.TodoStatusDone,
+					}},
+					NextCursor: "NTY",
+					HasMore:    true,
+				}
 				fetchMock.EXPECT().
 					Call(a.ctx, in).
 					Return(out, nil)
@@ -186,6 +212,7 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 			},
 			want: &ql.Todo{
 				ID:          "10",
+				UserID:      "11",
 				Title:       "title",
 				Description: "description",
 				Status:      ql.StatusDrop,
@@ -197,6 +224,7 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 				in := domain.FindInput{ID: 10}
 				out := &domain.Todo{
 					ID:          10,
+					UserID:      11,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusDrop,
@@ -516,6 +544,7 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 			},
 			want: &ql.Todo{
 				ID:          "10",
+				UserID:      "11",
 				Title:       "title",
 				Description: "description",
 				Status:      ql.StatusInProgress,
@@ -532,6 +561,7 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 				}
 				out := &domain.Todo{
 					ID:          10,
+					UserID:      11,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusInProgress,

@@ -2,14 +2,17 @@ package usecase
 
 import (
 	"context"
+	"encoding/base64"
+	"strconv"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/pagination"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type FetchStore interface {
-	Fetch(ctx context.Context, filter map[string]string) ([]domain.Todo, error)
+	Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error)
 }
 
 type Fetch struct {
@@ -24,12 +27,16 @@ func NewFetch(dep Dependency, s FetchStore) *Fetch {
 	}
 }
 
-func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) ([]domain.Todo, error) {
-	filter := map[string]string{
-		"id":          in.ID,
-		"title":       in.Title,
-		"description": in.Description,
-		"status":      in.Status,
+func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOutput, error) {
+	cursor, limit := pagination.ParseCursorBased(in.Cursor, in.Limit)
+
+	filter := map[string]any{
+		"cursor": cursor,
+		"limit":  limit,
+	}
+
+	if in.Status != "" {
+		filter["status"] = in.Status
 	}
 
 	todos, err := s.store.Fetch(ctx, filter)
@@ -39,5 +46,17 @@ func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) ([]domain.Todo, 
 		return nil, goerror.NewServer("failed to fetch todo", err)
 	}
 
-	return todos, nil
+	nextCursor := ""
+	hasMore := len(todos) > limit
+
+	if hasMore {
+		nextCursor = base64.RawURLEncoding.EncodeToString([]byte(strconv.FormatUint(todos[limit].ID, 10)))
+		todos = todos[:limit]
+	}
+
+	return &domain.FetchOutput{
+		Todos:      todos,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
+	}, nil
 }

@@ -23,23 +23,23 @@ func (_m *MockFetch) EXPECT() *MockFetch_Expecter {
 }
 
 // Call provides a mock function with given fields: ctx, in
-func (_m *MockFetch) Call(ctx context.Context, in domain.FetchInput) ([]domain.Todo, error) {
+func (_m *MockFetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOutput, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Call")
 	}
 
-	var r0 []domain.Todo
+	var r0 *domain.FetchOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.FetchInput) ([]domain.Todo, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.FetchInput) (*domain.FetchOutput, error)); ok {
 		return rf(ctx, in)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.FetchInput) []domain.Todo); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.FetchInput) *domain.FetchOutput); ok {
 		r0 = rf(ctx, in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Todo)
+			r0 = ret.Get(0).(*domain.FetchOutput)
 		}
 	}
 
@@ -71,12 +71,12 @@ func (_c *MockFetch_Call_Call) Run(run func(ctx context.Context, in domain.Fetch
 	return _c
 }
 
-func (_c *MockFetch_Call_Call) Return(_a0 []domain.Todo, _a1 error) *MockFetch_Call_Call {
+func (_c *MockFetch_Call_Call) Return(_a0 *domain.FetchOutput, _a1 error) *MockFetch_Call_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockFetch_Call_Call) RunAndReturn(run func(context.Context, domain.FetchInput) ([]domain.Todo, error)) *MockFetch_Call_Call {
+func (_c *MockFetch_Call_Call) RunAndReturn(run func(context.Context, domain.FetchInput) (*domain.FetchOutput, error)) *MockFetch_Call_Call {
 	_c.Call.Return(run)
 	return _c
 }

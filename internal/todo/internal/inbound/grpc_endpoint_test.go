@@ -191,6 +191,7 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 			},
 			want: &pb.FindResponse{
 				Id:          10,
+				UserId:      11,
 				Title:       "title",
 				Description: "description",
 				Status:      pb.Status_STATUS_DONE,
@@ -202,6 +203,7 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 				in := domain.FindInput{ID: a.req.GetId()}
 				out := &domain.Todo{
 					ID:          10,
+					UserID:      11,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusDone,
@@ -244,10 +246,9 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: &pb.FetchRequest{
-					Id:          10,
-					Title:       "title",
-					Description: "description",
-					Status:      pb.Status_STATUS_DONE,
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: pb.Status_STATUS_DONE,
 				},
 			},
 			want:    nil,
@@ -256,10 +257,9 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 
 				in := domain.FetchInput{
-					ID:          "10",
-					Title:       "title",
-					Description: "description",
-					Status:      "STATUS_DONE",
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: a.req.Status.String(),
 				}
 				fetchMock.EXPECT().
 					Call(a.ctx, in).
@@ -275,36 +275,44 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: &pb.FetchRequest{
-					Id:          10,
-					Title:       "title",
-					Description: "description",
-					Status:      pb.Status_STATUS_DONE,
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: pb.Status_STATUS_DONE,
 				},
 			},
-			want: &pb.FetchResponse{Todos: []*pb.Todo{
-				{
+			want: &pb.FetchResponse{
+				Todos: []*pb.Todo{{
 					Id:          10,
+					UserId:      11,
 					Title:       "title",
 					Description: "description",
 					Status:      pb.Status_STATUS_DONE,
+				}},
+				Pagination: &pb.Pagination{
+					NextCursor: "NTY",
+					HasMore:    true,
 				},
-			}},
+			},
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
 
 				in := domain.FetchInput{
-					ID:          "10",
-					Title:       "title",
-					Description: "description",
-					Status:      "STATUS_DONE",
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: a.req.Status.String(),
 				}
-				out := []domain.Todo{{
-					ID:          10,
-					Title:       "title",
-					Description: "description",
-					Status:      domain.TodoStatusDone,
-				}}
+				out := &domain.FetchOutput{
+					Todos: []domain.Todo{{
+						ID:          10,
+						UserID:      11,
+						Title:       "title",
+						Description: "description",
+						Status:      domain.TodoStatusDone,
+					}},
+					NextCursor: "NTY",
+					HasMore:    true,
+				}
 				fetchMock.EXPECT().
 					Call(a.ctx, in).
 					Return(out, nil)
@@ -449,6 +457,7 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 			},
 			want: &pb.UpdateResponse{
 				Id:          10,
+				UserId:      11,
 				Title:       "title",
 				Description: "description",
 				Status:      pb.Status_STATUS_DROP,
@@ -465,6 +474,7 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 				}
 				out := &domain.Todo{
 					ID:          10,
+					UserID:      11,
 					Title:       "title",
 					Description: "description",
 					Status:      domain.TodoStatusDrop,

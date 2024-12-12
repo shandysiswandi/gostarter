@@ -51,7 +51,7 @@ func TestFind_Execute(t *testing.T) {
 	}{
 		{
 			name:    "ErrorValidation",
-			args:    args{ctx: context.TODO(), in: domain.FindInput{}},
+			args:    args{ctx: context.Background(), in: domain.FindInput{}},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Find {
@@ -69,7 +69,7 @@ func TestFind_Execute(t *testing.T) {
 		},
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.FindInput{}},
+			args:    args{ctx: context.Background(), in: domain.FindInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to find todo", assert.AnError),
 			mockFn: func(a args) *Find {
@@ -90,7 +90,7 @@ func TestFind_Execute(t *testing.T) {
 		},
 		{
 			name:    "StoreNotFound",
-			args:    args{ctx: context.TODO(), in: domain.FindInput{}},
+			args:    args{ctx: context.Background(), in: domain.FindInput{}},
 			want:    nil,
 			wantErr: goerror.NewBusiness("todo not found", goerror.CodeNotFound),
 			mockFn: func(a args) *Find {
@@ -111,7 +111,7 @@ func TestFind_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.TODO(), in: domain.FindInput{}},
+			args: args{ctx: context.Background(), in: domain.FindInput{}},
 			want: &domain.Todo{
 				ID:          10,
 				UserID:      11,

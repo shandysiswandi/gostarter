@@ -51,7 +51,7 @@ func TestUpdateStatus_Execute(t *testing.T) {
 	}{
 		{
 			name:    "ErrorValidation",
-			args:    args{ctx: context.TODO(), in: domain.UpdateStatusInput{}},
+			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{}},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *UpdateStatus {
@@ -69,7 +69,7 @@ func TestUpdateStatus_Execute(t *testing.T) {
 		},
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.UpdateStatusInput{}},
+			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to update status todo", assert.AnError),
 			mockFn: func(a args) *UpdateStatus {
@@ -91,7 +91,7 @@ func TestUpdateStatus_Execute(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), in: domain.UpdateStatusInput{ID: 1}},
+			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{ID: 1}},
 			want:    &domain.UpdateStatusOutput{ID: 1, Status: domain.TodoStatusUnknown},
 			wantErr: nil,
 			mockFn: func(a args) *UpdateStatus {

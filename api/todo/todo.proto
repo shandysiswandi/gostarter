@@ -2,12 +2,7 @@ syntax = "proto3";
 
 package gostarter.api.todo;
 
-import "google/type/decimal.proto";
 import "buf/validate/validate.proto";
-
-message EXAMPLE {
-    google.type.Decimal amount = 1;
-}
 
 enum Status {
     STATUS_UNSPECIFIED = 0;
@@ -19,9 +14,15 @@ enum Status {
 
 message Todo {
     uint64 id = 1;
-    string title = 2;
-    string description = 3;
-    Status status = 4;
+    uint64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    Status status = 5;
+}
+
+message Pagination {
+    string next_cursor = 1;
+    bool has_more = 2;
 }
 
 message CreateRequest { 
@@ -47,20 +48,21 @@ message FindRequest {
 
 message FindResponse { 
     uint64 id = 1;
-    string title = 2;
-    string description = 3;
-    Status status = 4;
+    uint64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    Status status = 5;
 }
 
 message FetchRequest { 
-    uint64 id = 1;
-    string title = 2;
-    string description = 3;
-    Status status = 4;
+    string cursor = 1;
+    string limit = 2;
+    Status status = 3;
 }
 
 message FetchResponse { 
     repeated Todo todos = 1;
+    Pagination pagination = 2;
 }
 
 message UpdateStatusRequest { 
@@ -82,9 +84,10 @@ message UpdateRequest {
 
 message UpdateResponse { 
     uint64 id = 1;
-    string title = 2;
-    string description = 3;
-    Status status = 4;
+    uint64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    Status status = 5;
 }
 
 service TodoService {

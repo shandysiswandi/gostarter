@@ -5,12 +5,17 @@ import (
 )
 
 type Fetch interface {
-	Call(ctx context.Context, in FetchInput) ([]Todo, error)
+	Call(ctx context.Context, in FetchInput) (*FetchOutput, error)
 }
 
 type FetchInput struct {
-	ID          string
-	Title       string
-	Description string
-	Status      string
+	Cursor string
+	Limit  string
+	Status string
+}
+
+type FetchOutput struct {
+	Todos      []Todo
+	NextCursor string
+	HasMore    bool
 }

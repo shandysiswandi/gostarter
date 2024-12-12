@@ -51,7 +51,7 @@ func TestDelete_Call(t *testing.T) {
 	}{
 		{
 			name:    "ErrorValidation",
-			args:    args{ctx: context.TODO(), in: domain.DeleteInput{}},
+			args:    args{ctx: context.Background(), in: domain.DeleteInput{}},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Delete {
@@ -69,7 +69,7 @@ func TestDelete_Call(t *testing.T) {
 		},
 		{
 			name:    "ErrorStore",
-			args:    args{ctx: context.TODO(), in: domain.DeleteInput{}},
+			args:    args{ctx: context.Background(), in: domain.DeleteInput{}},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to delete todo", assert.AnError),
 			mockFn: func(a args) *Delete {
@@ -90,7 +90,7 @@ func TestDelete_Call(t *testing.T) {
 		},
 		{
 			name:    "Success",
-			args:    args{ctx: context.TODO(), in: domain.DeleteInput{ID: 111}},
+			args:    args{ctx: context.Background(), in: domain.DeleteInput{ID: 111}},
 			want:    &domain.DeleteOutput{ID: 111},
 			wantErr: nil,
 			mockFn: func(a args) *Delete {

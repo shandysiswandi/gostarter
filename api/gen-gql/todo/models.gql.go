@@ -14,13 +14,22 @@ type CreateInput struct {
 }
 
 type FetchInput struct {
-	ID          *string `json:"id,omitempty"`
-	Title       *string `json:"title,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Status      *Status `json:"status,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *string `json:"limit,omitempty"`
+	Status *Status `json:"status,omitempty"`
+}
+
+type FetchOutput struct {
+	Todos      []Todo      `json:"todos"`
+	Pagination *Pagination `json:"pagination"`
 }
 
 type Mutation struct {
+}
+
+type Pagination struct {
+	NextCursor string `json:"next_cursor"`
+	HasNext    bool   `json:"has_next"`
 }
 
 type Query struct {
@@ -28,6 +37,7 @@ type Query struct {
 
 type Todo struct {
 	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      Status `json:"status"`

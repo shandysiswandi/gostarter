@@ -30,7 +30,7 @@ func (r *mutationResolver) Update(ctx context.Context, in UpdateInput) (*Todo, e
 }
 
 // Fetch is the resolver for the fetch field.
-func (r *queryResolver) Fetch(ctx context.Context, in *FetchInput) ([]Todo, error) {
+func (r *queryResolver) Fetch(ctx context.Context, in *FetchInput) (*FetchOutput, error) {
 	panic(fmt.Errorf("not implemented: Fetch - fetch"))
 }
 

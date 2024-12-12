@@ -39,14 +39,13 @@ func (e *gqlEndpoint) Mutation() ql.MutationResolver { return e }
 
 func (e *gqlEndpoint) Query() ql.QueryResolver { return e }
 
-func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) ([]ql.Todo, error) {
+func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) (*ql.FetchOutput, error) {
 	input := domain.FetchInput{}
 	if in != nil {
 		input = domain.FetchInput{
-			ID:          getString(in.ID),
-			Title:       getString(in.Title),
-			Description: getString(in.Description),
-			Status:      getStatusString(in.Status),
+			Cursor: getString(in.Cursor),
+			Limit:  getString(in.Limit),
+			Status: getStatusString(in.Status),
 		}
 	}
 
@@ -56,16 +55,23 @@ func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) ([]ql.Todo, 
 	}
 
 	todos := make([]ql.Todo, 0)
-	for _, todo := range resp {
+	for _, todo := range resp.Todos {
 		todos = append(todos, ql.Todo{
 			ID:          strconv.FormatUint(todo.ID, 10),
+			UserID:      strconv.FormatUint(todo.UserID, 10),
 			Title:       todo.Title,
 			Description: todo.Description,
 			Status:      ql.Status(todo.Status.String()),
 		})
 	}
 
-	return todos, nil
+	return &ql.FetchOutput{
+		Todos: todos,
+		Pagination: &ql.Pagination{
+			NextCursor: resp.NextCursor,
+			HasNext:    resp.HasMore,
+		},
+	}, nil
 }
 
 func (e *gqlEndpoint) Find(ctx context.Context, id string) (*ql.Todo, error) {
@@ -81,6 +87,7 @@ func (e *gqlEndpoint) Find(ctx context.Context, id string) (*ql.Todo, error) {
 
 	return &ql.Todo{
 		ID:          strconv.FormatUint(resp.ID, 10),
+		UserID:      strconv.FormatUint(resp.UserID, 10),
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      ql.Status(resp.Status.String()),
@@ -147,6 +154,7 @@ func (e *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.Todo, 
 
 	return &ql.Todo{
 		ID:          strconv.FormatUint(resp.ID, 10),
+		UserID:      strconv.FormatUint(resp.UserID, 10),
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      ql.Status(resp.Status.String()),

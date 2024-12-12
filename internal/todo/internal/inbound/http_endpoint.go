@@ -70,17 +70,16 @@ func (e *httpEndpoint) Find(c framework.Context) (any, error) {
 
 func (e *httpEndpoint) Fetch(c framework.Context) (any, error) {
 	resp, err := e.fetchUC.Call(c.Context(), domain.FetchInput{
-		ID:          c.Query("id"),
-		Title:       c.Query("title"),
-		Description: c.Query("description"),
-		Status:      c.Query("status"),
+		Cursor: c.Query("cursor"),
+		Limit:  c.Query("limit"),
+		Status: c.Query("status"),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	todos := make([]Todo, 0)
-	for _, todo := range resp {
+	for _, todo := range resp.Todos {
 		todos = append(todos, Todo{
 			ID:          todo.ID,
 			UserID:      todo.UserID,
@@ -90,7 +89,13 @@ func (e *httpEndpoint) Fetch(c framework.Context) (any, error) {
 		})
 	}
 
-	return FetchResponse{Todos: todos}, nil
+	return FetchResponse{
+		Todos: todos,
+		Pagination: Pagination{
+			NextCursor: resp.NextCursor,
+			HashMore:   resp.HasMore,
+		},
+	}, nil
 }
 
 func (e *httpEndpoint) UpdateStatus(c framework.Context) (any, error) {

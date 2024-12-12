@@ -2,7 +2,6 @@ package inbound
 
 import (
 	"context"
-	"strconv"
 
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
@@ -48,6 +47,7 @@ func (e *grpcEndpoint) Find(ctx context.Context, req *pb.FindRequest) (*pb.FindR
 
 	return &pb.FindResponse{
 		Id:          req.GetId(),
+		UserId:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      pb.Status(resp.Status),
@@ -56,26 +56,32 @@ func (e *grpcEndpoint) Find(ctx context.Context, req *pb.FindRequest) (*pb.FindR
 
 func (e *grpcEndpoint) Fetch(ctx context.Context, req *pb.FetchRequest) (*pb.FetchResponse, error) {
 	resp, err := e.fetchUC.Call(ctx, domain.FetchInput{
-		ID:          strconv.FormatUint(req.GetId(), 10),
-		Title:       req.GetTitle(),
-		Description: req.GetDescription(),
-		Status:      req.GetStatus().String(),
+		Cursor: req.GetCursor(),
+		Limit:  req.GetLimit(),
+		Status: req.GetStatus().String(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	todos := make([]*pb.Todo, 0)
-	for _, todo := range resp {
+	for _, todo := range resp.Todos {
 		todos = append(todos, &pb.Todo{
 			Id:          todo.ID,
+			UserId:      todo.UserID,
 			Title:       todo.Title,
 			Description: todo.Description,
 			Status:      pb.Status(todo.Status),
 		})
 	}
 
-	return &pb.FetchResponse{Todos: todos}, nil
+	return &pb.FetchResponse{
+		Todos: todos,
+		Pagination: &pb.Pagination{
+			NextCursor: resp.NextCursor,
+			HasMore:    resp.HasMore,
+		},
+	}, nil
 }
 
 func (e *grpcEndpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (
@@ -105,6 +111,7 @@ func (e *grpcEndpoint) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.U
 
 	return &pb.UpdateResponse{
 		Id:          resp.ID,
+		UserId:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
 		Status:      pb.Status(resp.Status),

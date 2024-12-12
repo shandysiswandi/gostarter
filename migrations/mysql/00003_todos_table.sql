@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS todos (
     user_id BIGINT UNSIGNED NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    status VARCHAR(50) NOT NULL
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 );
 
 CREATE INDEX todos_user_id_idx ON todos (user_id);

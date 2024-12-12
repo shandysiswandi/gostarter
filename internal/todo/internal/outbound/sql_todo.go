@@ -62,12 +62,28 @@ func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 	return dbops.SQLGet[domain.Todo](ctx, st.db, query)
 }
 
-func (st *SQLTodo) Fetch(ctx context.Context, _ map[string]string) ([]domain.Todo, error) {
+func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error) {
+	cursor, hasCursor := filter["cursor"].(uint64)
+	limit, hasLimit := filter["limit"].(int)
+	status, hasStatus := filter["status"].(string)
+
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "user_id", "title", "description", "status").
-			From("todos").
-			Prepared(true).
-			ToSQL()
+		q := st.qu.Select("id", "user_id", "title", "description", "status").
+			From("todos")
+
+		if hasCursor && cursor > 0 {
+			q = q.Where(goqu.Ex{"id": goqu.Op{"gt": cursor}})
+		}
+
+		if hasStatus {
+			q = q.Where(goqu.Ex{"status": status})
+		}
+
+		if hasLimit {
+			q = q.Limit(uint(limit + 1))
+		}
+
+		return q.Prepared(true).ToSQL()
 	}
 
 	return dbops.SQLGets[domain.Todo](ctx, st.db, query)

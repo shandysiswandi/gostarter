@@ -83,6 +83,9 @@
             "type": "object",
             "$ref": "#/definitions/todoTodo"
           }
+        },
+        "pagination": {
+          "$ref": "#/definitions/todoPagination"
         }
       }
     },
@@ -90,6 +93,10 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "userId": {
           "type": "string",
           "format": "uint64"
         },
@@ -104,10 +111,25 @@
         }
       }
     },
+    "todoPagination": {
+      "type": "object",
+      "properties": {
+        "nextCursor": {
+          "type": "string"
+        },
+        "hasMore": {
+          "type": "boolean"
+        }
+      }
+    },
     "todoTodo": {
       "type": "object",
       "properties": {
         "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "userId": {
           "type": "string",
           "format": "uint64"
         },
@@ -126,6 +148,10 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "userId": {
           "type": "string",
           "format": "uint64"
         },

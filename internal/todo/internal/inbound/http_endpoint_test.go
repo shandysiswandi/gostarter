@@ -285,9 +285,8 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 			name: "ErrorCallUC",
 			c: func() framework.Context {
 				c := framework.NewTestContext(http.MethodGet, "/todos", nil)
-				c.SetQuery("id", "11")
-				c.SetQuery("title", "title")
-				c.SetQuery("description", "description")
+				c.SetQuery("limit", "1")
+				c.SetQuery("cursor", "Mg")
 				c.SetQuery("status", "done")
 
 				return c.Build()
@@ -298,10 +297,9 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 
 				in := domain.FetchInput{
-					ID:          "11",
-					Title:       "title",
-					Description: "description",
-					Status:      "done",
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: "done",
 				}
 				fetchMock.EXPECT().
 					Call(ctx, in).
@@ -316,35 +314,43 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 			name: "Success",
 			c: func() framework.Context {
 				c := framework.NewTestContext(http.MethodGet, "/todos", nil)
-				c.SetQuery("id", "11")
-				c.SetQuery("title", "title")
-				c.SetQuery("description", "description")
+				c.SetQuery("limit", "1")
+				c.SetQuery("cursor", "Mg")
 				c.SetQuery("status", "done")
 
 				return c.Build()
 			},
-			want: FetchResponse{Todos: []Todo{{
-				ID:          11,
-				Title:       "title",
-				Description: "description",
-				Status:      domain.TodoStatusDone.String(),
-			}}},
+			want: FetchResponse{
+				Todos: []Todo{{
+					ID:          11,
+					Title:       "title",
+					Description: "description",
+					Status:      domain.TodoStatusDone.String(),
+				}},
+				Pagination: Pagination{
+					NextCursor: "NTY",
+					HashMore:   true,
+				},
+			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
 
 				in := domain.FetchInput{
-					ID:          "11",
-					Title:       "title",
-					Description: "description",
-					Status:      "done",
+					Cursor: "Mg",
+					Limit:  "1",
+					Status: "done",
 				}
-				out := []domain.Todo{{
-					ID:          11,
-					Title:       "title",
-					Description: "description",
-					Status:      domain.TodoStatusDone,
-				}}
+				out := &domain.FetchOutput{
+					Todos: []domain.Todo{{
+						ID:          11,
+						Title:       "title",
+						Description: "description",
+						Status:      domain.TodoStatusDone,
+					}},
+					NextCursor: "NTY",
+					HasMore:    true,
+				}
 				fetchMock.EXPECT().
 					Call(ctx, in).
 					Return(out, nil)

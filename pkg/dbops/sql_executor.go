@@ -116,6 +116,10 @@ func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider)
 		return nil, err
 	}
 
+	if verbose {
+		log.Printf("SQLGets: query: %s\n", query)
+	}
+
 	tx, ok := ctx.Value(contextKeySQLTx{}).(*sql.Tx)
 	if ok {
 		q = tx

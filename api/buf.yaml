@@ -10,4 +10,4 @@ lint:
     - RULE_NAME
 deps:
   - buf.build/bufbuild/protovalidate:v0.7.1
-  - buf.build/googleapis/googleapis
+  # - buf.build/googleapis/googleapis
