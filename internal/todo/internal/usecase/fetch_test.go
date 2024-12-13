@@ -100,7 +100,7 @@ func TestFetch_Execute(t *testing.T) {
 				filter := map[string]any{
 					"cursor": cursor,
 					"limit":  limit,
-					"status": a.in.Status,
+					"status": domain.ParseTodoStatus(a.in.Status),
 				}
 				store.EXPECT().Fetch(a.ctx, filter).Return([]domain.Todo{
 					{

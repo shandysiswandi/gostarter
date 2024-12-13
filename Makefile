@@ -111,6 +111,9 @@ migration-reset:
 docker-build:
 	@docker build --build-arg TZ="Asia/Jakarta" -t gostarter .
 
-# docker-compose: Builds a Docker image for the application with a timezone argument, tagging the image as 'gostarter' and running it.
-docker-compose:
-	@docker compose build && docker compose up
+
+compose-up:
+	@docker compose up --build
+	
+compose-down:
+	@docker compose down 

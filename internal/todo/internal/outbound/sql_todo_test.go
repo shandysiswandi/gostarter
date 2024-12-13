@@ -328,7 +328,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			args: args{ctx: context.Background(), in: map[string]any{
 				"cursor": uint64(1),
 				"limit":  int(1),
-				"status": "done",
+				"status": domain.TodoStatusDone,
 			}},
 			want: []domain.Todo{
 				{
@@ -354,7 +354,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					Select("id", "user_id", "title", "description", "status").
 					From("todos").
 					Where(goqu.Ex{"id": goqu.Op{"gt": 1}}).
-					Where(goqu.Ex{"status": "done"}).
+					Where(goqu.Ex{"status": "DONE"}).
 					Limit(2).
 					Prepared(true).
 					ToSQL()

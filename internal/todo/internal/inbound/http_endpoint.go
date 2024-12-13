@@ -93,7 +93,7 @@ func (e *httpEndpoint) Fetch(c framework.Context) (any, error) {
 		Todos: todos,
 		Pagination: Pagination{
 			NextCursor: resp.NextCursor,
-			HashMore:   resp.HasMore,
+			HasMore:    resp.HasMore,
 		},
 	}, nil
 }

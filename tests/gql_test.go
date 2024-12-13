@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/base64"
 	"encoding/json"
 
 	"github.com/go-resty/resty/v2"
@@ -10,18 +11,22 @@ import (
 type GQLSuite struct {
 	suite.Suite
 
-	httpClient *resty.Client
-	baseURL    string
-	idTodo     *string
-	token      string
+	httpClient  *resty.Client
+	baseURL     string
+	baseURLRest string
+	idTodo      *string
+	idTodo2     *string
+	token       string
 }
 
 func (gs *GQLSuite) SetupSuite() {
 	// Hook 1: Initialize anything in suite
 
-	gs.baseURL = "http://localhost:8081"
+	gs.baseURL = "http://localhost:8082"
+	gs.baseURLRest = "http://localhost:8081"
 	gs.httpClient = resty.New()
 	gs.idTodo = new(string)
+	gs.idTodo2 = new(string)
 	gs.token = gs.getAccessToken()
 }
 
@@ -37,7 +42,7 @@ func (gs *GQLSuite) getAccessToken() string {
 			"password": "admin123",
 		}).
 		SetResult(&responseBody).
-		Post(gs.baseURL + "/auth/login")
+		Post(gs.baseURLRest + "/auth/login")
 
 	gs.Assert().NoError(err)
 	gs.Assert().NotNil(resp)
@@ -54,7 +59,9 @@ func (gs *GQLSuite) TearDownSuite() {
 
 	gs.httpClient = nil
 	gs.baseURL = ""
+	gs.baseURLRest = ""
 	gs.idTodo = nil
+	gs.idTodo2 = nil
 	gs.token = ""
 }
 
@@ -85,6 +92,27 @@ func (gs *GQLSuite) TestGQLTodos() {
 				}
 
 				*gs.idTodo = obj
+			},
+		},
+		{
+			name: "CREATETwo",
+			query: func() string {
+				return `mutation{
+					create(in: {title: "some title gql", description: "some description gql" })
+				}`
+			},
+			cb: func(v any) {
+				data, ok := v.(map[string]any)
+				if !ok {
+					return
+				}
+
+				obj, ok := data["create"].(string)
+				if !ok {
+					return
+				}
+
+				*gs.idTodo2 = obj
 			},
 		},
 		{
@@ -121,13 +149,52 @@ func (gs *GQLSuite) TestGQLTodos() {
 		{
 			name: "FETCH",
 			query: func() string {
-				return `query{ fetch{ id title description status } }`
+				return `query{ 
+					fetch{ todos{id title description status} } 
+				}`
+			},
+		},
+		{
+			name: "FETCHWithLimit",
+			query: func() string {
+				return `query{ 
+					fetch(in: { limit: "1"}){ 
+						todos{id title description status} pagination{ next_cursor has_next } 
+					} 
+				}`
+			},
+		},
+		{
+			name: "FETCHWithCursor",
+			query: func() string {
+				cursor := base64.RawURLEncoding.EncodeToString([]byte(*gs.idTodo2))
+				return `query{ 
+					fetch(in: { cursor: "` + cursor + `" }){ 
+						todos{id title description status} pagination{ next_cursor has_next } 
+					} 
+				}`
+			},
+		},
+		{
+			name: "FETCHWithStatus",
+			query: func() string {
+				return `query{ 
+					fetch(in: { status: INITIATE }){ 
+						todos{id title description status} pagination{ next_cursor has_next } 
+					} 
+				}`
 			},
 		},
 		{
 			name: "DELETE",
 			query: func() string {
 				return `mutation{ delete(id: "` + *gs.idTodo + `") }`
+			},
+		},
+		{
+			name: "DELETETwo",
+			query: func() string {
+				return `mutation{ delete(id: "` + *gs.idTodo2 + `") }`
 			},
 		},
 	}

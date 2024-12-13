@@ -19,7 +19,10 @@ const (
 )
 
 func ParseTodoStatus(s string) TodoStatus {
-	switch strings.TrimPrefix(s, "STATUS_") {
+	sts := strings.TrimPrefix(s, "STATUS_") // for support grpc enum
+	sts = strings.ToUpper(sts)
+
+	switch sts {
 	case TodoStatusInitiate.String():
 		return TodoStatusInitiate
 	case TodoStatusInProgress.String():

@@ -10,7 +10,7 @@ type Todo struct {
 
 type Pagination struct {
 	NextCursor string `json:"next_cursor"`
-	HashMore   bool   `json:"has_more"`
+	HasMore    bool   `json:"has_more"`
 }
 
 // for request and response Create.

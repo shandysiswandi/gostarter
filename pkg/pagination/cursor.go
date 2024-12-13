@@ -5,8 +5,10 @@ import (
 	"strconv"
 )
 
-const DefaultLimit = 10
-const MaxLimit = 100
+const (
+	DefaultLimit = 10
+	MaxLimit     = 100
+)
 
 func ParseCursorBased(cursor, limit string) (uint64, int) {
 	lmt, err := strconv.Atoi(limit)

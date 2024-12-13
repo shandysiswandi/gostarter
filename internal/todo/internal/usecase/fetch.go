@@ -36,7 +36,7 @@ func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOu
 	}
 
 	if in.Status != "" {
-		filter["status"] = in.Status
+		filter["status"] = domain.ParseTodoStatus(in.Status)
 	}
 
 	todos, err := s.store.Fetch(ctx, filter)

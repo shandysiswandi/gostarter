@@ -37,6 +37,6 @@ func (*Suite) TearDownSuite() {
 */
 
 func TestMain(t *testing.T) {
-	// suite.Run(t, new(RESTSuite))
+	suite.Run(t, new(RESTSuite))
 	suite.Run(t, new(GQLSuite))
 }

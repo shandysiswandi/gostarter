@@ -329,7 +329,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 				}},
 				Pagination: Pagination{
 					NextCursor: "NTY",
-					HashMore:   true,
+					HasMore:    true,
 				},
 			},
 			wantErr: nil,

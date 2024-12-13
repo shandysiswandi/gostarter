@@ -65,7 +65,7 @@ func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error) {
 	cursor, hasCursor := filter["cursor"].(uint64)
 	limit, hasLimit := filter["limit"].(int)
-	status, hasStatus := filter["status"].(string)
+	status, hasStatus := filter["status"].(domain.TodoStatus)
 
 	query := func() (string, []any, error) {
 		q := st.qu.Select("id", "user_id", "title", "description", "status").
