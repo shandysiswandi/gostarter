@@ -6,7 +6,7 @@ ifeq ($(DRIVER), postgres)
 endif
 
 install:
-	@go install github.com/vektra/mockery/v2@v2.49.2
+	@go install github.com/vektra/mockery/v2@v2.50.0
 	@go install github.com/bufbuild/buf/cmd/buf@v1.47.2
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
 	@go install github.com/cespare/reflex@latest

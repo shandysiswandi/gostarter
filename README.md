@@ -139,38 +139,67 @@ Installs CLI tools required for development:
 
 ### Usage Examples
 
-1. Set up the environment:
+Here is an example of how to use the Makefile to set up, develop, test, and deploy the application:
 
-   ```sh
-   make install
-   ```
+- **Install dependencies**:
 
-2. Run the application with hot reloading:
+  ```sh
+  make install
+  ```
 
-   ```sh
-   make run
-   ```
+- **Set up the database credentials**: Export the required environment variables:
 
-3. Run unit tests:
+  ```sh
+  export DB_USR=your_database_user
+  export DB_PWD=your_database_password
+  ```
 
-   ```sh
-   make test-unit
-   ```
+- **Apply database migrations**:
 
-4. Generate Protobuf files:
+  ```sh
+  make migration-up
+  ```
 
-   ```sh
-   make gen-proto
-   ```
+- **Run the application in development mode with hot reloading**:
 
-5. Apply database migrations:
+  ```sh
+  make run
+  ```
 
-   ```sh
-   make migration-up
-   ```
+- **Run unit tests and check code coverage**:
 
-6. Build and run Docker Compose:
+  ```sh
+  make test-unit
+  ```
 
-   ```sh
-   make compose-up
-   ```
+- **Perform static code analysis**:
+
+  ```sh
+  make lint
+  ```
+
+- **Generate required files (e.g., Protobuf, GraphQL, mocks)**:
+
+  ```sh
+  make gen-proto
+  make gen-gql
+  make gen-mock
+  ```
+
+- **Build the Docker image**:
+
+  ```sh
+  make docker-build
+  ```
+
+- **Bring up the application stack using Docker Compose**:
+
+  ```sh
+  make compose-up
+  ```
+
+- **Tear down the Docker Compose stack**:
+
+  ```sh
+  make compose-down
+  ```
