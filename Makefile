@@ -40,7 +40,7 @@ gen-proto:
 	@cd api && rm -rf gen-proto && buf dep update && buf build && buf generate && cd ..
 
 gen-gql:
-	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.56 generate
+	@cd api && rm -rf gen-gql && go run github.com/99designs/gqlgen@v0.17.60 generate
 
 gen-mock:
 	@mockery
