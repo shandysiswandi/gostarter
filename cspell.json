@@ -51,6 +51,7 @@
     "healthcheck",
     "HMACSHA",
     "httprouter",
+    "httpyac",
     "idletime",
     "installsuffix",
     "keygen",

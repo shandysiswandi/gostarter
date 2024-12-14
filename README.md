@@ -55,17 +55,11 @@ Installs CLI tools required for development:
 
 - Runs `golangci-lint` for static code analysis and ensures adherence to Go best practices.
 
-#### Testing
-
-`test-unit`
+`test`
 
 - Runs unit tests, excluding specific directories (`mocker`, `mockz`, etc.).
 - Generates a coverage report and detects concurrency issues.
 - If `HTML=true` is set, an HTML coverage report is generated and opened.
-
-`test-integration`
-
-- Executes integration tests located in the `./tests/...` directory.
 
 #### Go Tooling
 
@@ -169,7 +163,7 @@ Here is an example of how to use the Makefile to set up, develop, test, and depl
 - **Run unit tests and check code coverage**:
 
   ```sh
-  make test-unit
+  make test
   ```
 
 - **Perform static code analysis**:

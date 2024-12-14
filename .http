@@ -1,0 +1,373 @@
+@url_http = http://localhost:8081
+@url_gql = http://localhost:8082
+@url_grpc = http://localhost:50001
+
+@authEmail = test@test.com
+@authPassword = test1234
+@authResetToken = token
+
+{{
+  const assert = require('assert');
+  const httpyac = require('httpyac');
+
+  exports.assert = assert;
+  exports.decodeJWT = httpyac.utils.decodeJWT;
+}}
+
+### HTTP Auth Module => Register
+POST {{url_http}}/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "{{$guid}}-{{authEmail}}",
+  "password": "{{$guid}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body email exists
+
+### HTTP Auth Module => Login
+POST {{url_http}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "{{authEmail}}",
+  "password": "{{authPassword}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body access_token exists
+?? body refresh_token exists
+
+{{
+  if (response.parsedBody.access_token) {
+    $global.accessToken = response.parsedBody.access_token;
+  }
+
+  if (response.parsedBody.refresh_token) {
+    $global.refreshToken = response.parsedBody.refresh_token;
+  }
+
+  const token = decodeJWT($global.accessToken);
+  $global.authID = token?.auth_id ? token.auth_id : 0;
+}}
+
+### HTTP Auth Module => Refresh Token
+POST {{url_http}}/auth/refresh-token HTTP/1.1
+Content-Type: application/json
+
+{
+  "refresh_token": "{{$global.refreshToken}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body access_token exists
+?? body refresh_token exists
+
+{{
+  if (response.parsedBody.access_token) {
+    $global.accessToken = response.parsedBody.access_token;
+  }
+
+  if (response.parsedBody.refresh_token) {
+    $global.refreshToken = response.parsedBody.refresh_token;
+  }
+
+  const token = decodeJWT($global.accessToken);
+  $global.authID = token?.auth_id ? token.auth_id : 0;
+}}
+
+### HTTP Auth Module => Forgot Password
+POST {{url_http}}/auth/forgot-password HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "{{authEmail}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body email exists
+?? body message exists
+
+### HTTP Auth Module => Reset Password
+POST {{url_http}}/auth/reset-password HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": "{{authResetToken}}",
+  "password": "{{authPassword}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body message exists
+
+### HTTP User Module => Profile
+GET {{url_http}}/users/profile HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body email exists
+
+### HTTP User Module => Logout
+POST {{url_http}}/users/logout HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body message exists
+
+### HTTP Todo Module => Create
+POST {{url_http}}/todos HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "title": "example title 101",
+  "description": "example description 101"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+
+{{
+  if (response.parsedBody.id) $global.todoId = response.parsedBody.id;
+}}
+
+### HTTP Todo Module => Find
+GET {{url_http}}/todos/{{$global.todoId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body user_id exists
+?? body title exists
+?? body description exists
+?? body status exists
+
+### HTTP Todo Module => Fetch
+GET {{url_http}}/todos?limit=1&status=&cursor= HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body todos exists
+?? js response.parsedBody.todos.length == 1
+?? body pagination exists
+?? body pagination.next_cursor exists
+?? body pagination.has_more exists
+
+### HTTP Todo Module => Update Status
+PATCH {{url_http}}/todos/{{$global.todoId}}/status HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "status": "DONE"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body status exists
+
+### HTTP Todo Module => Update
+PUT {{url_http}}/todos/{{$global.todoId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "title": "example title",
+  "description": "example description",
+  "status": "UNKNOWN"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body user_id exists
+?? body title exists
+?? body description exists
+?? body status exists
+
+### HTTP Todo Module => Delete
+DELETE {{url_http}}/todos/{{$global.todoId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+
+### GQL Todo Module => Create
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+mutation Create($title: String!, $description: String!) {
+  create(in: { title: $title, description: $description })
+}
+
+{
+  "title": "some title from gql",
+  "description": "some description from gql"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.create exists
+
+{{
+  if (response.parsedBody.data.create) $global.todoId = response.parsedBody.data.create;
+}}
+
+### GQL Todo Module => Find
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+query Find($id: String!) {
+  find(id: $id) { id user_id title description status }
+}
+
+{
+  "id": "{{$global.todoId}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.find exists
+?? body data.find.id exists
+?? body data.find.user_id exists
+?? body data.find.title exists
+?? body data.find.description exists
+?? body data.find.status exists
+
+### GQL Todo Module => Fetch
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+query Fetch($cursor: String, $limit: String) {
+  fetch(in: { cursor: $cursor, limit: $limit, status: null }) {
+    todos { id user_id title description status }
+    pagination { next_cursor has_next }
+  }
+}
+
+{
+  "cursor": "",
+  "limit": "1"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.fetch exists
+?? body data.fetch.todos exists
+?? js response.parsedBody.data.fetch.todos.length == 1
+?? body data.fetch.pagination exists
+?? body data.fetch.pagination.next_cursor exists
+?? body data.fetch.pagination.has_next exists
+
+### GQL Todo Module => Update Status
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+mutation UpdateStatus($id: String!, $status: Status!) {
+  updateStatus(in: { id: $id, status: $status }) {
+    id status
+  }
+}
+
+{
+  "id": "{{$global.todoId}}",
+  "status": "DONE"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.updateStatus exists
+?? body data.updateStatus.id exists
+?? body data.updateStatus.status exists
+
+### GQL Todo Module => Update
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+mutation Update($id: String!, $title: String!, $description: String!, $status: Status!) {
+  update(in: { id: $id, title: $title, description: $description, status: $status }) {
+    id user_id title description status
+  }
+}
+
+{
+  "id": "{{$global.todoId}}",
+  "title": "some title from gql update",
+  "description": "some description from gql update",
+  "status": "DROP"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.update exists
+?? body data.update.id exists
+?? body data.update.user_id exists
+?? body data.update.title exists
+?? body data.update.description exists
+?? body data.update.status exists
+
+### GQL Todo Module => Delete
+POST {{url_gql}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+mutation Delete($id: String!) {
+  delete(id: $id)
+}
+
+{
+  "id": "{{$global.todoId}}"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body data exists
+?? body data.delete exists

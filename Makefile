@@ -18,7 +18,7 @@ run:
 lint:
 	@golangci-lint run
 
-test-unit:
+test:
 	@PUBSUB_EMULATOR_HOST=localhost:8085 go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
 	-coverprofile=coverage.out -race
 	@go tool cover -func=coverage.out | grep total
@@ -26,9 +26,6 @@ test-unit:
 		go tool cover -html=coverage.out -o=cover.html; \
 		open cover.html; \
 	fi
-
-test-integration:
-	@go test ./tests/... -race
 
 tidy:
 	@go mod tidy

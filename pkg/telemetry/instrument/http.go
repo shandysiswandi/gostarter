@@ -122,6 +122,7 @@ func (ihs *instarumentHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 
 	if verbose {
+		r.Header.Del(xActualPath)
 		fields = append(fields, logger.KeyVal("http.response", filter.Body(srw.responseBody)))
 		fields = append(fields, logger.KeyVal("http.header", filter.Header(r.Header)))
 	}
