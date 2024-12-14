@@ -57,6 +57,7 @@ func TestRegister_Call(t *testing.T) {
 				ctx: context.Background(),
 				in: domain.RegisterInput{
 					Email:    "email",
+					Name:     "name",
 					Password: "password",
 				},
 			},
@@ -88,6 +89,7 @@ func TestRegister_Call(t *testing.T) {
 				ctx: context.Background(),
 				in: domain.RegisterInput{
 					Email:    "email",
+					Name:     "name",
 					Password: "password",
 				},
 			},
@@ -124,6 +126,7 @@ func TestRegister_Call(t *testing.T) {
 				ctx: context.Background(),
 				in: domain.RegisterInput{
 					Email:    "email",
+					Name:     "name",
 					Password: "password",
 				},
 			},
@@ -160,6 +163,7 @@ func TestRegister_Call(t *testing.T) {
 				ctx: context.Background(),
 				in: domain.RegisterInput{
 					Email:    "email",
+					Name:     "name",
 					Password: "password",
 				},
 			},
@@ -201,6 +205,7 @@ func TestRegister_Call(t *testing.T) {
 				ctx: context.Background(),
 				in: domain.RegisterInput{
 					Email:    "email",
+					Name:     "name",
 					Password: "password",
 				},
 			},
@@ -230,7 +235,12 @@ func TestRegister_Call(t *testing.T) {
 
 				idnumMock.EXPECT().Generate().Return(111)
 
-				dataUser := domain.User{ID: 111, Email: "email", Password: "hash_password"}
+				dataUser := domain.User{
+					ID:       111,
+					Name:     a.in.Name,
+					Email:    a.in.Email,
+					Password: "hash_password",
+				}
 				storeMock.EXPECT().
 					SaveUser(ctx, dataUser).
 					Return(assert.AnError)
@@ -279,7 +289,12 @@ func TestRegister_Call(t *testing.T) {
 
 				idnumMock.EXPECT().Generate().Return(111)
 
-				dataUser := domain.User{ID: 111, Email: "email", Password: "hash_password"}
+				dataUser := domain.User{
+					ID:       111,
+					Name:     a.in.Name,
+					Email:    a.in.Email,
+					Password: "hash_password",
+				}
 				storeMock.EXPECT().
 					SaveUser(ctx, dataUser).
 					Return(nil)

@@ -17,8 +17,9 @@ message LoginResponse {
 }
 
 message RegisterRequest { 
-    string email = 1 [(buf.validate.field).string.min_len = 5];
-    string password = 2 [(buf.validate.field).string.min_len = 5];
+    string name = 1 [(buf.validate.field).string.min_len = 5];
+    string email = 2 [(buf.validate.field).string.min_len = 5];
+    string password = 3 [(buf.validate.field).string.min_len = 5];
 }
 
 message RegisterResponse {

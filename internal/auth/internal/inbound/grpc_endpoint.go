@@ -33,6 +33,7 @@ func (g *GrpcEndpoint) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Log
 
 func (g *GrpcEndpoint) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	resp, err := g.registerUC.Call(ctx, domain.RegisterInput{
+		Name:     req.GetName(),
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	})

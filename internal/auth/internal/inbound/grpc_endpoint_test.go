@@ -118,7 +118,11 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 			mockFn: func(a args) *GrpcEndpoint {
 				registerMock := new(mockz.MockRegister)
 
-				in := domain.RegisterInput{Email: a.req.Email, Password: a.req.Password}
+				in := domain.RegisterInput{
+					Name:     a.req.Name,
+					Email:    a.req.Email,
+					Password: a.req.Password,
+				}
 				registerMock.EXPECT().
 					Call(a.ctx, in).
 					Return(nil, assert.AnError)
@@ -142,7 +146,11 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 			mockFn: func(a args) *GrpcEndpoint {
 				registerMock := new(mockz.MockRegister)
 
-				in := domain.RegisterInput{Email: "email", Password: "password"}
+				in := domain.RegisterInput{
+					Name:     a.req.Name,
+					Email:    a.req.Email,
+					Password: a.req.Password,
+				}
 				registerMock.EXPECT().
 					Call(a.ctx, in).
 					Return(&domain.RegisterOutput{Email: "email"}, nil)

@@ -67,6 +67,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 
 	userData := domain.User{
 		ID:       s.uidnumber.Generate(),
+		Name:     in.Name,
 		Email:    in.Email,
 		Password: string(passHash),
 	}

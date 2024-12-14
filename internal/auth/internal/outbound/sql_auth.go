@@ -46,8 +46,8 @@ func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
 
 	query := func() (string, []any, error) {
 		return st.qu.Insert("users").
-			Cols("id", "email", "password").
-			Vals([]any{u.ID, u.Email, u.Password}).
+			Cols("id", "name", "email", "password").
+			Vals([]any{u.ID, u.Name, u.Email, u.Password}).
 			Prepared(true).
 			ToSQL()
 	}

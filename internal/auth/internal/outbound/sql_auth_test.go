@@ -218,8 +218,8 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
 					Insert("users").
-					Cols("id", "email", "password").
-					Vals([]any{a.u.ID, a.u.Email, a.u.Password}).
+					Cols("id", "name", "email", "password").
+					Vals([]any{a.u.ID, a.u.Name, a.u.Email, a.u.Password}).
 					Prepared(true).
 					ToSQL()
 
@@ -246,8 +246,8 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
 					Insert("users").
-					Cols("id", "email", "password").
-					Vals([]any{a.u.ID, a.u.Email, a.u.Password}).
+					Cols("id", "name", "email", "password").
+					Vals([]any{a.u.ID, a.u.Name, a.u.Email, a.u.Password}).
 					Prepared(true).
 					ToSQL()
 
@@ -274,8 +274,8 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
 					Insert("users").
-					Cols("id", "email", "password").
-					Vals([]any{a.u.ID, a.u.Email, a.u.Password}).
+					Cols("id", "name", "email", "password").
+					Vals([]any{a.u.ID, a.u.Name, a.u.Email, a.u.Password}).
 					Prepared(true).
 					ToSQL()
 

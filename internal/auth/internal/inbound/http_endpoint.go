@@ -45,6 +45,7 @@ func (e *httpEndpoint) Register(c framework.Context) (any, error) {
 
 	resp, err := e.registerUC.Call(c.Context(), domain.RegisterInput{
 		Email:    req.Email,
+		Name:     req.Name,
 		Password: req.Password,
 	})
 	if err != nil {

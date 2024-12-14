@@ -126,7 +126,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 		{
 			name: "ErrorCallUC",
 			c: func() framework.Context {
-				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
+				body := bytes.NewBufferString(`{"name":"fullname","email":"email","password":"password"}`)
 				c := framework.NewTestContext(http.MethodPost, "/auth/register", body)
 				return c.Build()
 			},
@@ -135,7 +135,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				registerMock := new(mockz.MockRegister)
 
-				in := domain.RegisterInput{Email: "email", Password: "password"}
+				in := domain.RegisterInput{Name: "fullname", Email: "email", Password: "password"}
 				registerMock.EXPECT().
 					Call(ctx, in).
 					Return(nil, assert.AnError)
@@ -148,7 +148,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 		{
 			name: "Success",
 			c: func() framework.Context {
-				body := bytes.NewBufferString(`{"email":"email","password":"password"}`)
+				body := bytes.NewBufferString(`{"name":"fullname","email":"email","password":"password"}`)
 				c := framework.NewTestContext(http.MethodPost, "/auth/register", body)
 				return c.Build()
 			},
@@ -157,7 +157,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				registerMock := new(mockz.MockRegister)
 
-				in := domain.RegisterInput{Email: "email", Password: "password"}
+				in := domain.RegisterInput{Name: "fullname", Email: "email", Password: "password"}
 				registerMock.EXPECT().
 					Call(ctx, in).
 					Return(&domain.RegisterOutput{Email: "email"}, nil)

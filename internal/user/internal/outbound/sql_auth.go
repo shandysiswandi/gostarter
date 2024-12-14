@@ -52,7 +52,6 @@ func (st *SQLUser) Update(ctx context.Context, user map[string]any) error {
 			Where(goqu.Ex{"id": id}).
 			Prepared(true).
 			ToSQL()
-
 	}
 
 	return dbops.Exec(ctx, st.db, query)

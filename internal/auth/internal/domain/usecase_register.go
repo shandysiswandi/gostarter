@@ -7,6 +7,7 @@ type Register interface {
 }
 
 type RegisterInput struct {
+	Name     string `validate:"required,min=5,max=100"`
 	Email    string `validate:"required,email"`
 	Password string `validate:"required"`
 }
