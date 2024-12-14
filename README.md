@@ -4,11 +4,36 @@ Go Starter is an opinionated, production-ready server API framework written in G
 
 This framework is suitable for a wide range of use cases, from microservices to monolithic applications. It comes with a set of pre-configured tools, libraries, and patterns to streamline development while ensuring maintainability, scalability, and performance.
 
-## Documentation Application
+## Table of Contents
 
-Read more [here](/docs/README.md)
+1. [Application](#application)
+2. [Makefile](#makefile)
+3. [Contact](#contact)
 
-## Documentation for Makefile
+## Application
+
+### Modules
+
+- Authentication
+- Users
+- Todos
+
+### Transport
+
+- HTTP
+- GraphQL
+- gRPC
+
+### Database
+
+- MySQL
+- PostgreSQL
+
+### Cache
+
+- Redis
+
+## Makefile
 
 Makefile is designed to streamline development, testing, and deployment processes for the application. It includes commands for managing dependencies, running the application, testing, generating files, database migrations, and Docker operations. Below is a breakdown of the available targets and their purposes.
 
@@ -197,3 +222,7 @@ Here is an example of how to use the Makefile to set up, develop, test, and depl
   ```sh
   make compose-down
   ```
+
+## Contact
+
+For questions or support, please contact [Project Maintainer](mailto:shandysiswandi@gmail.com).
