@@ -1,9 +1,18 @@
 package inbound
 
+type User struct {
+	ID    uint64 `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
 type (
-	ProfileResponse struct {
-		ID    uint64 `json:"id"`
-		Email string `json:"email"`
+	UpdateRequest struct {
+		Name string `json:"name"`
+	}
+
+	UpdateResponse struct {
+		Name string `json:"name"`
 	}
 )
 

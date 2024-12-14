@@ -43,6 +43,7 @@ func New(dep Dependency) (*Expose, error) {
 		SecHash:   dep.SecHash,
 	}
 	profile := usecase.NewProfile(ucDep, sqlUser)
+	update := usecase.NewUpdate(ucDep, sqlUser)
 	logout := usecase.NewLogout(ucDep, sqlUser)
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
@@ -51,6 +52,7 @@ func New(dep Dependency) (*Expose, error) {
 		GRPCServer: dep.GRPCServer,
 		//
 		ProfileUC: profile,
+		UpdateUC:  update,
 		LogoutUC:  logout,
 	}
 	inbound.RegisterUserServiceServer()

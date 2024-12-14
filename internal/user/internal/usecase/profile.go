@@ -54,6 +54,7 @@ func (p *Profile) Call(ctx context.Context, in domain.ProfileInput) (*domain.Use
 
 	return &domain.User{
 		ID:       user.ID,
+		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
 	}, nil

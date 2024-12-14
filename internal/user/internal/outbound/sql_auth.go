@@ -29,7 +29,7 @@ func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.U
 	defer span.End()
 
 	query := func() (string, []any, error) {
-		return st.qu.Select("id", "email", "password").
+		return st.qu.Select("id", "name", "email", "password").
 			From("users").
 			Where(goqu.Ex{"email": email}).
 			Prepared(true).
@@ -37,6 +37,25 @@ func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.U
 	}
 
 	return dbops.SQLGet[domain.User](ctx, st.db, query)
+}
+
+func (st *SQLUser) Update(ctx context.Context, user map[string]any) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.Update")
+	defer span.End()
+
+	id := user["id"]
+	delete(user, "id")
+
+	query := func() (string, []any, error) {
+		return st.qu.Update("users").
+			Set(user).
+			Where(goqu.Ex{"id": id}).
+			Prepared(true).
+			ToSQL()
+
+	}
+
+	return dbops.Exec(ctx, st.db, query)
 }
 
 func (st *SQLUser) DeleteTokenByAccess(ctx context.Context, token string) error {

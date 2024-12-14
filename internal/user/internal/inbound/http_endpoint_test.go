@@ -1,6 +1,7 @@
 package inbound
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +26,7 @@ func Test_httpEndpoint_Profile(t *testing.T) {
 		{
 			name: "ErrorCallUC",
 			c: func() framework.Context {
-				c := framework.NewTestContext(http.MethodGet, "/users/profile", nil)
+				c := framework.NewTestContext(http.MethodGet, "/me/profile", nil)
 				claim := jwt.NewClaim(1, "email", time.Time{}, nil)
 				ctx := jwt.SetClaim(context.Background(), claim)
 				c.SetContext(ctx)
@@ -48,21 +50,22 @@ func Test_httpEndpoint_Profile(t *testing.T) {
 		{
 			name: "Success",
 			c: func() framework.Context {
-				c := framework.NewTestContext(http.MethodGet, "/users/profile", nil)
+				c := framework.NewTestContext(http.MethodGet, "/me/profile", nil)
 				claim := jwt.NewClaim(1, "email", time.Time{}, nil)
 				ctx := jwt.SetClaim(context.Background(), claim)
 				c.SetContext(ctx)
 				return c.Build()
 			},
-			want:    ProfileResponse{ID: 1, Email: "email"},
+			want:    User{ID: 1, Name: "full name", Email: "email"},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				profileMock := mockz.NewMockProfile(t)
 
 				in := domain.ProfileInput{Email: "email"}
+				out := &domain.User{ID: 1, Name: "full name", Email: "email"}
 				profileMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.User{ID: 1, Email: "email"}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
 					profileUC: profileMock,
@@ -82,6 +85,107 @@ func Test_httpEndpoint_Profile(t *testing.T) {
 	}
 }
 
+func Test_httpEndpoint_Update(t *testing.T) {
+	tests := []struct {
+		name    string
+		c       func() framework.Context
+		want    any
+		wantErr error
+		mockFn  func(ctx context.Context) *httpEndpoint
+	}{
+		{
+			name: "ErrorDecodeBody",
+			c: func() framework.Context {
+				body := bytes.NewBufferString("fake request")
+				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				claim := jwt.NewClaim(1, "email", time.Time{}, nil)
+				ctx := jwt.SetClaim(context.Background(), claim)
+				c.SetContext(ctx)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updateMock := mockz.NewMockUpdate(t)
+
+				return &httpEndpoint{
+					updateUC: updateMock,
+				}
+			},
+		},
+		{
+			name: "ErrorCallUC",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"name":"full name"}`)
+				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				claim := jwt.NewClaim(21, "email", time.Time{}, nil)
+				ctx := jwt.SetClaim(context.Background(), claim)
+				c.SetContext(ctx)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: assert.AnError,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updateMock := mockz.NewMockUpdate(t)
+
+				in := domain.UpdateInput{ID: 21, Name: "full name"}
+				updateMock.EXPECT().
+					Call(ctx, in).
+					Return(nil, assert.AnError)
+
+				return &httpEndpoint{
+					updateUC: updateMock,
+				}
+			},
+		},
+		{
+			name: "Success",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"name":"full name"}`)
+				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				claim := jwt.NewClaim(21, "email", time.Time{}, nil)
+				ctx := jwt.SetClaim(context.Background(), claim)
+				c.SetContext(ctx)
+				return c.Build()
+			},
+			want: User{
+				ID:    21,
+				Name:  "full name",
+				Email: "full@name.com",
+			},
+			wantErr: nil,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updateMock := mockz.NewMockUpdate(t)
+
+				in := domain.UpdateInput{ID: 21, Name: "full name"}
+				out := &domain.User{
+					ID:       21,
+					Name:     "full name",
+					Email:    "full@name.com",
+					Password: "***",
+				}
+				updateMock.EXPECT().
+					Call(ctx, in).
+					Return(out, nil)
+
+				return &httpEndpoint{
+					updateUC: updateMock,
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			c := tt.c()
+			e := tt.mockFn(c.Context())
+			got, err := e.Update(c)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_httpEndpoint_Logout(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -93,7 +197,7 @@ func Test_httpEndpoint_Logout(t *testing.T) {
 		{
 			name: "ErrorCallUC",
 			c: func() framework.Context {
-				c := framework.NewTestContext(http.MethodPost, "/users/logout", nil)
+				c := framework.NewTestContext(http.MethodPost, "/me/logout", nil)
 				c.SetHeader("Authorization", "Bearer ay")
 				return c.Build()
 			},
@@ -115,7 +219,7 @@ func Test_httpEndpoint_Logout(t *testing.T) {
 		{
 			name: "Success",
 			c: func() framework.Context {
-				c := framework.NewTestContext(http.MethodPost, "/users/logout", nil)
+				c := framework.NewTestContext(http.MethodPost, "/me/logout", nil)
 				c.SetHeader("Authorization", "Bearer ay")
 				return c.Build()
 			},

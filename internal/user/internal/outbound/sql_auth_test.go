@@ -97,7 +97,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
-					Select("id", "email", "password").
+					Select("id", "name", "email", "password").
 					From("users").
 					Where(goqu.Ex{"email": a.email}).
 					Prepared(true).
@@ -126,7 +126,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
-					Select("id", "email", "password").
+					Select("id", "name", "email", "password").
 					From("users").
 					Where(goqu.Ex{"email": a.email}).
 					Prepared(true).
@@ -151,6 +151,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 			},
 			want: &domain.User{
 				ID:       1,
+				Name:     "full name",
 				Email:    "test@test.com",
 				Password: "password",
 			},
@@ -159,15 +160,15 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
-					Select("id", "email", "password").
+					Select("id", "name", "email", "password").
 					From("users").
 					Where(goqu.Ex{"email": a.email}).
 					Prepared(true).
 					ToSQL()
 
 				row := sqlmock.
-					NewRows([]string{"id", "email", "password"}).
-					AddRow(1, "test@test.com", "password")
+					NewRows([]string{"id", "name", "email", "password"}).
+					AddRow(1, "full name", "test@test.com", "password")
 
 				mock.ExpectQuery(query).
 					WithArgs(testconvertArgs(args)...).
@@ -190,6 +191,80 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 			got, err := s.FindUserByEmail(tt.args.ctx, tt.args.email)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSQLUser_Update(t *testing.T) {
+	type args struct {
+		ctx  context.Context
+		user map[string]any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLUser, func() error)
+	}{
+		{
+			name:    "ErrorWhenExec",
+			args:    args{ctx: context.Background(), user: map[string]any{"id": 10, "name": "fullname"}},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLUser, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("users").
+					Set(map[string]any{"name": a.user["name"]}).
+					Where(goqu.Ex{"id": a.user["id"]}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLUser{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name:    "Success",
+			args:    args{ctx: context.Background(), user: map[string]any{"id": 10, "name": "fullname"}},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLUser, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("users").
+					Set(map[string]any{"name": a.user["name"]}).
+					Where(goqu.Ex{"id": a.user["id"]}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLUser{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.Update(tt.args.ctx, tt.args.user)
+			assert.Equal(t, tt.wantErr, err)
 		})
 	}
 }
