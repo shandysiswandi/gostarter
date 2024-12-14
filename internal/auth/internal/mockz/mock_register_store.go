@@ -81,6 +81,53 @@ func (_c *MockRegisterStore_FindUserByEmail_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// SaveAccount provides a mock function with given fields: ctx, user
+func (_m *MockRegisterStore) SaveAccount(ctx context.Context, user domain.Account) error {
+	ret := _m.Called(ctx, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveAccount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Account) error); ok {
+		r0 = rf(ctx, user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRegisterStore_SaveAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveAccount'
+type MockRegisterStore_SaveAccount_Call struct {
+	*mock.Call
+}
+
+// SaveAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - user domain.Account
+func (_e *MockRegisterStore_Expecter) SaveAccount(ctx interface{}, user interface{}) *MockRegisterStore_SaveAccount_Call {
+	return &MockRegisterStore_SaveAccount_Call{Call: _e.mock.On("SaveAccount", ctx, user)}
+}
+
+func (_c *MockRegisterStore_SaveAccount_Call) Run(run func(ctx context.Context, user domain.Account)) *MockRegisterStore_SaveAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.Account))
+	})
+	return _c
+}
+
+func (_c *MockRegisterStore_SaveAccount_Call) Return(_a0 error) *MockRegisterStore_SaveAccount_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRegisterStore_SaveAccount_Call) RunAndReturn(run func(context.Context, domain.Account) error) *MockRegisterStore_SaveAccount_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SaveUser provides a mock function with given fields: ctx, user
 func (_m *MockRegisterStore) SaveUser(ctx context.Context, user domain.User) error {
 	ret := _m.Called(ctx, user)

@@ -60,6 +60,26 @@ func (st *SQLAuth) SaveUser(ctx context.Context, u domain.User) error {
 	return err
 }
 
+func (st *SQLAuth) SaveAccount(ctx context.Context, a domain.Account) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SaveAccount")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Insert("accounts").
+			Cols("id", "user_id").
+			Vals([]any{a.ID, a.UserID}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	err := dbops.Exec(ctx, st.db, query, true)
+	if errors.Is(err, dbops.ErrZeroRowsAffected) {
+		return domain.ErrAccountNotCreated
+	}
+
+	return err
+}
+
 func (st *SQLAuth) UpdateUserPassword(ctx context.Context, id uint64, pass string) error {
 	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.UpdateUserPassword")
 	defer span.End()

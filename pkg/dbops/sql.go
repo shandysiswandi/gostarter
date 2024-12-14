@@ -40,4 +40,8 @@ type Tx interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
+type SQLTx interface {
+	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+}
+
 type QueryProvider func() (string, []any, error)

@@ -125,7 +125,7 @@ Authorization: Bearer {{$global.accessToken}}
 ?? body email exists
 
 ### HTTP User Module => Update
-POST {{url_http}}/me/update HTTP/1.1
+PATCH {{url_http}}/me/update HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{$global.accessToken}}
 

@@ -303,6 +303,114 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 	}
 }
 
+func TestSQLAuth_SaveAccount(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		a   domain.Account
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLAuth, func() error)
+	}{
+		{
+			name: "ErrorWhenExec",
+			args: args{
+				ctx: context.Background(),
+				a:   domain.Account{},
+			},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLAuth, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("accounts").
+					Cols("id", "user_id").
+					Vals([]any{a.a.ID, a.a.UserID}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLAuth{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "ErrorNoRowsAffected",
+			args: args{
+				ctx: context.Background(),
+				a:   domain.Account{},
+			},
+			wantErr: domain.ErrAccountNotCreated,
+			mockFn: func(a args) (*SQLAuth, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("accounts").
+					Cols("id", "user_id").
+					Vals([]any{a.a.ID, a.a.UserID}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				return &SQLAuth{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				a:   domain.Account{},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLAuth, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("accounts").
+					Cols("id", "user_id").
+					Vals([]any{a.a.ID, a.a.UserID}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(testconvertArgs(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLAuth{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.SaveAccount(tt.args.ctx, tt.args.a)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
 func TestSQLAuth_UpdateUserPassword(t *testing.T) {
 	type args struct {
 		ctx  context.Context

@@ -41,13 +41,14 @@ func New(dep Dependency) (*Expose, error) {
 
 	// This block initializes core business logic or use cases to handle user interaction
 	ucDep := usecase.Dependency{
-		Telemetry: dep.Telemetry,
-		Validator: dep.Validator,
-		UIDNumber: dep.UIDNumber,
-		Hash:      dep.Hash,
-		SecHash:   dep.SecHash,
-		JWT:       dep.JWT,
-		Clock:     dep.Clock,
+		Telemetry:   dep.Telemetry,
+		Validator:   dep.Validator,
+		UIDNumber:   dep.UIDNumber,
+		Hash:        dep.Hash,
+		SecHash:     dep.SecHash,
+		JWT:         dep.JWT,
+		Clock:       dep.Clock,
+		Transaction: dep.Transaction,
 	}
 
 	loginUC := usecase.NewLogin(ucDep, sqlAuth)

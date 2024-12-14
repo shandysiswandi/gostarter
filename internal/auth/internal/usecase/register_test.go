@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -200,7 +201,7 @@ func TestRegister_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorStoreSaveUser",
+			name: "ErrorTransactionStoreSaveUser",
 			args: args{
 				ctx: context.Background(),
 				in: domain.RegisterInput{
@@ -217,6 +218,7 @@ func TestRegister_Call(t *testing.T) {
 				storeMock := new(mockz.MockRegisterStore)
 				hashMock := new(mockHash.MockHash)
 				idnumMock := new(mockUID.MockNumberID)
+				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
 
 				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Register")
 				defer span.End()
@@ -235,6 +237,8 @@ func TestRegister_Call(t *testing.T) {
 
 				idnumMock.EXPECT().Generate().Return(111)
 
+				ctx = dbops.SetContextNoopTx(ctx)
+
 				dataUser := domain.User{
 					ID:       111,
 					Name:     a.in.Name,
@@ -250,6 +254,76 @@ func TestRegister_Call(t *testing.T) {
 					validator: validatorMock,
 					uidnumber: idnumMock,
 					hash:      hashMock,
+					trx:       trxMock,
+					store:     storeMock,
+				}
+			},
+		},
+		{
+			name: "ErrorTransactionStoreSaveAccount",
+			args: args{
+				ctx: context.Background(),
+				in: domain.RegisterInput{
+					Email:    "email",
+					Name:     "name",
+					Password: "password",
+				},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *Register {
+				tel := telemetry.NewTelemetry()
+				validatorMock := new(mockValidation.MockValidator)
+				storeMock := new(mockz.MockRegisterStore)
+				hashMock := new(mockHash.MockHash)
+				idnumMock := new(mockUID.MockNumberID)
+				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
+
+				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Register")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				storeMock.EXPECT().
+					FindUserByEmail(ctx, a.in.Email).
+					Return(nil, nil)
+
+				hashMock.EXPECT().
+					Hash(a.in.Password).
+					Return([]byte("hash_password"), nil)
+
+				idnumMock.EXPECT().Generate().Return(111).Once()
+
+				ctx = dbops.SetContextNoopTx(ctx)
+
+				dataUser := domain.User{
+					ID:       111,
+					Name:     a.in.Name,
+					Email:    a.in.Email,
+					Password: "hash_password",
+				}
+				storeMock.EXPECT().
+					SaveUser(ctx, dataUser).
+					Return(nil)
+
+				idnumMock.EXPECT().Generate().Return(121).Once()
+
+				dataAccount := domain.Account{
+					ID:     121,
+					UserID: dataUser.ID,
+				}
+				storeMock.EXPECT().
+					SaveAccount(ctx, dataAccount).
+					Return(assert.AnError)
+
+				return &Register{
+					tele:      tel,
+					validator: validatorMock,
+					uidnumber: idnumMock,
+					hash:      hashMock,
+					trx:       trxMock,
 					store:     storeMock,
 				}
 			},
@@ -271,6 +345,7 @@ func TestRegister_Call(t *testing.T) {
 				storeMock := new(mockz.MockRegisterStore)
 				hashMock := new(mockHash.MockHash)
 				idnumMock := new(mockUID.MockNumberID)
+				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
 
 				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Register")
 				defer span.End()
@@ -287,7 +362,9 @@ func TestRegister_Call(t *testing.T) {
 					Hash(a.in.Password).
 					Return([]byte("hash_password"), nil)
 
-				idnumMock.EXPECT().Generate().Return(111)
+				idnumMock.EXPECT().Generate().Return(111).Once()
+
+				ctx = dbops.SetContextNoopTx(ctx)
 
 				dataUser := domain.User{
 					ID:       111,
@@ -299,11 +376,22 @@ func TestRegister_Call(t *testing.T) {
 					SaveUser(ctx, dataUser).
 					Return(nil)
 
+				idnumMock.EXPECT().Generate().Return(121).Once()
+
+				dataAccount := domain.Account{
+					ID:     121,
+					UserID: dataUser.ID,
+				}
+				storeMock.EXPECT().
+					SaveAccount(ctx, dataAccount).
+					Return(nil)
+
 				return &Register{
 					tele:      tel,
 					validator: validatorMock,
 					uidnumber: idnumMock,
 					hash:      hashMock,
+					trx:       trxMock,
 					store:     storeMock,
 				}
 			},

@@ -15,11 +15,11 @@ type contextKeySQLTx struct{}
 // Transaction provides an abstraction over SQL transactions, allowing for the execution
 // of a function within a transactional context.
 type Transaction struct {
-	db *sql.DB
+	db SQLTx
 }
 
-// NewTransaction creates a new Transaction instance with the provided *sql.DB.
-func NewTransaction(db *sql.DB) *Transaction {
+// NewTransaction creates a new Transaction instance with the provided SQLTx.
+func NewTransaction(db SQLTx) *Transaction {
 	return &Transaction{
 		db: db,
 	}
@@ -37,6 +37,10 @@ func (t *Transaction) Transaction(ctx context.Context, fn func(ctx context.Conte
 	ctx = context.WithValue(ctx, contextKeySQLTx{}, tx)
 
 	defer func() {
+		if tx == nil {
+			return
+		}
+
 		if r := recover(); r != nil {
 			if err := tx.Rollback(); err != nil {
 				log.Println("panic when execute function and error rollback", err)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
+	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -16,13 +17,14 @@ import (
 )
 
 type Dependency struct {
-	Telemetry *telemetry.Telemetry
-	Validator validation.Validator
-	UIDNumber uid.NumberID
-	Hash      hash.Hash
-	SecHash   hash.Hash
-	JWT       jwt.JWT
-	Clock     clock.Clocker
+	Telemetry   *telemetry.Telemetry
+	Validator   validation.Validator
+	UIDNumber   uid.NumberID
+	Hash        hash.Hash
+	SecHash     hash.Hash
+	JWT         jwt.JWT
+	Clock       clock.Clocker
+	Transaction dbops.Tx
 }
 
 type tokenSaver interface {
