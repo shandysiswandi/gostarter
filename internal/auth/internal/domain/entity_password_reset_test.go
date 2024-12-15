@@ -16,7 +16,12 @@ func TestPasswordReset_ScanColumn(t *testing.T) {
 			name: "Success",
 			pr:   &PasswordReset{},
 			want: func(pr *PasswordReset) []any {
-				return []any{&pr.ID, &pr.UserID, &pr.Token, &pr.ExpiresAt}
+				return []any{
+					&pr.ID,
+					&pr.UserID,
+					&pr.Token,
+					&pr.ExpiresAt,
+				}
 			},
 		},
 	}

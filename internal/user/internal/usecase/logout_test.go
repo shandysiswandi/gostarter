@@ -60,7 +60,7 @@ func TestLogout_Call(t *testing.T) {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.Logout")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.Logout")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -87,7 +87,7 @@ func TestLogout_Call(t *testing.T) {
 				validatorMock := mockValidation.NewMockValidator(t)
 				secHashMock := mockHash.NewMockHash(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.Logout")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.Logout")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -120,7 +120,7 @@ func TestLogout_Call(t *testing.T) {
 				secHashMock := mockHash.NewMockHash(t)
 				storeMock := mockz.NewMockLogoutStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Logout")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Logout")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -157,7 +157,7 @@ func TestLogout_Call(t *testing.T) {
 				secHashMock := mockHash.NewMockHash(t)
 				storeMock := mockz.NewMockLogoutStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Logout")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Logout")
 				defer span.End()
 
 				validatorMock.EXPECT().

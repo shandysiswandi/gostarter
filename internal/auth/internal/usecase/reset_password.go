@@ -36,7 +36,7 @@ func NewResetPassword(dep Dependency, s ResetPasswordStore) *ResetPassword {
 func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) (
 	*domain.ResetPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.ResetPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "auth.usecase.ResetPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

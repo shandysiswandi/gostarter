@@ -52,7 +52,7 @@ func NewLogin(dep Dependency, s LoginStore) *Login {
 }
 
 func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOutput, error) {
-	ctx, span := s.tel.Tracer().Start(ctx, "usecase.Login")
+	ctx, span := s.tel.Tracer().Start(ctx, "auth.usecase.Login")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

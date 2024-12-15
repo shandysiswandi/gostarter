@@ -9,6 +9,7 @@ type NoopDB struct{}
 
 func SetContextNoopTx(ctx context.Context) context.Context {
 	var tx *sql.Tx
+
 	return context.WithValue(ctx, contextKeySQLTx{}, tx)
 }
 
@@ -17,5 +18,5 @@ func NewNoopDB() *NoopDB {
 }
 
 func (*NoopDB) BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error) {
-	return nil, nil
+	return nil, nil //nolint:nilnil // for no operation
 }

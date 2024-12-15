@@ -41,7 +41,7 @@ type Tx interface {
 }
 
 type SQLTx interface {
-	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+	BeginTx(ctx context.Context, opt *sql.TxOptions) (*sql.Tx, error)
 }
 
 type QueryProvider func() (string, []any, error)

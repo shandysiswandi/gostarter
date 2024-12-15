@@ -47,7 +47,7 @@ func NewForgotPassword(dep Dependency, s ForgotPasswordStore) *ForgotPassword {
 func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput) (
 	*domain.ForgotPasswordOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.ForgotPassword")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "auth.usecase.ForgotPassword")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

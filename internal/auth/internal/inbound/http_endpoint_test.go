@@ -10,6 +10,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +32,14 @@ func Test_httpEndpoint_Login(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidFormat("invalid request body"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
 			},
 		},
 		{
@@ -44,15 +52,23 @@ func Test_httpEndpoint_Login(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				loginMock := new(mockz.MockLogin)
+				loginMock := mockz.NewMockLogin(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.LoginInput{Email: "email", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				defer span.End()
+
+				in := domain.LoginInput{
+					Email:    "email",
+					Password: "password",
+				}
 				loginMock.EXPECT().
 					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
-					loginUC: loginMock,
+					telemetry: tel,
+					loginUC:   loginMock,
 				}
 			},
 		},
@@ -71,20 +87,29 @@ func Test_httpEndpoint_Login(t *testing.T) {
 			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				loginMock := new(mockz.MockLogin)
+				loginMock := mockz.NewMockLogin(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.LoginInput{Email: "email", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				defer span.End()
+
+				in := domain.LoginInput{
+					Email:    "email",
+					Password: "password",
+				}
+				out := &domain.LoginOutput{
+					AccessToken:      "access_token",
+					RefreshToken:     "refresh_token",
+					AccessExpiresIn:  10,
+					RefreshExpiresIn: 20,
+				}
 				loginMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.LoginOutput{
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiresIn:  10,
-						RefreshExpiresIn: 20,
-					}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
-					loginUC: loginMock,
+					telemetry: tel,
+					loginUC:   loginMock,
 				}
 			},
 		},
@@ -119,8 +144,14 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidFormat("invalid request body"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
 
-				return &httpEndpoint{}
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
 			},
 		},
 		{
@@ -133,14 +164,23 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				registerMock := new(mockz.MockRegister)
+				registerMock := mockz.NewMockRegister(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.RegisterInput{Name: "fullname", Email: "email", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				defer span.End()
+
+				in := domain.RegisterInput{
+					Name:     "fullname",
+					Email:    "email",
+					Password: "password",
+				}
 				registerMock.EXPECT().
 					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					telemetry:  tel,
 					registerUC: registerMock,
 				}
 			},
@@ -155,14 +195,24 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			want:    RegisterResponse{Email: "email"},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				registerMock := new(mockz.MockRegister)
+				registerMock := mockz.NewMockRegister(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.RegisterInput{Name: "fullname", Email: "email", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				defer span.End()
+
+				in := domain.RegisterInput{
+					Name:     "fullname",
+					Email:    "email",
+					Password: "password",
+				}
+				out := &domain.RegisterOutput{Email: "email"}
 				registerMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.RegisterOutput{Email: "email"}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
+					telemetry:  tel,
 					registerUC: registerMock,
 				}
 			},
@@ -198,8 +248,14 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidFormat("invalid request body"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
 
-				return &httpEndpoint{}
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
 			},
 		},
 		{
@@ -212,7 +268,11 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				rtMock := new(mockz.MockRefreshToken)
+				rtMock := mockz.NewMockRefreshToken(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: "token"}
 				rtMock.EXPECT().
@@ -220,6 +280,7 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					telemetry:      tel,
 					refreshTokenUC: rtMock,
 				}
 			},
@@ -239,19 +300,25 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				rtMock := new(mockz.MockRefreshToken)
+				rtMock := mockz.NewMockRefreshToken(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: "token"}
+				out := &domain.RefreshTokenOutput{
+					AccessToken:      "access_token",
+					RefreshToken:     "refresh_token",
+					AccessExpiresIn:  10,
+					RefreshExpiresIn: 20,
+				}
 				rtMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.RefreshTokenOutput{
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiresIn:  10,
-						RefreshExpiresIn: 20,
-					}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
+					telemetry:      tel,
 					refreshTokenUC: rtMock,
 				}
 			},
@@ -287,7 +354,14 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidFormat("invalid request body"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
 			},
 		},
 		{
@@ -300,7 +374,11 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				fpMock := new(mockz.MockForgotPassword)
+				fpMock := mockz.NewMockForgotPassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: "email"}
 				fpMock.EXPECT().
@@ -308,6 +386,7 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					telemetry:        tel,
 					forgotPasswordUC: fpMock,
 				}
 			},
@@ -325,17 +404,23 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				fpMock := new(mockz.MockForgotPassword)
+				fpMock := mockz.NewMockForgotPassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: "email"}
+				out := &domain.ForgotPasswordOutput{
+					Email:   "email",
+					Message: "message",
+				}
 				fpMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.ForgotPasswordOutput{
-						Email:   "email",
-						Message: "message",
-					}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
+					telemetry:        tel,
 					forgotPasswordUC: fpMock,
 				}
 			},
@@ -371,8 +456,14 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidFormat("invalid request body"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
 
-				return &httpEndpoint{}
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
 			},
 		},
 		{
@@ -385,14 +476,22 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				rpMock := new(mockz.MockResetPassword)
+				rpMock := mockz.NewMockResetPassword(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.ResetPasswordInput{Token: "token", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
+
+				in := domain.ResetPasswordInput{
+					Token:    "token",
+					Password: "password",
+				}
 				rpMock.EXPECT().
 					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					telemetry:       tel,
 					resetPasswordUC: rpMock,
 				}
 			},
@@ -407,14 +506,23 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 			want:    ResetPasswordResponse{Message: "message"},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				rpMock := new(mockz.MockResetPassword)
+				rpMock := mockz.NewMockResetPassword(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.ResetPasswordInput{Token: "token", Password: "password"}
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				defer span.End()
+
+				in := domain.ResetPasswordInput{
+					Token:    "token",
+					Password: "password",
+				}
+				out := &domain.ResetPasswordOutput{Message: "message"}
 				rpMock.EXPECT().
 					Call(ctx, in).
-					Return(&domain.ResetPasswordOutput{Message: "message"}, nil)
+					Return(out, nil)
 
 				return &httpEndpoint{
+					telemetry:       tel,
 					resetPasswordUC: rpMock,
 				}
 			},

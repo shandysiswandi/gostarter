@@ -61,6 +61,7 @@ func New(dep Dependency) (*Expose, error) {
 	inbound := inbound.Inbound{
 		Router:     dep.Router,
 		GRPCServer: dep.GRPCServer,
+		Telemetry:  dep.Telemetry,
 		//
 		LoginUC:          loginUC,
 		RegisterUC:       registerUC,

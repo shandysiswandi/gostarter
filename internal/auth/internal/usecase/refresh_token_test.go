@@ -66,9 +66,9 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
+				validatorMock := mockValidation.NewMockValidator(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -96,10 +96,10 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -131,11 +131,11 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -171,11 +171,11 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -211,11 +211,11 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("token has expired", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -226,9 +226,17 @@ func TestRefreshToken_Call(t *testing.T) {
 					Hash(a.in.RefreshToken).
 					Return([]byte("hash_refresh_token"), nil)
 
+				token := &domain.Token{
+					ID:               10,
+					UserID:           20,
+					AccessToken:      "access",
+					RefreshToken:     "refresh",
+					AccessExpiredAt:  time.Time{},
+					RefreshExpiredAt: time.Time{},
+				}
 				storeMock.EXPECT().
 					FindTokenByRefresh(ctx, "hash_refresh_token").
-					Return(&domain.Token{RefreshExpiredAt: time.Time{}}, nil)
+					Return(token, nil)
 
 				return &RefreshToken{
 					telemetry: tel,
@@ -251,11 +259,11 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -266,9 +274,17 @@ func TestRefreshToken_Call(t *testing.T) {
 					Hash(a.in.RefreshToken).
 					Return([]byte("hash_refresh_token"), nil)
 
+				token := &domain.Token{
+					ID:               10,
+					UserID:           20,
+					AccessToken:      "access",
+					RefreshToken:     "refresh",
+					AccessExpiredAt:  time.Time{},
+					RefreshExpiredAt: time.Now().Add(time.Minute),
+				}
 				storeMock.EXPECT().
 					FindTokenByRefresh(ctx, "hash_refresh_token").
-					Return(&domain.Token{RefreshExpiredAt: time.Now().Add(time.Minute)}, nil)
+					Return(token, nil)
 
 				return &RefreshToken{
 					telemetry: tel,
@@ -291,13 +307,13 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -308,16 +324,17 @@ func TestRefreshToken_Call(t *testing.T) {
 					Hash(a.in.RefreshToken).
 					Return([]byte("hash_refresh_token"), nil)
 
+				token := &domain.Token{
+					ID:               10,
+					UserID:           20,
+					AccessToken:      "access",
+					RefreshToken:     "refresh",
+					AccessExpiredAt:  time.Now().Add(time.Minute),
+					RefreshExpiredAt: time.Now().Add(time.Minute),
+				}
 				storeMock.EXPECT().
 					FindTokenByRefresh(ctx, "hash_refresh_token").
-					Return(&domain.Token{
-						ID:               90,
-						UserID:           10,
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiredAt:  time.Now().Add(time.Minute),
-						RefreshExpiredAt: time.Now().Add(time.Minute),
-					}, nil)
+					Return(token, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -325,15 +342,23 @@ func TestRefreshToken_Call(t *testing.T) {
 					Return(now)
 
 				email := "test"
-				acClaim := jwt.NewClaim(10, email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					token.UserID,
+					email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(10, email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					token.UserID,
+					email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -350,8 +375,8 @@ func TestRefreshToken_Call(t *testing.T) {
 					Once()
 
 				tokenIn := domain.Token{
-					ID:               90,
-					UserID:           10,
+					ID:               token.ID,
+					UserID:           token.UserID,
 					AccessToken:      "hash_access_token",
 					RefreshToken:     "hash_refresh_token",
 					AccessExpiredAt:  time.Time{}.Add(time.Hour),
@@ -393,13 +418,13 @@ func TestRefreshToken_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				secHashMock := new(mockHash.MockHash)
-				storeMock := new(mockz.MockRefreshTokenStore)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				secHashMock := mockHash.NewMockHash(t)
+				storeMock := mockz.NewMockRefreshTokenStore(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.RefreshToken")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.RefreshToken")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -410,16 +435,17 @@ func TestRefreshToken_Call(t *testing.T) {
 					Hash(a.in.RefreshToken).
 					Return([]byte("hash_refresh_token"), nil)
 
+				token := &domain.Token{
+					ID:               10,
+					UserID:           20,
+					AccessToken:      "access",
+					RefreshToken:     "refresh",
+					AccessExpiredAt:  time.Now().Add(time.Minute),
+					RefreshExpiredAt: time.Now().Add(time.Minute),
+				}
 				storeMock.EXPECT().
 					FindTokenByRefresh(ctx, "hash_refresh_token").
-					Return(&domain.Token{
-						ID:               90,
-						UserID:           10,
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiredAt:  time.Now().Add(time.Minute),
-						RefreshExpiredAt: time.Now().Add(time.Minute),
-					}, nil)
+					Return(token, nil)
 
 				now := time.Time{}
 				clockMock.EXPECT().
@@ -427,15 +453,23 @@ func TestRefreshToken_Call(t *testing.T) {
 					Return(now)
 
 				email := "test"
-				acClaim := jwt.NewClaim(10, email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					token.UserID,
+					email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(10, email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					token.UserID,
+					email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -452,8 +486,8 @@ func TestRefreshToken_Call(t *testing.T) {
 					Once()
 
 				tokenIn := domain.Token{
-					ID:               90,
-					UserID:           10,
+					ID:               token.ID,
+					UserID:           token.UserID,
 					AccessToken:      "hash_access_token",
 					RefreshToken:     "hash_refresh_token",
 					AccessExpiredAt:  time.Time{}.Add(time.Hour),

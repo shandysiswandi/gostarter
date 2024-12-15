@@ -66,9 +66,9 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
+				validatorMock := mockValidation.NewMockValidator(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -98,10 +98,10 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -135,10 +135,10 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -172,11 +172,11 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -185,6 +185,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -219,11 +220,11 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -232,6 +233,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -270,14 +272,14 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -286,6 +288,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -306,8 +309,12 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("", assert.AnError).
@@ -344,14 +351,14 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -360,6 +367,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -380,15 +388,23 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("", assert.AnError).
@@ -425,14 +441,14 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -441,6 +457,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -461,15 +478,23 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -511,14 +536,14 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -527,6 +552,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -547,15 +573,23 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -602,15 +636,15 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
 				idnumMock := new(mockUID.MockNumberID)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -619,6 +653,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -639,15 +674,23 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).
@@ -663,7 +706,9 @@ func TestLogin_Call(t *testing.T) {
 					Return([]byte("hash_refresh_token"), nil).
 					Once()
 
-				idnumMock.EXPECT().Generate().Return(111)
+				idnumMock.EXPECT().
+					Generate().
+					Return(111)
 
 				tokenIn := domain.Token{
 					ID:               111,
@@ -714,14 +759,14 @@ func TestLogin_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockLoginStore)
-				hashMock := new(mockHash.MockHash)
-				secHashMock := new(mockHash.MockHash)
-				clockMock := new(mockClock.MockClocker)
-				jwtMock := new(mockJwt.MockJWT)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockLoginStore(t)
+				hashMock := mockHash.NewMockHash(t)
+				secHashMock := mockHash.NewMockHash(t)
+				clockMock := mockClock.NewMockClocker(t)
+				jwtMock := mockJwt.NewMockJWT(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Login")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Login")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -730,6 +775,7 @@ func TestLogin_Call(t *testing.T) {
 
 				user := &domain.User{
 					ID:       10,
+					Name:     "",
 					Email:    "email",
 					Password: "password",
 				}
@@ -751,15 +797,23 @@ func TestLogin_Call(t *testing.T) {
 					Now().
 					Return(now)
 
-				acClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour),
-					[]string{"gostarter.access.token"})
+				acClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour),
+					[]string{"gostarter.access.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(acClaim).
 					Return("access_token", nil).
 					Once()
 
-				refClaim := jwt.NewClaim(user.ID, a.in.Email, now.Add(time.Hour*24),
-					[]string{"gostarter.refresh.token"})
+				refClaim := jwt.NewClaim(
+					user.ID,
+					a.in.Email,
+					now.Add(time.Hour*24),
+					[]string{"gostarter.refresh.token"},
+				)
 				jwtMock.EXPECT().
 					Generate(refClaim).
 					Return("refresh_token", nil).

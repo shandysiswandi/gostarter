@@ -40,7 +40,7 @@ func NewRegister(dep Dependency, s RegisterStore) *Register {
 }
 
 func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.RegisterOutput, error) {
-	ctx, span := s.tele.Tracer().Start(ctx, "usecase.Register")
+	ctx, span := s.tele.Tracer().Start(ctx, "auth.usecase.Register")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

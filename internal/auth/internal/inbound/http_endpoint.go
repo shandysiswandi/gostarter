@@ -6,11 +6,14 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
 
 type httpEndpoint struct {
+	telemetry *telemetry.Telemetry
+
 	loginUC          domain.Login
 	registerUC       domain.Register
 	refreshTokenUC   domain.RefreshToken
@@ -18,13 +21,19 @@ type httpEndpoint struct {
 	resetPasswordUC  domain.ResetPassword
 }
 
-func (e *httpEndpoint) Login(c framework.Context) (any, error) {
+func (h *httpEndpoint) Login(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.Login")
+	defer span.End()
+
 	var req LoginRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.loginUC.Call(c.Context(), domain.LoginInput{Email: req.Email, Password: req.Password})
+	resp, err := h.loginUC.Call(ctx, domain.LoginInput{
+		Email:    req.Email,
+		Password: req.Password,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +46,16 @@ func (e *httpEndpoint) Login(c framework.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) Register(c framework.Context) (any, error) {
+func (h *httpEndpoint) Register(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.Register")
+	defer span.End()
+
 	var req RegisterRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.registerUC.Call(c.Context(), domain.RegisterInput{
+	resp, err := h.registerUC.Call(ctx, domain.RegisterInput{
 		Email:    req.Email,
 		Name:     req.Name,
 		Password: req.Password,
@@ -55,13 +67,16 @@ func (e *httpEndpoint) Register(c framework.Context) (any, error) {
 	return RegisterResponse{Email: resp.Email}, nil
 }
 
-func (e *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
+func (h *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	defer span.End()
+
 	var req RefreshTokenRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.refreshTokenUC.Call(c.Context(), domain.RefreshTokenInput{RefreshToken: req.RefreshToken})
+	resp, err := h.refreshTokenUC.Call(ctx, domain.RefreshTokenInput{RefreshToken: req.RefreshToken})
 	if err != nil {
 		return nil, err
 	}
@@ -74,27 +89,36 @@ func (e *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) ForgotPassword(c framework.Context) (any, error) {
+func (h *httpEndpoint) ForgotPassword(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	defer span.End()
+
 	var req ForgotPasswordRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.forgotPasswordUC.Call(c.Context(), domain.ForgotPasswordInput{Email: req.Email})
+	resp, err := h.forgotPasswordUC.Call(ctx, domain.ForgotPasswordInput{Email: req.Email})
 	if err != nil {
 		return nil, err
 	}
 
-	return ForgotPasswordResponse{Email: resp.Email, Message: resp.Message}, nil
+	return ForgotPasswordResponse{
+		Email:   resp.Email,
+		Message: resp.Message,
+	}, nil
 }
 
-func (e *httpEndpoint) ResetPassword(c framework.Context) (any, error) {
+func (h *httpEndpoint) ResetPassword(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	defer span.End()
+
 	var req ResetPasswordRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.resetPasswordUC.Call(c.Context(), domain.ResetPasswordInput{
+	resp, err := h.resetPasswordUC.Call(ctx, domain.ResetPasswordInput{
 		Token:    req.Token,
 		Password: req.Password,
 	})

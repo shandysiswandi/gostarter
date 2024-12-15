@@ -7,6 +7,7 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,7 @@ func TestGrpcEndpoint_Login(t *testing.T) {
 		args    args
 		want    *pb.LoginResponse
 		wantErr error
-		mockFn  func(a args) *GrpcEndpoint
+		mockFn  func(a args) *grpcEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
@@ -33,16 +34,24 @@ func TestGrpcEndpoint_Login(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: assert.AnError,
-			mockFn: func(a args) *GrpcEndpoint {
-				loginMock := new(mockz.MockLogin)
+			mockFn: func(a args) *grpcEndpoint {
+				loginMock := mockz.NewMockLogin(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.LoginInput{Email: a.req.Email, Password: a.req.Password}
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.Login")
+				defer span.End()
+
+				in := domain.LoginInput{
+					Email:    a.req.Email,
+					Password: a.req.Password,
+				}
 				loginMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
-				return &GrpcEndpoint{
-					loginUC: loginMock,
+				return &grpcEndpoint{
+					telemetry: tel,
+					loginUC:   loginMock,
 				}
 			},
 		},
@@ -62,21 +71,30 @@ func TestGrpcEndpoint_Login(t *testing.T) {
 				RefreshExpiresIn: 20,
 			},
 			wantErr: nil,
-			mockFn: func(a args) *GrpcEndpoint {
-				loginMock := new(mockz.MockLogin)
+			mockFn: func(a args) *grpcEndpoint {
+				loginMock := mockz.NewMockLogin(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.LoginInput{Email: "email", Password: "password"}
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.Login")
+				defer span.End()
+
+				in := domain.LoginInput{
+					Email:    "email",
+					Password: "password",
+				}
+				out := &domain.LoginOutput{
+					AccessToken:      "access_token",
+					RefreshToken:     "refresh_token",
+					AccessExpiresIn:  10,
+					RefreshExpiresIn: 20,
+				}
 				loginMock.EXPECT().
-					Call(a.ctx, in).
-					Return(&domain.LoginOutput{
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiresIn:  10,
-						RefreshExpiresIn: 20,
-					}, nil)
+					Call(ctx, in).
+					Return(out, nil)
 
-				return &GrpcEndpoint{
-					loginUC: loginMock,
+				return &grpcEndpoint{
+					telemetry: tel,
+					loginUC:   loginMock,
 				}
 			},
 		},
@@ -102,7 +120,7 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 		args    args
 		want    *pb.RegisterResponse
 		wantErr error
-		mockFn  func(a args) *GrpcEndpoint
+		mockFn  func(a args) *grpcEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
@@ -115,8 +133,12 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: assert.AnError,
-			mockFn: func(a args) *GrpcEndpoint {
-				registerMock := new(mockz.MockRegister)
+			mockFn: func(a args) *grpcEndpoint {
+				registerMock := mockz.NewMockRegister(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.Register")
+				defer span.End()
 
 				in := domain.RegisterInput{
 					Name:     a.req.Name,
@@ -124,10 +146,11 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 					Password: a.req.Password,
 				}
 				registerMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:  tel,
 					registerUC: registerMock,
 				}
 			},
@@ -143,19 +166,25 @@ func TestGrpcEndpoint_Register(t *testing.T) {
 			},
 			want:    &pb.RegisterResponse{Email: "email"},
 			wantErr: nil,
-			mockFn: func(a args) *GrpcEndpoint {
-				registerMock := new(mockz.MockRegister)
+			mockFn: func(a args) *grpcEndpoint {
+				registerMock := mockz.NewMockRegister(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.Register")
+				defer span.End()
 
 				in := domain.RegisterInput{
 					Name:     a.req.Name,
 					Email:    a.req.Email,
 					Password: a.req.Password,
 				}
+				out := &domain.RegisterOutput{Email: "email"}
 				registerMock.EXPECT().
-					Call(a.ctx, in).
-					Return(&domain.RegisterOutput{Email: "email"}, nil)
+					Call(ctx, in).
+					Return(out, nil)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:  tel,
 					registerUC: registerMock,
 				}
 			},
@@ -182,7 +211,7 @@ func TestGrpcEndpoint_RefreshToken(t *testing.T) {
 		args    args
 		want    *pb.RefreshTokenResponse
 		wantErr error
-		mockFn  func(a args) *GrpcEndpoint
+		mockFn  func(a args) *grpcEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
@@ -192,15 +221,20 @@ func TestGrpcEndpoint_RefreshToken(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: assert.AnError,
-			mockFn: func(a args) *GrpcEndpoint {
-				refreshTokenMock := new(mockz.MockRefreshToken)
+			mockFn: func(a args) *grpcEndpoint {
+				refreshTokenMock := mockz.NewMockRefreshToken(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.RefreshToken")
+				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: a.req.RefreshToken}
 				refreshTokenMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:      tel,
 					refreshTokenUC: refreshTokenMock,
 				}
 			},
@@ -218,20 +252,26 @@ func TestGrpcEndpoint_RefreshToken(t *testing.T) {
 				RefreshExpiresIn: 20,
 			},
 			wantErr: nil,
-			mockFn: func(a args) *GrpcEndpoint {
-				refreshTokenMock := new(mockz.MockRefreshToken)
+			mockFn: func(a args) *grpcEndpoint {
+				refreshTokenMock := mockz.NewMockRefreshToken(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.RefreshToken")
+				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: a.req.RefreshToken}
+				out := &domain.RefreshTokenOutput{
+					AccessToken:      "access_token",
+					RefreshToken:     "refresh_token",
+					AccessExpiresIn:  10,
+					RefreshExpiresIn: 20,
+				}
 				refreshTokenMock.EXPECT().
-					Call(a.ctx, in).
-					Return(&domain.RefreshTokenOutput{
-						AccessToken:      "access_token",
-						RefreshToken:     "refresh_token",
-						AccessExpiresIn:  10,
-						RefreshExpiresIn: 20,
-					}, nil)
+					Call(ctx, in).
+					Return(out, nil)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:      tel,
 					refreshTokenUC: refreshTokenMock,
 				}
 			},
@@ -258,7 +298,7 @@ func TestGrpcEndpoint_ForgotPassword(t *testing.T) {
 		args    args
 		want    *pb.ForgotPasswordResponse
 		wantErr error
-		mockFn  func(a args) *GrpcEndpoint
+		mockFn  func(a args) *grpcEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
@@ -268,15 +308,20 @@ func TestGrpcEndpoint_ForgotPassword(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: assert.AnError,
-			mockFn: func(a args) *GrpcEndpoint {
-				forgotPasswordMock := new(mockz.MockForgotPassword)
+			mockFn: func(a args) *grpcEndpoint {
+				forgotPasswordMock := mockz.NewMockForgotPassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.ForgotPassword")
+				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: a.req.Email}
 				forgotPasswordMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:        tel,
 					forgotPasswordUC: forgotPasswordMock,
 				}
 			},
@@ -292,18 +337,24 @@ func TestGrpcEndpoint_ForgotPassword(t *testing.T) {
 				Message: "message",
 			},
 			wantErr: nil,
-			mockFn: func(a args) *GrpcEndpoint {
-				forgotPasswordMock := new(mockz.MockForgotPassword)
+			mockFn: func(a args) *grpcEndpoint {
+				forgotPasswordMock := mockz.NewMockForgotPassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.ForgotPassword")
+				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: a.req.Email}
+				out := &domain.ForgotPasswordOutput{
+					Email:   "email",
+					Message: "message",
+				}
 				forgotPasswordMock.EXPECT().
-					Call(a.ctx, in).
-					Return(&domain.ForgotPasswordOutput{
-						Email:   "email",
-						Message: "message",
-					}, nil)
+					Call(ctx, in).
+					Return(out, nil)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:        tel,
 					forgotPasswordUC: forgotPasswordMock,
 				}
 			},
@@ -330,7 +381,7 @@ func TestGrpcEndpoint_ResetPassword(t *testing.T) {
 		args    args
 		want    *pb.ResetPasswordResponse
 		wantErr error
-		mockFn  func(a args) *GrpcEndpoint
+		mockFn  func(a args) *grpcEndpoint
 	}{
 		{
 			name: "ErrorCallUC",
@@ -343,15 +394,23 @@ func TestGrpcEndpoint_ResetPassword(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: assert.AnError,
-			mockFn: func(a args) *GrpcEndpoint {
-				resetPasswordMock := new(mockz.MockResetPassword)
+			mockFn: func(a args) *grpcEndpoint {
+				resetPasswordMock := mockz.NewMockResetPassword(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.ResetPasswordInput{Token: a.req.Token, Password: a.req.Password}
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.ResetPassword")
+				defer span.End()
+
+				in := domain.ResetPasswordInput{
+					Token:    a.req.Token,
+					Password: a.req.Password,
+				}
 				resetPasswordMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:       tel,
 					resetPasswordUC: resetPasswordMock,
 				}
 			},
@@ -367,15 +426,24 @@ func TestGrpcEndpoint_ResetPassword(t *testing.T) {
 			},
 			want:    &pb.ResetPasswordResponse{Message: "message"},
 			wantErr: nil,
-			mockFn: func(a args) *GrpcEndpoint {
-				resetPasswordMock := new(mockz.MockResetPassword)
+			mockFn: func(a args) *grpcEndpoint {
+				resetPasswordMock := mockz.NewMockResetPassword(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.ResetPasswordInput{Token: a.req.Token, Password: a.req.Password}
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.inbound.grpcEndpoint.ResetPassword")
+				defer span.End()
+
+				in := domain.ResetPasswordInput{
+					Token:    a.req.Token,
+					Password: a.req.Password,
+				}
+				out := &domain.ResetPasswordOutput{Message: "message"}
 				resetPasswordMock.EXPECT().
-					Call(a.ctx, in).
-					Return(&domain.ResetPasswordOutput{Message: "message"}, nil)
+					Call(ctx, in).
+					Return(out, nil)
 
-				return &GrpcEndpoint{
+				return &grpcEndpoint{
+					telemetry:       tel,
 					resetPasswordUC: resetPasswordMock,
 				}
 			},

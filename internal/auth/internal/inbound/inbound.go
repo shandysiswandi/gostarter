@@ -6,12 +6,14 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"google.golang.org/grpc"
 )
 
 type Inbound struct {
 	Router     *framework.Router
 	GRPCServer *grpc.Server
+	Telemetry  *telemetry.Telemetry
 	//
 	LoginUC          domain.Login
 	RegisterUC       domain.Register
@@ -22,6 +24,8 @@ type Inbound struct {
 
 func (in Inbound) RegisterAuthServiceServer() {
 	he := &httpEndpoint{
+		telemetry: in.Telemetry,
+		//
 		loginUC:          in.LoginUC,
 		registerUC:       in.RegisterUC,
 		refreshTokenUC:   in.RefreshTokenUC,
@@ -29,7 +33,9 @@ func (in Inbound) RegisterAuthServiceServer() {
 		resetPasswordUC:  in.ResetPasswordUC,
 	}
 
-	ge := &GrpcEndpoint{
+	ge := &grpcEndpoint{
+		telemetry: in.Telemetry,
+		//
 		loginUC:          in.LoginUC,
 		registerUC:       in.RegisterUC,
 		refreshTokenUC:   in.RefreshTokenUC,

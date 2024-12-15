@@ -3,6 +3,7 @@ package auth
 import (
 	"testing"
 
+	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
@@ -19,9 +20,18 @@ func TestNew(t *testing.T) {
 			name: "Success",
 			dep: func() Dependency {
 				return Dependency{
-					Router:     framework.NewRouter(),
-					GRPCServer: grpc.NewServer(),
-					Telemetry:  telemetry.NewTelemetry(),
+					Database:     nil,
+					Transaction:  nil,
+					QueryBuilder: goqu.DialectWrapper{},
+					Telemetry:    telemetry.NewTelemetry(),
+					Router:       framework.NewRouter(),
+					GRPCServer:   grpc.NewServer(),
+					Validator:    nil,
+					UIDNumber:    nil,
+					Hash:         nil,
+					SecHash:      nil,
+					JWT:          nil,
+					Clock:        nil,
 				}
 			},
 			wantErr: nil,

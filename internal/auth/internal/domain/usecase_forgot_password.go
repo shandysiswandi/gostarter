@@ -7,7 +7,7 @@ type ForgotPassword interface {
 }
 
 type ForgotPasswordInput struct {
-	Email string `validate:"required,email"`
+	Email string `validate:"required,email,min=5,max=100"`
 }
 
 type ForgotPasswordOutput struct {

@@ -64,9 +64,9 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
+				validatorMock := mockValidation.NewMockValidator(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -94,10 +94,10 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -129,10 +129,10 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("invalid token", goerror.CodeUnauthorized),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -164,10 +164,10 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("token has expired", goerror.CodeUnauthorized),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -175,6 +175,9 @@ func TestResetPassword_Call(t *testing.T) {
 					Return(nil)
 
 				ps := &domain.PasswordReset{
+					ID:        10,
+					UserID:    20,
+					Token:     "token",
 					ExpiresAt: time.Time{},
 				}
 				storeMock.EXPECT().
@@ -202,10 +205,10 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -213,6 +216,9 @@ func TestResetPassword_Call(t *testing.T) {
 					Return(nil)
 
 				ps := &domain.PasswordReset{
+					ID:        10,
+					UserID:    20,
+					Token:     "token",
 					ExpiresAt: time.Now().Add(time.Minute),
 				}
 				storeMock.EXPECT().
@@ -244,11 +250,11 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
-				hashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
+				hashMock := mockHash.NewMockHash(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -256,6 +262,9 @@ func TestResetPassword_Call(t *testing.T) {
 					Return(nil)
 
 				ps := &domain.PasswordReset{
+					ID:        10,
+					UserID:    20,
+					Token:     "token",
 					ExpiresAt: time.Now().Add(time.Minute),
 				}
 				storeMock.EXPECT().
@@ -291,11 +300,11 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
-				hashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
+				hashMock := mockHash.NewMockHash(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -303,6 +312,9 @@ func TestResetPassword_Call(t *testing.T) {
 					Return(nil)
 
 				ps := &domain.PasswordReset{
+					ID:        10,
+					UserID:    20,
+					Token:     "token",
 					ExpiresAt: time.Now().Add(time.Minute),
 				}
 				storeMock.EXPECT().
@@ -318,7 +330,7 @@ func TestResetPassword_Call(t *testing.T) {
 					Return([]byte("hash_password"), nil)
 
 				storeMock.EXPECT().
-					UpdateUserPassword(ctx, ps.ID, "hash_password").
+					UpdateUserPassword(ctx, ps.UserID, "hash_password").
 					Return(assert.AnError)
 
 				return &ResetPassword{
@@ -344,11 +356,11 @@ func TestResetPassword_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := new(mockValidation.MockValidator)
-				storeMock := new(mockz.MockResetPasswordStore)
-				hashMock := new(mockHash.MockHash)
+				validatorMock := mockValidation.NewMockValidator(t)
+				storeMock := mockz.NewMockResetPasswordStore(t)
+				hashMock := mockHash.NewMockHash(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.ResetPassword")
+				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ResetPassword")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -356,6 +368,9 @@ func TestResetPassword_Call(t *testing.T) {
 					Return(nil)
 
 				ps := &domain.PasswordReset{
+					ID:        10,
+					UserID:    20,
+					Token:     "token",
 					ExpiresAt: time.Now().Add(time.Minute),
 				}
 				storeMock.EXPECT().
@@ -371,7 +386,7 @@ func TestResetPassword_Call(t *testing.T) {
 					Return([]byte("hash_password"), nil)
 
 				storeMock.EXPECT().
-					UpdateUserPassword(ctx, ps.ID, "hash_password").
+					UpdateUserPassword(ctx, ps.UserID, "hash_password").
 					Return(nil)
 
 				return &ResetPassword{

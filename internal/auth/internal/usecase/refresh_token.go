@@ -52,7 +52,7 @@ func NewRefreshToken(dep Dependency, s RefreshTokenStore) *RefreshToken {
 func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	*domain.RefreshTokenOutput, error,
 ) {
-	ctx, span := s.telemetry.Tracer().Start(ctx, "usecase.RefreshToken")
+	ctx, span := s.telemetry.Tracer().Start(ctx, "auth.usecase.RefreshToken")
 	defer span.End()
 
 	if err := s.validator.Validate(in); err != nil {

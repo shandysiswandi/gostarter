@@ -16,7 +16,11 @@ func TestUser_ScanColumn(t *testing.T) {
 			name: "Success",
 			u:    &User{},
 			want: func(u *User) []any {
-				return []any{&u.ID, &u.Email, &u.Password}
+				return []any{
+					&u.ID,
+					&u.Email,
+					&u.Password,
+				}
 			},
 		},
 	}
