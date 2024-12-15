@@ -15,32 +15,48 @@ jobs:
       DB_USER: root
       DB_PASS: root
       LOCAL: true
+      COVERAGE_THRESHOLD: 80 # Change as needed
+      TZ: "Asia/Jakarta"
+      PUBSUB_EMULATOR_HOST: localhost:8085
 
     steps:
-      - name: Install MySQL, Postgres and Redis
-        run: |
-          sudo systemctl start postgresql.service
-          sudo systemctl start mysql.service
-
-          sudo apt-get update && sudo apt-get install -y redis-server && sudo service redis-server start
-          redis-cli ping
-
-          sudo mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;" -u$DB_USER -p$DB_PASS
-        continue-on-error: false
-
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Linter and Run It
+      - name: Set up Go with cache
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Set up Linter and Run
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: "v1.62.2"
+
+      - name: Cache Redis installation
+        uses: actions/cache@v4
+        with:
+          path: /usr/bin/redis-server
+          key: redis-install-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            redis-install-${{ runner.os }}-
+
+      - name: Start MySQL, Postgres and Redis
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
-          $(go env GOPATH)/bin/golangci-lint run
+          if [ ! -f /usr/bin/redis-server ]; then 
+            sudo apt-get update && sudo apt-get install -y redis-server 
+          fi
+
+          sudo systemctl start postgresql.service
+          sudo systemctl start mysql.service
+          sudo systemctl start redis-server.service
+
+          sudo mysql --user="$DB_USER" --password="$DB_PASS" <<EOF
+          CREATE DATABASE IF NOT EXISTS $DB_NAME;
+          EOF
+        continue-on-error: false
 
       - name: Run tests and validate coverage
-        env:
-          COVERAGE_THRESHOLD: 80 # Change as needed
-          TZ: "Asia/Jakarta"
-          PUBSUB_EMULATOR_HOST: localhost:8085
         run: |
           go test $(go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') -coverprofile=coverage.out -race
 
