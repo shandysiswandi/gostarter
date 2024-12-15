@@ -37,7 +37,8 @@ func NewPaymentTopup(dep Dependency, s PaymentTopupStore) *PaymentTopup {
 }
 
 func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
-	*domain.PaymentTopupOutput, error) {
+	*domain.PaymentTopupOutput, error,
+) {
 	if err := pt.validator.Validate(in); err != nil {
 		pt.telemetry.Logger().Warn(ctx, "validation failed")
 
@@ -74,7 +75,7 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 		}, nil
 	}
 
-	err = pt.trx.Transaction(ctx, func(ctx context.Context) error {
+	err = pt.trx.Transaction(ctx, func(_ context.Context) error {
 		// update balance account
 		// create topUps
 		// create transaction

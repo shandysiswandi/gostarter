@@ -17,7 +17,7 @@ const (
 )
 
 func ParseTransactionType(s string) TransactionType {
-	sts := strings.TrimPrefix(s, "STATUS_") // for support grpc enum
+	sts := strings.TrimPrefix(s, "TRANSACTION_TYPE_") // for support grpc enum
 	sts = strings.ToUpper(sts)
 
 	switch sts {
@@ -32,13 +32,13 @@ func ParseTransactionType(s string) TransactionType {
 
 func (tt TransactionType) String() string {
 	statuses := [...]string{
-		"UNKNOWN",
+		unknown,
 		"DEBIT",
 		"CREDIT",
 	}
 
 	if tt < TransactionTypeUnknown || int(tt) >= len(statuses) {
-		return "UNKNOWN"
+		return unknown
 	}
 
 	return statuses[tt]

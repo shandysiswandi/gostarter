@@ -15,10 +15,11 @@ const (
 	BillTypePulsa
 	BillTypeListrik
 	BillTypeInternet
+	BillTypeDonasi
 )
 
 func ParseBillType(s string) BillType {
-	sts := strings.TrimPrefix(s, "STATUS_") // for support grpc enum
+	sts := strings.TrimPrefix(s, "BILL_TYPE_") // for support grpc enum
 	sts = strings.ToUpper(sts)
 
 	switch sts {
@@ -28,24 +29,27 @@ func ParseBillType(s string) BillType {
 		return BillTypeListrik
 	case BillTypeInternet.String():
 		return BillTypeInternet
+	case BillTypeDonasi.String():
+		return BillTypeDonasi
 	default:
 		return BillTypeUnknown
 	}
 }
 
 func (bt BillType) String() string {
-	statuses := [...]string{
-		"UNKNOWN",
+	bts := [...]string{
+		unknown,
 		"PULSA",
 		"LISTRIK",
 		"INTERNET",
+		"DONASI",
 	}
 
-	if bt < BillTypeUnknown || int(bt) >= len(statuses) {
-		return "UNKNOWN"
+	if bt < BillTypeUnknown || int(bt) >= len(bts) {
+		return unknown
 	}
 
-	return statuses[bt]
+	return bts[bt]
 }
 
 func (bt *BillType) Scan(value any) error {

@@ -18,7 +18,7 @@ const (
 )
 
 func ParseTransactionStatus(s string) TransactionStatus {
-	sts := strings.TrimPrefix(s, "STATUS_") // for support grpc enum
+	sts := strings.TrimPrefix(s, "TRANSACTION_STATUS_") // for support grpc enum
 	sts = strings.ToUpper(sts)
 
 	switch sts {
@@ -35,14 +35,14 @@ func ParseTransactionStatus(s string) TransactionStatus {
 
 func (ts TransactionStatus) String() string {
 	statuses := [...]string{
-		"UNKNOWN",
+		unknown,
 		"PENDING",
 		"FAILED",
 		"SUCCESS",
 	}
 
 	if ts < TransactionStatusUnknown || int(ts) >= len(statuses) {
-		return "UNKNOWN"
+		return unknown
 	}
 
 	return statuses[ts]
