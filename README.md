@@ -12,11 +12,14 @@ This framework is suitable for a wide range of use cases, from microservices to 
 
 ## Application
 
+![flow](/docs/flow.png)
+
 ### Modules
 
 - Authentication
-- Users
-- Todos
+- User
+- Todo
+- Payment
 
 ### Transport
 

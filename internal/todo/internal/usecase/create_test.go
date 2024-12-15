@@ -61,13 +61,16 @@ func TestCreate_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Create {
-				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
+				defer span.End()
 
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
 
 				return &Create{
-					telemetry: mtel,
+					telemetry: tel,
 					store:     nil,
 					uidnumber: nil,
 					validator: validator,
@@ -80,10 +83,13 @@ func TestCreate_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewBusiness("failed to create todo", goerror.CodeUnknown),
 			mockFn: func(a args) *Create {
-				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 				idgen := um.NewMockNumberID(t)
 				store := mockz.NewMockCreateStore(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
+				defer span.End()
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
@@ -96,10 +102,10 @@ func TestCreate_Execute(t *testing.T) {
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,
 				}
-				store.EXPECT().Create(a.ctx, input).Return(domain.ErrTodoNotCreated)
+				store.EXPECT().Create(ctx, input).Return(domain.ErrTodoNotCreated)
 
 				return &Create{
-					telemetry: mtel,
+					telemetry: tel,
 					store:     store,
 					uidnumber: idgen,
 					validator: validator,
@@ -112,10 +118,13 @@ func TestCreate_Execute(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewServer("failed to create todo", assert.AnError),
 			mockFn: func(a args) *Create {
-				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 				idgen := um.NewMockNumberID(t)
 				store := mockz.NewMockCreateStore(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
+				defer span.End()
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
@@ -128,10 +137,10 @@ func TestCreate_Execute(t *testing.T) {
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,
 				}
-				store.EXPECT().Create(a.ctx, input).Return(assert.AnError)
+				store.EXPECT().Create(ctx, input).Return(assert.AnError)
 
 				return &Create{
-					telemetry: mtel,
+					telemetry: tel,
 					store:     store,
 					uidnumber: idgen,
 					validator: validator,
@@ -144,10 +153,13 @@ func TestCreate_Execute(t *testing.T) {
 			want:    &domain.CreateOutput{ID: 101},
 			wantErr: nil,
 			mockFn: func(a args) *Create {
-				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 				idgen := um.NewMockNumberID(t)
 				store := mockz.NewMockCreateStore(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
+				defer span.End()
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
@@ -160,10 +172,10 @@ func TestCreate_Execute(t *testing.T) {
 					Description: a.in.Description,
 					Status:      domain.TodoStatusInitiate,
 				}
-				store.EXPECT().Create(a.ctx, input).Return(nil)
+				store.EXPECT().Create(ctx, input).Return(nil)
 
 				return &Create{
-					telemetry: mtel,
+					telemetry: tel,
 					store:     store,
 					uidnumber: idgen,
 					validator: validator,

@@ -5,10 +5,7 @@
     {
       "languageId": "go",
       "allowCompoundWords": false,
-      "includeRegExpList": [
-        "CStyleComment",
-        "string"
-      ],
+      "includeRegExpList": ["CStyleComment", "string"],
       "ignoreRegExpList": [
         // ignore multiline imports
         "import\\s*\\((.|[\r\n])*?\\)",
@@ -74,7 +71,8 @@
     "shandysiswandi",
     "sslmode",
     "todos",
-    "topus",
+    "topup",
+    "topups",
     "usecase",
     "vektra"
   ]

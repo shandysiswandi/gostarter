@@ -28,6 +28,9 @@ func NewFetch(dep Dependency, s FetchStore) *Fetch {
 }
 
 func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOutput, error) {
+	ctx, span := s.telemetry.Tracer().Start(ctx, "todo.usecase.Fetch")
+	defer span.End()
+
 	cursor, limit := pagination.ParseCursorBased(in.Cursor, in.Limit)
 
 	filter := map[string]any{

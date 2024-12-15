@@ -58,6 +58,9 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 
+				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
 
 				return &UpdateStatus{
@@ -77,10 +80,13 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStatusStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
 				sts := domain.ParseTodoStatus(a.in.Status)
-				store.EXPECT().UpdateStatus(a.ctx, a.in.ID, sts).Return(assert.AnError)
+				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(assert.AnError)
 
 				return &UpdateStatus{
 					telemetry: mtel,
@@ -99,10 +105,13 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStatusStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
 				sts := domain.ParseTodoStatus(a.in.Status)
-				store.EXPECT().UpdateStatus(a.ctx, a.in.ID, sts).Return(nil)
+				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(nil)
 
 				return &UpdateStatus{
 					telemetry: mtel,

@@ -34,3 +34,4 @@ feature.flag.todo.job: false
 module.flag.auth: true
 module.flag.user: true
 module.flag.todo: true
+module.flag.payment: true

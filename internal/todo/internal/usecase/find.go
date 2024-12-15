@@ -28,6 +28,9 @@ func NewFind(dep Dependency, s FindStore) *Find {
 }
 
 func (s *Find) Call(ctx context.Context, in domain.FindInput) (*domain.Todo, error) {
+	ctx, span := s.telemetry.Tracer().Start(ctx, "todo.usecase.Find")
+	defer span.End()
+
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

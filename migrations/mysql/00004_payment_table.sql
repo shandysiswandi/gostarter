@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE INDEX transactions_user_id_idx ON transactions (user_id);
 
-CREATE TABLE IF NOT EXISTS topus (
+CREATE TABLE IF NOT EXISTS topups (
     id BIGINT UNSIGNED PRIMARY KEY,
     transaction_id BIGINT UNSIGNED NOT NULL,
     reference_id VARCHAR(255) NOT NULL UNIQUE, -- from payment gateway for top-up
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS topus (
     updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 );
 
-CREATE INDEX topus_transaction_id_idx ON topus (transaction_id);
+CREATE INDEX topups_transaction_id_idx ON topups (transaction_id);
 
 CREATE TABLE IF NOT EXISTS bills (
     id BIGINT UNSIGNED PRIMARY KEY,
@@ -62,6 +62,6 @@ CREATE INDEX transfers_transaction_id_idx ON transfers (transaction_id);
 -- +goose Down
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS transactions;
-DROP TABLE IF EXISTS topus;
+DROP TABLE IF EXISTS topups;
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS transfers;

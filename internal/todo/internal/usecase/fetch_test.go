@@ -58,13 +58,16 @@ func TestFetch_Execute(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Fetch")
+				defer span.End()
+
 				cursor, limit := pagination.ParseCursorBased(a.in.Cursor, a.in.Limit)
 
 				filter := map[string]any{
 					"cursor": cursor,
 					"limit":  limit,
 				}
-				store.EXPECT().Fetch(a.ctx, filter).Return(nil, assert.AnError)
+				store.EXPECT().Fetch(ctx, filter).Return(nil, assert.AnError)
 
 				return &Fetch{
 					telemetry: mtel,
@@ -95,6 +98,9 @@ func TestFetch_Execute(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Fetch")
+				defer span.End()
+
 				cursor, limit := pagination.ParseCursorBased(a.in.Cursor, a.in.Limit)
 
 				filter := map[string]any{
@@ -102,7 +108,7 @@ func TestFetch_Execute(t *testing.T) {
 					"limit":  limit,
 					"status": domain.ParseTodoStatus(a.in.Status),
 				}
-				store.EXPECT().Fetch(a.ctx, filter).Return([]domain.Todo{
+				store.EXPECT().Fetch(ctx, filter).Return([]domain.Todo{
 					{
 						ID:          1,
 						UserID:      2,

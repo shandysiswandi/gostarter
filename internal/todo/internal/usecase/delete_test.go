@@ -58,6 +58,9 @@ func TestDelete_Call(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 
+				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
 
 				return &Delete{
@@ -77,9 +80,12 @@ func TestDelete_Call(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockDeleteStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Delete(a.ctx, a.in.ID).Return(assert.AnError)
+				store.EXPECT().Delete(ctx, a.in.ID).Return(assert.AnError)
 
 				return &Delete{
 					telemetry: mtel,
@@ -98,9 +104,12 @@ func TestDelete_Call(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockDeleteStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Delete(a.ctx, a.in.ID).Return(nil)
+				store.EXPECT().Delete(ctx, a.in.ID).Return(nil)
 
 				return &Delete{
 					telemetry: mtel,

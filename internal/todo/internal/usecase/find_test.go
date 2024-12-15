@@ -58,6 +58,9 @@ func TestFind_Execute(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 
+				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
 
 				return &Find{
@@ -77,9 +80,12 @@ func TestFind_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockFindStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Find(a.ctx, a.in.ID).Return(nil, assert.AnError)
+				store.EXPECT().Find(ctx, a.in.ID).Return(nil, assert.AnError)
 
 				return &Find{
 					telemetry: mtel,
@@ -98,9 +104,12 @@ func TestFind_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockFindStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Find(a.ctx, a.in.ID).Return(nil, nil)
+				store.EXPECT().Find(ctx, a.in.ID).Return(nil, nil)
 
 				return &Find{
 					telemetry: mtel,
@@ -125,9 +134,12 @@ func TestFind_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockFindStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Find(a.ctx, a.in.ID).Return(&domain.Todo{
+				store.EXPECT().Find(ctx, a.in.ID).Return(&domain.Todo{
 					ID:          10,
 					UserID:      11,
 					Title:       "test 1",

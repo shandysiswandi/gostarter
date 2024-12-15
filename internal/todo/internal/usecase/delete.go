@@ -28,6 +28,9 @@ func NewDelete(dep Dependency, s DeleteStore) *Delete {
 }
 
 func (s *Delete) Call(ctx context.Context, in domain.DeleteInput) (*domain.DeleteOutput, error) {
+	ctx, span := s.telemetry.Tracer().Start(ctx, "todo.usecase.Delete")
+	defer span.End()
+
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 

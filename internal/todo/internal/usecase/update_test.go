@@ -63,6 +63,9 @@ func TestUpdate_Execute(t *testing.T) {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)
 
+				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Update")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(assert.AnError)
 
 				return &Update{
@@ -82,10 +85,13 @@ func TestUpdate_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Update")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
 				sts := domain.ParseTodoStatus(a.in.Status)
-				store.EXPECT().Update(a.ctx, domain.Todo{
+				store.EXPECT().Update(ctx, domain.Todo{
 					ID:          a.in.ID,
 					UserID:      11,
 					Title:       a.in.Title,
@@ -121,9 +127,12 @@ func TestUpdate_Execute(t *testing.T) {
 				validator := vm.NewMockValidator(t)
 				store := mockz.NewMockUpdateStore(t)
 
+				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Update")
+				defer span.End()
+
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				store.EXPECT().Update(a.ctx, domain.Todo{
+				store.EXPECT().Update(ctx, domain.Todo{
 					ID:          a.in.ID,
 					UserID:      11,
 					Title:       a.in.Title,

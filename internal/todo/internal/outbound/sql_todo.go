@@ -8,21 +8,27 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type SQLTodo struct {
-	db *sql.DB
-	qu goqu.DialectWrapper
+	db  *sql.DB
+	qu  goqu.DialectWrapper
+	tel *telemetry.Telemetry
 }
 
-func NewSQLTodo(db *sql.DB, qu goqu.DialectWrapper) *SQLTodo {
+func NewSQLTodo(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *SQLTodo {
 	return &SQLTodo{
-		db: db,
-		qu: qu,
+		db:  db,
+		qu:  qu,
+		tel: tel,
 	}
 }
 
 func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Insert("todos").
 			Cols("id", "user_id", "title", "description", "status").
@@ -40,6 +46,9 @@ func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
 }
 
 func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Delete")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Delete("todos").
 			Where(goqu.Ex{"id": id}).
@@ -51,6 +60,9 @@ func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
 }
 
 func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Find")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Select("id", "user_id", "title", "description", "status").
 			From("todos").
@@ -63,6 +75,9 @@ func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 }
 
 func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error) {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	defer span.End()
+
 	cursor, hasCursor := filter["cursor"].(uint64)
 	limit, hasLimit := filter["limit"].(int)
 	status, hasStatus := filter["status"].(domain.TodoStatus)
@@ -90,6 +105,9 @@ func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.T
 }
 
 func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts domain.TodoStatus) error {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Update("todos").
 			Set(map[string]any{"status": sts}).
@@ -102,6 +120,9 @@ func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts domain.TodoS
 }
 
 func (st *SQLTodo) Update(ctx context.Context, todo domain.Todo) error {
+	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	defer span.End()
+
 	query := func() (string, []any, error) {
 		return st.qu.Update("todos").
 			Set(map[string]any{

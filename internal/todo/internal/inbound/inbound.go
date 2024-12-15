@@ -7,7 +7,6 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"google.golang.org/grpc"
@@ -19,7 +18,6 @@ var (
 )
 
 type Inbound struct {
-	Config     config.Config
 	Router     *framework.Router
 	GQLRouter  *framework.Router
 	GRPCServer *grpc.Server

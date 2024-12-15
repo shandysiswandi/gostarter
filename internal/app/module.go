@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/shandysiswandi/gostarter/internal/auth"
+	"github.com/shandysiswandi/gostarter/internal/payment"
 	"github.com/shandysiswandi/gostarter/internal/todo"
 	"github.com/shandysiswandi/gostarter/internal/user"
 )
@@ -19,6 +20,7 @@ func (a *App) initModules() {
 	a.moduleAuth()
 	a.moduleUser()
 	a.moduleTodo()
+	a.modulePayment()
 }
 
 func (a *App) moduleAuth() {
@@ -68,8 +70,6 @@ func (a *App) moduleTodo() {
 		expTodo, err := todo.New(todo.Dependency{
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
-			Transaction:  a.transaction,
-			RedisDB:      a.redisDB,
 			Messaging:    a.messaging,
 			Config:       a.config,
 			UIDNumber:    a.uidNumber,
@@ -79,13 +79,29 @@ func (a *App) moduleTodo() {
 			GQLRouter:    a.gqlRouter,
 			GRPCServer:   a.grpcServer,
 			Telemetry:    a.telemetry,
-			Goroutine:    a.goroutine,
-			JWT:          a.jwt,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module todo", err)
 		}
 
 		a.runnables = append(a.runnables, expTodo.Tasks...)
+	}
+}
+
+func (a *App) modulePayment() {
+	if a.config.GetBool("module.flag.payment") {
+		_, err := payment.New(payment.Dependency{
+			Database:     a.database,
+			QueryBuilder: a.queryBuilder,
+			Transaction:  a.transaction,
+			UIDNumber:    a.uidNumber,
+			Validator:    a.validator,
+			Router:       a.httpRouter,
+			GRPCServer:   a.grpcServer,
+			Telemetry:    a.telemetry,
+		})
+		if err != nil {
+			log.Fatalln("failed to init module payment", err)
+		}
 	}
 }

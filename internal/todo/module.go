@@ -4,17 +4,13 @@ import (
 	"database/sql"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/job"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/messaging"
 	"github.com/shandysiswandi/gostarter/pkg/task"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -29,36 +25,27 @@ type Expose struct {
 
 type Dependency struct {
 	Database     *sql.DB
-	Transaction  dbops.Tx
 	QueryBuilder goqu.DialectWrapper
-	RedisDB      *redis.Client
 	Messaging    messaging.Client
 	Config       config.Config
 	UIDNumber    uid.NumberID
 	CodecJSON    codec.Codec
 	Validator    validation.Validator
-	JWT          jwt.JWT
 	Router       *framework.Router
 	GQLRouter    *framework.Router
 	GRPCServer   *grpc.Server
 	Telemetry    *telemetry.Telemetry
-	Goroutine    *goroutine.Manager
 }
 
 func New(dep Dependency) (*Expose, error) {
 	// This block initializes outbound services: Database, HTTP client, gRPC client, Redis, etc.
-	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.QueryBuilder)
+	sqlTodo := outbound.NewSQLTodo(dep.Database, dep.QueryBuilder, dep.Telemetry)
 
 	// This block initializes core business logic or use cases to handle user interaction
 	ucDep := usecase.Dependency{
-		Messaging: dep.Messaging,
-		Config:    dep.Config,
 		UIDNumber: dep.UIDNumber,
-		CodecJSON: dep.CodecJSON,
 		Validator: dep.Validator,
-		JWT:       dep.JWT,
 		Telemetry: dep.Telemetry,
-		Goroutine: dep.Goroutine,
 	}
 	findUC := usecase.NewFind(ucDep, sqlTodo)
 	fetchUC := usecase.NewFetch(ucDep, sqlTodo)
@@ -69,7 +56,6 @@ func New(dep Dependency) (*Expose, error) {
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
 	inbound := inbound.Inbound{
-		Config:     dep.Config,
 		Router:     dep.Router,
 		GQLRouter:  dep.GQLRouter,
 		GRPCServer: dep.GRPCServer,

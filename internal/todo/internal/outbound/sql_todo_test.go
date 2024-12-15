@@ -10,6 +10,7 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +26,9 @@ func testconvertArgs(args []any) []driver.Value {
 
 func TestNewSQLTodo(t *testing.T) {
 	type args struct {
-		db *sql.DB
-		qu goqu.DialectWrapper
+		db  *sql.DB
+		qu  goqu.DialectWrapper
+		tel *telemetry.Telemetry
 	}
 	tests := []struct {
 		name string
@@ -53,7 +55,7 @@ func TestNewSQLTodo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewSQLTodo(tt.args.db, tt.args.qu)
+			got := NewSQLTodo(tt.args.db, tt.args.qu, tt.args.tel)
 			assert.Equal(t, tt.want.db, got.db)
 			assert.Equal(t, tt.want.qu, got.qu)
 		})
@@ -85,7 +87,11 @@ func TestSQLTodo_Create(t *testing.T) {
 
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -103,7 +109,11 @@ func TestSQLTodo_Create(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -121,7 +131,11 @@ func TestSQLTodo_Create(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}
@@ -160,7 +174,11 @@ func TestSQLTodo_Delete(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -176,7 +194,11 @@ func TestSQLTodo_Delete(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}
@@ -217,7 +239,11 @@ func TestSQLTodo_Find(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -243,7 +269,11 @@ func TestSQLTodo_Find(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(row)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}
@@ -285,7 +315,11 @@ func TestSQLTodo_Fetch(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -320,7 +354,11 @@ func TestSQLTodo_Fetch(t *testing.T) {
 				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
 					WillReturnRows(rows)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -367,7 +405,11 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					WithArgs(testconvertArgs(args)...).
 					WillReturnRows(rows)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}
@@ -409,7 +451,11 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -426,7 +472,11 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}
@@ -469,7 +519,11 @@ func TestSQLTodo_Update(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnError(assert.AnError)
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 		{
@@ -489,7 +543,11 @@ func TestSQLTodo_Update(t *testing.T) {
 				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				return &SQLTodo{db: db, qu: goqu.Dialect(dbops.PostgresDriver)}, db.Close
+				return &SQLTodo{
+					db:  db,
+					qu:  goqu.Dialect(dbops.PostgresDriver),
+					tel: telemetry.NewTelemetry(),
+				}, db.Close
 			},
 		},
 	}

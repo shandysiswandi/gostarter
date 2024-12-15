@@ -29,7 +29,7 @@ CREATE TRIGGER update_todos_updated_at
 BEFORE UPDATE ON transactions
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TABLE IF NOT EXISTS topus (
+CREATE TABLE IF NOT EXISTS topups (
     id BIGINT PRIMARY KEY,
     transaction_id BIGINT NOT NULL,
     reference_id VARCHAR(255) NOT NULL UNIQUE, -- from payment gateway for top-up
@@ -38,10 +38,10 @@ CREATE TABLE IF NOT EXISTS topus (
     updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX topus_transaction_id_idx ON topus (transaction_id);
+CREATE INDEX topups_transaction_id_idx ON topups (transaction_id);
 
 CREATE TRIGGER update_todos_updated_at
-BEFORE UPDATE ON topus
+BEFORE UPDATE ON topups
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TABLE IF NOT EXISTS bills (
@@ -81,6 +81,6 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 -- +goose Down
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS transactions;
-DROP TABLE IF EXISTS topus;
+DROP TABLE IF EXISTS topups;
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS transfers;

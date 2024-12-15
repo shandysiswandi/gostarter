@@ -29,6 +29,9 @@ func NewUpdate(dep Dependency, s UpdateStore) *Update {
 }
 
 func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo, error) {
+	ctx, span := s.telemetry.Tracer().Start(ctx, "todo.usecase.Update")
+	defer span.End()
+
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
