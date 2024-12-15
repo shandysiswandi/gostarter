@@ -207,8 +207,11 @@ func TestSQLUser_Update(t *testing.T) {
 		mockFn  func(a args) (*SQLUser, func() error)
 	}{
 		{
-			name:    "ErrorWhenExec",
-			args:    args{ctx: context.Background(), user: map[string]any{"id": 10, "name": "fullname"}},
+			name: "ErrorWhenExec",
+			args: args{
+				ctx:  context.Background(),
+				user: map[string]any{"id": 10, "name": "fullname"},
+			},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLUser, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -232,8 +235,11 @@ func TestSQLUser_Update(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), user: map[string]any{"id": 10, "name": "fullname"}},
+			name: "Success",
+			args: args{
+				ctx:  context.Background(),
+				user: map[string]any{"id": 10, "name": "fullname"},
+			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLUser, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -281,8 +287,11 @@ func TestSQLUser_DeleteTokenByAccess(t *testing.T) {
 		mockFn  func(a args) (*SQLUser, func() error)
 	}{
 		{
-			name:    "ErrorWhenExec",
-			args:    args{ctx: context.Background(), token: "token"},
+			name: "ErrorWhenExec",
+			args: args{
+				ctx:   context.Background(),
+				token: "token",
+			},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLUser, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -305,8 +314,11 @@ func TestSQLUser_DeleteTokenByAccess(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), token: "token"},
+			name: "Success",
+			args: args{
+				ctx:   context.Background(),
+				token: "token",
+			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLUser, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))

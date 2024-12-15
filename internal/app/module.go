@@ -50,13 +50,8 @@ func (a *App) moduleUser() {
 		_, err := user.New(user.Dependency{
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
-			RedisDB:      a.redisDB,
-			Config:       a.config,
-			CodecJSON:    a.codecJSON,
 			Validator:    a.validator,
-			SecHash:      a.secHash,
 			Router:       a.httpRouter,
-			GRPCServer:   a.grpcServer,
 			Telemetry:    a.telemetry,
 		})
 		if err != nil {

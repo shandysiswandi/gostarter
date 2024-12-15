@@ -7,7 +7,7 @@ type Logout interface {
 }
 
 type LogoutInput struct {
-	AccessToken string `validate:"required"`
+	AccessToken string `validate:"required,min=5"`
 }
 type LogoutOutput struct {
 	Message string

@@ -5,9 +5,9 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type ProfileStore interface {
@@ -15,38 +15,35 @@ type ProfileStore interface {
 }
 
 type Profile struct {
-	tel       *telemetry.Telemetry
-	validator validation.Validator
-	store     ProfileStore
+	tel   *telemetry.Telemetry
+	store ProfileStore
 }
 
 func NewProfile(dep Dependency, s ProfileStore) *Profile {
 	return &Profile{
-		tel:       dep.Telemetry,
-		validator: dep.Validator,
-		store:     s,
+		tel:   dep.Telemetry,
+		store: s,
 	}
 }
 
-func (p *Profile) Call(ctx context.Context, in domain.ProfileInput) (*domain.User, error) {
-	ctx, span := p.tel.Tracer().Start(ctx, "usecase.Profile")
+func (p *Profile) Call(ctx context.Context, _ domain.ProfileInput) (*domain.User, error) {
+	ctx, span := p.tel.Tracer().Start(ctx, "user.usecase.Profile")
 	defer span.End()
 
-	if err := p.validator.Validate(in); err != nil {
-		p.tel.Logger().Warn(ctx, "validation failed")
-
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+	var email string
+	if clm := jwt.GetClaim(ctx); clm != nil {
+		email = clm.Subject
 	}
 
-	user, err := p.store.FindUserByEmail(ctx, in.Email)
+	user, err := p.store.FindUserByEmail(ctx, email)
 	if err != nil {
-		p.tel.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
+		p.tel.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", email))
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	if user == nil {
-		p.tel.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
+		p.tel.Logger().Warn(ctx, "user not found", logger.KeyVal("email", email))
 
 		return nil, goerror.NewBusiness("user not found", goerror.CodeNotFound)
 	}

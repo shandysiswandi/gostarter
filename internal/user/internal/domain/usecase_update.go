@@ -7,6 +7,5 @@ type Update interface {
 }
 
 type UpdateInput struct {
-	ID   uint64 `validate:"required"`
 	Name string `validate:"required,min=5,max=100"`
 }

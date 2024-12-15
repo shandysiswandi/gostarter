@@ -3,12 +3,13 @@ package usecase
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,6 +37,9 @@ func TestNewProfile(t *testing.T) {
 }
 
 func TestProfile_Call(t *testing.T) {
+	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
+	ctxJWT := jwt.SetClaim(context.Background(), claim)
+
 	type args struct {
 		ctx context.Context
 		in  domain.ProfileInput
@@ -48,112 +52,74 @@ func TestProfile_Call(t *testing.T) {
 		mockFn  func(a args) *Profile
 	}{
 		{
-			name: "ErrorValidationInput",
-			args: args{
-				ctx: context.Background(),
-				in:  domain.ProfileInput{Email: "email"},
-			},
-			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
-			mockFn: func(a args) *Profile {
-				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
-
-				_, span := tel.Tracer().Start(a.ctx, "usecase.Profile")
-				defer span.End()
-
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(assert.AnError)
-
-				return &Profile{
-					tel:       tel,
-					validator: validatorMock,
-					store:     nil,
-				}
-			},
-		},
-		{
 			name: "ErrorStoreFindUserByEmail",
 			args: args{
-				ctx: context.Background(),
-				in:  domain.ProfileInput{Email: "email"},
+				ctx: ctxJWT,
+				in:  domain.ProfileInput{},
 			},
 			want:    nil,
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Profile {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
 				storeMock := mockz.NewMockProfileStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Profile")
+				ctx, span := tel.Tracer().Start(a.ctx, "user.usecase.Profile")
 				defer span.End()
 
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(nil)
-
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					FindUserByEmail(ctx, "email").
 					Return(nil, assert.AnError)
 
 				return &Profile{
-					tel:       tel,
-					validator: validatorMock,
-					store:     storeMock,
+					tel:   tel,
+					store: storeMock,
 				}
 			},
 		},
 		{
 			name: "ErrorStoreFindUserByEmailNotFound",
 			args: args{
-				ctx: context.Background(),
-				in:  domain.ProfileInput{Email: "email"},
+				ctx: ctxJWT,
+				in:  domain.ProfileInput{},
 			},
 			want:    nil,
 			wantErr: goerror.NewBusiness("user not found", goerror.CodeNotFound),
 			mockFn: func(a args) *Profile {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
 				storeMock := mockz.NewMockProfileStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Profile")
+				ctx, span := tel.Tracer().Start(a.ctx, "user.usecase.Profile")
 				defer span.End()
 
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(nil)
-
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					FindUserByEmail(ctx, "email").
 					Return(nil, nil)
 
 				return &Profile{
-					tel:       tel,
-					validator: validatorMock,
-					store:     storeMock,
+					tel:   tel,
+					store: storeMock,
 				}
 			},
 		},
 		{
 			name: "Success",
 			args: args{
-				ctx: context.Background(),
-				in:  domain.ProfileInput{Email: "email"},
+				ctx: ctxJWT,
+				in:  domain.ProfileInput{},
 			},
-			want:    &domain.User{ID: 1, Name: "full name", Email: "email", Password: "***"},
+			want: &domain.User{
+				ID:       1,
+				Name:     "full name",
+				Email:    "email",
+				Password: "***",
+			},
 			wantErr: nil,
 			mockFn: func(a args) *Profile {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
 				storeMock := mockz.NewMockProfileStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Profile")
+				ctx, span := tel.Tracer().Start(a.ctx, "user.usecase.Profile")
 				defer span.End()
-
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(nil)
 
 				out := &domain.User{
 					ID:       1,
@@ -162,13 +128,12 @@ func TestProfile_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					FindUserByEmail(ctx, "email").
 					Return(out, nil)
 
 				return &Profile{
-					tel:       tel,
-					validator: validatorMock,
-					store:     storeMock,
+					tel:   tel,
+					store: storeMock,
 				}
 			},
 		},

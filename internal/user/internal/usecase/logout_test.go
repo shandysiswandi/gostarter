@@ -70,6 +70,7 @@ func TestLogout_Call(t *testing.T) {
 				return &Logout{
 					tel:       tel,
 					validator: validatorMock,
+					secHash:   nil,
 					store:     nil,
 				}
 			},

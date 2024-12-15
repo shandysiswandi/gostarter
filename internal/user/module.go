@@ -4,17 +4,12 @@ import (
 	"database/sql"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/redis/go-redis/v9"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/usecase"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
-	"google.golang.org/grpc"
 )
 
 type Expose struct{}
@@ -22,13 +17,8 @@ type Expose struct{}
 type Dependency struct {
 	Database     *sql.DB
 	QueryBuilder goqu.DialectWrapper
-	RedisDB      *redis.Client
-	Config       config.Config
-	CodecJSON    codec.Codec
 	Validator    validation.Validator
-	SecHash      hash.Hash
 	Router       *framework.Router
-	GRPCServer   *grpc.Server
 	Telemetry    *telemetry.Telemetry
 }
 
@@ -40,7 +30,6 @@ func New(dep Dependency) (*Expose, error) {
 	ucDep := usecase.Dependency{
 		Telemetry: dep.Telemetry,
 		Validator: dep.Validator,
-		SecHash:   dep.SecHash,
 	}
 	profile := usecase.NewProfile(ucDep, sqlUser)
 	update := usecase.NewUpdate(ucDep, sqlUser)
@@ -48,8 +37,7 @@ func New(dep Dependency) (*Expose, error) {
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
 	inbound := inbound.Inbound{
-		Router:     dep.Router,
-		GRPCServer: dep.GRPCServer,
+		Router: dep.Router,
 		//
 		ProfileUC: profile,
 		UpdateUC:  update,

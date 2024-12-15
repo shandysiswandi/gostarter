@@ -30,7 +30,7 @@ func NewUpdate(dep Dependency, s UpdateStore) *Update {
 }
 
 func (p *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.User, error) {
-	ctx, span := p.tel.Tracer().Start(ctx, "usecase.Update")
+	ctx, span := p.tel.Tracer().Start(ctx, "user.usecase.Update")
 	defer span.End()
 
 	if err := p.validator.Validate(in); err != nil {
@@ -40,19 +40,21 @@ func (p *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.User,
 	}
 
 	var email string
+	var uid uint64
 	if clm := jwt.GetClaim(ctx); clm != nil {
 		email = clm.Subject
+		uid = clm.AuthID
 	}
 
-	user := map[string]any{"id": in.ID, "name": in.Name}
+	user := map[string]any{"id": uid, "name": in.Name}
 	if err := p.store.Update(ctx, user); err != nil {
-		p.tel.Logger().Error(ctx, "failed to update user", err, logger.KeyVal("id", in.ID))
+		p.tel.Logger().Error(ctx, "failed to update user", err, logger.KeyVal("id", uid))
 
 		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.User{
-		ID:       in.ID,
+		ID:       uid,
 		Name:     in.Name,
 		Email:    email,
 		Password: "***",

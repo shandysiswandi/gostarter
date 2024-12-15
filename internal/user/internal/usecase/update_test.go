@@ -55,8 +55,8 @@ func TestUpdate_Call(t *testing.T) {
 		{
 			name: "ErrorValidationInput",
 			args: args{
-				ctx: context.Background(),
-				in:  domain.UpdateInput{ID: 11, Name: ""},
+				ctx: ctxJWT,
+				in:  domain.UpdateInput{Name: "name"},
 			},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
@@ -64,7 +64,7 @@ func TestUpdate_Call(t *testing.T) {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
 
-				_, span := tel.Tracer().Start(a.ctx, "usecase.Update")
+				_, span := tel.Tracer().Start(a.ctx, "user.usecase.Update")
 				defer span.End()
 
 				validatorMock.EXPECT().
@@ -81,8 +81,8 @@ func TestUpdate_Call(t *testing.T) {
 		{
 			name: "ErrorStoreUpdate",
 			args: args{
-				ctx: context.Background(),
-				in:  domain.UpdateInput{ID: 11, Name: "full name"},
+				ctx: ctxJWT,
+				in:  domain.UpdateInput{Name: "full name"},
 			},
 			want:    nil,
 			wantErr: goerror.NewServerInternal(assert.AnError),
@@ -91,14 +91,17 @@ func TestUpdate_Call(t *testing.T) {
 				validatorMock := mockValidation.NewMockValidator(t)
 				storeMock := mockz.NewMockUpdateStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Update")
+				ctx, span := tel.Tracer().Start(a.ctx, "user.usecase.Update")
 				defer span.End()
 
 				validatorMock.EXPECT().
 					Validate(a.in).
 					Return(nil)
 
-				in := map[string]any{"id": a.in.ID, "name": a.in.Name}
+				in := map[string]any{
+					"id":   uint64(11),
+					"name": a.in.Name,
+				}
 				storeMock.EXPECT().
 					Update(ctx, in).
 					Return(assert.AnError)
@@ -114,7 +117,7 @@ func TestUpdate_Call(t *testing.T) {
 			name: "Success",
 			args: args{
 				ctx: ctxJWT,
-				in:  domain.UpdateInput{ID: 11, Name: "full name"},
+				in:  domain.UpdateInput{Name: "full name"},
 			},
 			want: &domain.User{
 				ID:       11,
@@ -128,14 +131,17 @@ func TestUpdate_Call(t *testing.T) {
 				validatorMock := mockValidation.NewMockValidator(t)
 				storeMock := mockz.NewMockUpdateStore(t)
 
-				ctx, span := tel.Tracer().Start(a.ctx, "usecase.Update")
+				ctx, span := tel.Tracer().Start(a.ctx, "user.usecase.Update")
 				defer span.End()
 
 				validatorMock.EXPECT().
 					Validate(a.in).
 					Return(nil)
 
-				in := map[string]any{"id": a.in.ID, "name": a.in.Name}
+				in := map[string]any{
+					"id":   uint64(11),
+					"name": a.in.Name,
+				}
 				storeMock.EXPECT().
 					Update(ctx, in).
 					Return(nil)

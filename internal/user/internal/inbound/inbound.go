@@ -5,12 +5,10 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"google.golang.org/grpc"
 )
 
 type Inbound struct {
-	Router     *framework.Router
-	GRPCServer *grpc.Server
+	Router *framework.Router
 	//
 	ProfileUC domain.Profile
 	UpdateUC  domain.Update

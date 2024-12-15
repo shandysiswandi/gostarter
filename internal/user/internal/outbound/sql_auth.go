@@ -25,7 +25,7 @@ func NewSQLUser(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *S
 }
 
 func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.SQLUser.FindUserByEmail")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.FindUserByEmail")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -40,7 +40,7 @@ func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.U
 }
 
 func (st *SQLUser) Update(ctx context.Context, user map[string]any) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.Update")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.Update")
 	defer span.End()
 
 	id := user["id"]
@@ -58,7 +58,7 @@ func (st *SQLUser) Update(ctx context.Context, user map[string]any) error {
 }
 
 func (st *SQLUser) DeleteTokenByAccess(ctx context.Context, token string) error {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.DeleteTokenByAccess")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.DeleteTokenByAccess")
 	defer span.End()
 
 	query := func() (string, []any, error) {

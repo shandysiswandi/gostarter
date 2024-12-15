@@ -6,23 +6,22 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type httpEndpoint struct {
+	tel *telemetry.Telemetry
+
 	profileUC domain.Profile
 	updateUC  domain.Update
 	logoutUC  domain.Logout
 }
 
-func (e *httpEndpoint) Profile(c framework.Context) (any, error) {
-	var email string
-	clm := jwt.GetClaim(c.Context())
-	if clm != nil {
-		email = clm.Subject
-	}
+func (h *httpEndpoint) Profile(c framework.Context) (any, error) {
+	ctx, span := h.tel.Tracer().Start(c.Context(), "user.inbound.httpEndpoint.Profile")
+	defer span.End()
 
-	resp, err := e.profileUC.Call(c.Context(), domain.ProfileInput{Email: email})
+	resp, err := h.profileUC.Call(ctx, domain.ProfileInput{})
 	if err != nil {
 		return nil, err
 	}
@@ -34,19 +33,16 @@ func (e *httpEndpoint) Profile(c framework.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) Update(c framework.Context) (any, error) {
-	var uid uint64
-	clm := jwt.GetClaim(c.Context())
-	if clm != nil {
-		uid = clm.AuthID
-	}
+func (h *httpEndpoint) Update(c framework.Context) (any, error) {
+	ctx, span := h.tel.Tracer().Start(c.Context(), "user.inbound.httpEndpoint.Update")
+	defer span.End()
 
 	var req UpdateRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, goerror.NewInvalidFormat("invalid request body")
 	}
 
-	resp, err := e.updateUC.Call(c.Context(), domain.UpdateInput{ID: uid, Name: req.Name})
+	resp, err := h.updateUC.Call(ctx, domain.UpdateInput{Name: req.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +54,11 @@ func (e *httpEndpoint) Update(c framework.Context) (any, error) {
 	}, nil
 }
 
-func (e *httpEndpoint) Logout(c framework.Context) (any, error) {
-	ac := c.Header().Get("Authorization")
-	resp, err := e.logoutUC.Call(c.Context(), domain.LogoutInput{AccessToken: ac})
+func (h *httpEndpoint) Logout(c framework.Context) (any, error) {
+	ctx, span := h.tel.Tracer().Start(c.Context(), "user.inbound.httpEndpoint.Logout")
+	defer span.End()
+
+	resp, err := h.logoutUC.Call(ctx, domain.LogoutInput{AccessToken: c.Header().Get("Authorization")})
 	if err != nil {
 		return nil, err
 	}

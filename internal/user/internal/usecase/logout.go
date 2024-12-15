@@ -25,13 +25,12 @@ func NewLogout(dep Dependency, s LogoutStore) *Logout {
 	return &Logout{
 		tel:       dep.Telemetry,
 		validator: dep.Validator,
-		secHash:   dep.SecHash,
 		store:     s,
 	}
 }
 
 func (l *Logout) Call(ctx context.Context, in domain.LogoutInput) (*domain.LogoutOutput, error) {
-	ctx, span := l.tel.Tracer().Start(ctx, "usecase.Logout")
+	ctx, span := l.tel.Tracer().Start(ctx, "user.usecase.Logout")
 	defer span.End()
 
 	if err := l.validator.Validate(in); err != nil {
