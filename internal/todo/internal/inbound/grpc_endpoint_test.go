@@ -7,6 +7,7 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -206,7 +207,7 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDone,
+					Status:      enum.New(domain.TodoStatusDone),
 				}
 				findMock.EXPECT().
 					Call(a.ctx, in).
@@ -308,7 +309,7 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 						UserID:      11,
 						Title:       "title",
 						Description: "description",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					}},
 					NextCursor: "NTY",
 					HasMore:    true,
@@ -379,7 +380,7 @@ func Test_grpcEndpoint_UpdateStatus(t *testing.T) {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 
 				in := domain.UpdateStatusInput{ID: 10, Status: "STATUS_DONE"}
-				out := &domain.UpdateStatusOutput{ID: 10, Status: domain.TodoStatusDone}
+				out := &domain.UpdateStatusOutput{ID: 10, Status: enum.New(domain.TodoStatusDone)}
 				updateStatusMock.EXPECT().
 					Call(a.ctx, in).
 					Return(out, nil)
@@ -477,7 +478,7 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}
 				updateMock.EXPECT().
 					Call(a.ctx, in).

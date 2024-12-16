@@ -7,6 +7,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -100,7 +101,7 @@ func TestCreate_Execute(t *testing.T) {
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
 				store.EXPECT().Create(ctx, input).Return(domain.ErrTodoNotCreated)
 
@@ -135,7 +136,7 @@ func TestCreate_Execute(t *testing.T) {
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
 				store.EXPECT().Create(ctx, input).Return(assert.AnError)
 
@@ -170,7 +171,7 @@ func TestCreate_Execute(t *testing.T) {
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
 				store.EXPECT().Create(ctx, input).Return(nil)
 

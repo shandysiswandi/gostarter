@@ -7,6 +7,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -90,7 +91,7 @@ func TestUpdate_Execute(t *testing.T) {
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
+				sts := enum.New(enum.Parse[domain.TodoStatus](a.in.Status))
 				store.EXPECT().Update(ctx, domain.Todo{
 					ID:          a.in.ID,
 					UserID:      11,
@@ -119,7 +120,7 @@ func TestUpdate_Execute(t *testing.T) {
 				UserID:      11,
 				Title:       "test 1",
 				Description: "test 2",
-				Status:      domain.TodoStatusDone,
+				Status:      enum.New(domain.TodoStatusDone),
 			},
 			wantErr: nil,
 			mockFn: func(a args) *Update {
@@ -137,7 +138,7 @@ func TestUpdate_Execute(t *testing.T) {
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.ParseTodoStatus(a.in.Status),
+					Status:      enum.New(enum.Parse[domain.TodoStatus](a.in.Status)),
 				}).Return(nil)
 
 				return &Update{

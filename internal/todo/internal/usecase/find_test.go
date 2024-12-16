@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
@@ -126,7 +127,7 @@ func TestFind_Execute(t *testing.T) {
 				UserID:      11,
 				Title:       "test 1",
 				Description: "test 2",
-				Status:      domain.TodoStatusDrop,
+				Status:      enum.New(domain.TodoStatusDrop),
 			},
 			wantErr: nil,
 			mockFn: func(a args) *Find {
@@ -144,7 +145,7 @@ func TestFind_Execute(t *testing.T) {
 					UserID:      11,
 					Title:       "test 1",
 					Description: "test 2",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}, nil)
 
 				return &Find{

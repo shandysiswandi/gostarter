@@ -7,6 +7,7 @@ import (
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -134,7 +135,7 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 						UserID:      11,
 						Title:       "title",
 						Description: "description",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					}},
 					NextCursor: "NTY",
 					HasMore:    true,
@@ -227,7 +228,7 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}
 				findMock.EXPECT().
 					Call(a.ctx, in).
@@ -450,7 +451,7 @@ func Test_gqlEndpoint_UpdateStatus(t *testing.T) {
 				updateStateMock := mockz.NewMockUpdateStatus(t)
 
 				in := domain.UpdateStatusInput{ID: 10, Status: ql.StatusDone.String()}
-				out := &domain.UpdateStatusOutput{ID: 10, Status: domain.TodoStatusDone}
+				out := &domain.UpdateStatusOutput{ID: 10, Status: enum.New(domain.TodoStatusDone)}
 				updateStateMock.EXPECT().
 					Call(a.ctx, in).
 					Return(out, nil)
@@ -564,7 +565,7 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusInProgress,
+					Status:      enum.New(domain.TodoStatusInProgress),
 				}
 				updateMock.EXPECT().
 					Call(a.ctx, in).

@@ -79,7 +79,5 @@ func New(dep Dependency) (*Expose, error) {
 		DomainCreate: createUC,
 	})
 
-	return &Expose{
-		Tasks: jobs,
-	}, nil
+	return &Expose{Tasks: jobs}, nil
 }

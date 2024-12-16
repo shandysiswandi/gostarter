@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
@@ -37,7 +38,7 @@ func TestNewUpdateStatus(t *testing.T) {
 	}
 }
 
-func TestUpdateStatus_Execute(t *testing.T) {
+func TestUpdateStatus_Call(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		in  domain.UpdateStatusInput
@@ -85,7 +86,7 @@ func TestUpdateStatus_Execute(t *testing.T) {
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
+				sts := enum.New(enum.Parse[domain.TodoStatus](a.in.Status))
 				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(assert.AnError)
 
 				return &UpdateStatus{
@@ -96,9 +97,12 @@ func TestUpdateStatus_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{ID: 1}},
-			want:    &domain.UpdateStatusOutput{ID: 1, Status: domain.TodoStatusUnknown},
+			name: "Success",
+			args: args{ctx: context.Background(), in: domain.UpdateStatusInput{ID: 1}},
+			want: &domain.UpdateStatusOutput{
+				ID:     1,
+				Status: enum.New(domain.TodoStatusUnknown),
+			},
 			wantErr: nil,
 			mockFn: func(a args) *UpdateStatus {
 				mtel := telemetry.NewTelemetry()
@@ -110,7 +114,7 @@ func TestUpdateStatus_Execute(t *testing.T) {
 
 				validator.EXPECT().Validate(a.in).Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
+				sts := enum.New(enum.Parse[domain.TodoStatus](a.in.Status))
 				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(nil)
 
 				return &UpdateStatus{

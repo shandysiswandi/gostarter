@@ -29,7 +29,9 @@
     "api/buf.gen.yaml",
     "api/gen-gql/**",
     "api/gen-proto/**",
-    "config/**"
+    "config/**",
+    "go.mod",
+    "go.sum"
   ],
   "words": [
     "bufbuild",

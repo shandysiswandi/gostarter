@@ -2,6 +2,8 @@ package domain
 
 import (
 	"context"
+
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 )
 
 type UpdateStatus interface {
@@ -15,5 +17,5 @@ type UpdateStatusInput struct {
 
 type UpdateStatusOutput struct {
 	ID     uint64
-	Status TodoStatus
+	Status enum.Enum[TodoStatus]
 }

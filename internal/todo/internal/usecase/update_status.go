@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type UpdateStatusStore interface {
-	UpdateStatus(ctx context.Context, in uint64, status domain.TodoStatus) error
+	UpdateStatus(ctx context.Context, in uint64, sts enum.Enum[domain.TodoStatus]) error
 }
 
 type UpdateStatus struct {
@@ -39,8 +40,7 @@ func (s *UpdateStatus) Call(ctx context.Context, in domain.UpdateStatusInput) (
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	sts := domain.ParseTodoStatus(in.Status)
-
+	sts := enum.New(enum.Parse[domain.TodoStatus](in.Status))
 	err := s.store.UpdateStatus(ctx, in.ID, sts)
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to update status", err)
@@ -48,5 +48,8 @@ func (s *UpdateStatus) Call(ctx context.Context, in domain.UpdateStatusInput) (
 		return nil, goerror.NewServer("failed to update status todo", err)
 	}
 
-	return &domain.UpdateStatusOutput{ID: in.ID, Status: sts}, nil
+	return &domain.UpdateStatusOutput{
+		ID:     in.ID,
+		Status: sts,
+	}, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
@@ -80,7 +81,7 @@ func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.T
 
 	cursor, hasCursor := filter["cursor"].(uint64)
 	limit, hasLimit := filter["limit"].(int)
-	status, hasStatus := filter["status"].(domain.TodoStatus)
+	status, hasStatus := filter["status"].(enum.Enum[domain.TodoStatus])
 
 	query := func() (string, []any, error) {
 		q := st.qu.Select("id", "user_id", "title", "description", "status").
@@ -104,7 +105,7 @@ func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.T
 	return dbops.SQLGets[domain.Todo](ctx, st.db, query)
 }
 
-func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts domain.TodoStatus) error {
+func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts enum.Enum[domain.TodoStatus]) error {
 	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
 	defer span.End()
 

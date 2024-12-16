@@ -8,6 +8,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
@@ -237,7 +238,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 				UserID:      89,
 				Title:       "title",
 				Description: "description",
-				Status:      domain.TodoStatusDone.String(),
+				Status:      enum.New(domain.TodoStatusDone).String(),
 			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
@@ -249,7 +250,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 					UserID:      89,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDone,
+					Status:      enum.New(domain.TodoStatusDone),
 				}
 				findMock.EXPECT().
 					Call(ctx, in).
@@ -325,7 +326,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 					ID:          11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDone.String(),
+					Status:      enum.New(domain.TodoStatusDone).String(),
 				}},
 				Pagination: Pagination{
 					NextCursor: "NTY",
@@ -346,7 +347,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 						ID:          11,
 						Title:       "title",
 						Description: "description",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					}},
 					NextCursor: "NTY",
 					HasMore:    true,
@@ -446,13 +447,13 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 
 				return c.Build()
 			},
-			want:    UpdateStatusResponse{ID: 2, Status: domain.TodoStatusDone.String()},
+			want:    UpdateStatusResponse{ID: 2, Status: enum.New(domain.TodoStatusDone).String()},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 
 				in := domain.UpdateStatusInput{ID: 2, Status: "done"}
-				out := &domain.UpdateStatusOutput{ID: 2, Status: domain.TodoStatusDone}
+				out := &domain.UpdateStatusOutput{ID: 2, Status: enum.New(domain.TodoStatusDone)}
 				updateStatusMock.EXPECT().
 					Call(ctx, in).
 					Return(out, nil)
@@ -558,7 +559,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 				UserID:      12,
 				Title:       "title",
 				Description: "description",
-				Status:      domain.TodoStatusDone.String(),
+				Status:      enum.New(domain.TodoStatusDone).String(),
 			},
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
@@ -575,7 +576,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 					UserID:      12,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDone,
+					Status:      enum.New(domain.TodoStatusDone),
 				}
 				updateMock.EXPECT().
 					Call(ctx, in).

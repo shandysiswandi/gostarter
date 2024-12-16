@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -38,7 +39,7 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	sts := domain.ParseTodoStatus(in.Status)
+	sts := enum.New(enum.Parse[domain.TodoStatus](in.Status))
 	userID := uint64(0)
 	if clm := jwt.GetClaim(ctx); clm != nil {
 		userID = clm.AuthID

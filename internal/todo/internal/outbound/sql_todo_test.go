@@ -10,6 +10,7 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
@@ -254,7 +255,7 @@ func TestSQLTodo_Find(t *testing.T) {
 				UserID:      11,
 				Title:       "title test",
 				Description: "description test",
-				Status:      domain.TodoStatusInProgress,
+				Status:      enum.New(domain.TodoStatusInProgress),
 			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
@@ -331,13 +332,13 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					UserID:      12,
 					Title:       "title test",
 					Description: "description test",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}, {
 					ID:          2,
 					UserID:      13,
 					Title:       "title test 2",
 					Description: "description test 2",
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				},
 			},
 			wantErr: nil,
@@ -366,7 +367,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			args: args{ctx: context.Background(), in: map[string]any{
 				"cursor": uint64(1),
 				"limit":  int(1),
-				"status": domain.TodoStatusDone,
+				"status": enum.New(domain.TodoStatusDone),
 			}},
 			want: []domain.Todo{
 				{
@@ -374,14 +375,14 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					UserID:      12,
 					Title:       "title test",
 					Description: "description test",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				},
 				{
 					ID:          2,
 					UserID:      13,
 					Title:       "title test 2",
 					Description: "description test 2",
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				},
 			},
 			wantErr: nil,
@@ -429,7 +430,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		id  uint64
-		sts domain.TodoStatus
+		sts enum.Enum[domain.TodoStatus]
 	}
 	tests := []struct {
 		name    string
@@ -438,8 +439,12 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name:    "Error",
-			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDrop},
+			name: "Error",
+			args: args{
+				ctx: context.Background(),
+				id:  1,
+				sts: enum.New(domain.TodoStatusDrop),
+			},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -459,8 +464,12 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDone},
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				id:  1,
+				sts: enum.New(domain.TodoStatusDone),
+			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))

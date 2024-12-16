@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/pagination"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -39,7 +40,7 @@ func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOu
 	}
 
 	if in.Status != "" {
-		filter["status"] = domain.ParseTodoStatus(in.Status)
+		filter["status"] = enum.New(enum.Parse[domain.TodoStatus](in.Status))
 	}
 
 	todos, err := s.store.Fetch(ctx, filter)

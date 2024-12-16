@@ -6,6 +6,8 @@ import (
 	context "context"
 
 	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	enum "github.com/shandysiswandi/gostarter/pkg/enum"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -22,17 +24,17 @@ func (_m *MockUpdateStatusStore) EXPECT() *MockUpdateStatusStore_Expecter {
 	return &MockUpdateStatusStore_Expecter{mock: &_m.Mock}
 }
 
-// UpdateStatus provides a mock function with given fields: ctx, in, status
-func (_m *MockUpdateStatusStore) UpdateStatus(ctx context.Context, in uint64, status domain.TodoStatus) error {
-	ret := _m.Called(ctx, in, status)
+// UpdateStatus provides a mock function with given fields: ctx, in, sts
+func (_m *MockUpdateStatusStore) UpdateStatus(ctx context.Context, in uint64, sts enum.Enum[domain.TodoStatus]) error {
+	ret := _m.Called(ctx, in, sts)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateStatus")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, domain.TodoStatus) error); ok {
-		r0 = rf(ctx, in, status)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, enum.Enum[domain.TodoStatus]) error); ok {
+		r0 = rf(ctx, in, sts)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -48,14 +50,14 @@ type MockUpdateStatusStore_UpdateStatus_Call struct {
 // UpdateStatus is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in uint64
-//   - status domain.TodoStatus
-func (_e *MockUpdateStatusStore_Expecter) UpdateStatus(ctx interface{}, in interface{}, status interface{}) *MockUpdateStatusStore_UpdateStatus_Call {
-	return &MockUpdateStatusStore_UpdateStatus_Call{Call: _e.mock.On("UpdateStatus", ctx, in, status)}
+//   - sts enum.Enum[domain.TodoStatus]
+func (_e *MockUpdateStatusStore_Expecter) UpdateStatus(ctx interface{}, in interface{}, sts interface{}) *MockUpdateStatusStore_UpdateStatus_Call {
+	return &MockUpdateStatusStore_UpdateStatus_Call{Call: _e.mock.On("UpdateStatus", ctx, in, sts)}
 }
 
-func (_c *MockUpdateStatusStore_UpdateStatus_Call) Run(run func(ctx context.Context, in uint64, status domain.TodoStatus)) *MockUpdateStatusStore_UpdateStatus_Call {
+func (_c *MockUpdateStatusStore_UpdateStatus_Call) Run(run func(ctx context.Context, in uint64, sts enum.Enum[domain.TodoStatus])) *MockUpdateStatusStore_UpdateStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint64), args[2].(domain.TodoStatus))
+		run(args[0].(context.Context), args[1].(uint64), args[2].(enum.Enum[domain.TodoStatus]))
 	})
 	return _c
 }
@@ -65,7 +67,7 @@ func (_c *MockUpdateStatusStore_UpdateStatus_Call) Return(_a0 error) *MockUpdate
 	return _c
 }
 
-func (_c *MockUpdateStatusStore_UpdateStatus_Call) RunAndReturn(run func(context.Context, uint64, domain.TodoStatus) error) *MockUpdateStatusStore_UpdateStatus_Call {
+func (_c *MockUpdateStatusStore_UpdateStatus_Call) RunAndReturn(run func(context.Context, uint64, enum.Enum[domain.TodoStatus]) error) *MockUpdateStatusStore_UpdateStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -50,7 +50,7 @@ func (e *grpcEndpoint) Find(ctx context.Context, req *pb.FindRequest) (*pb.FindR
 		UserId:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
-		Status:      pb.Status(resp.Status),
+		Status:      pb.Status(resp.Status.Enum()),
 	}, nil
 }
 
@@ -71,7 +71,7 @@ func (e *grpcEndpoint) Fetch(ctx context.Context, req *pb.FetchRequest) (*pb.Fet
 			UserId:      todo.UserID,
 			Title:       todo.Title,
 			Description: todo.Description,
-			Status:      pb.Status(todo.Status),
+			Status:      pb.Status(todo.Status.Enum()),
 		})
 	}
 
@@ -95,7 +95,10 @@ func (e *grpcEndpoint) UpdateStatus(ctx context.Context, req *pb.UpdateStatusReq
 		return nil, err
 	}
 
-	return &pb.UpdateStatusResponse{Id: resp.ID, Status: pb.Status(resp.Status)}, nil
+	return &pb.UpdateStatusResponse{
+		Id:     resp.ID,
+		Status: pb.Status(resp.Status.Enum()),
+	}, nil
 }
 
 func (e *grpcEndpoint) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
@@ -114,6 +117,6 @@ func (e *grpcEndpoint) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.U
 		UserId:      resp.UserID,
 		Title:       resp.Title,
 		Description: resp.Description,
-		Status:      pb.Status(resp.Status),
+		Status:      pb.Status(resp.Status.Enum()),
 	}, nil
 }
