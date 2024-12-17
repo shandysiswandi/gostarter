@@ -39,7 +39,7 @@ func Test_grpcEndpoint_Create(t *testing.T) {
 				createMock := mockz.NewMockCreate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Create")
 				defer span.End()
 
 				in := domain.CreateInput{
@@ -71,7 +71,7 @@ func Test_grpcEndpoint_Create(t *testing.T) {
 				createMock := mockz.NewMockCreate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Create")
 				defer span.End()
 
 				in := domain.CreateInput{
@@ -125,7 +125,7 @@ func Test_grpcEndpoint_Delete(t *testing.T) {
 				deleteMock := mockz.NewMockDelete(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Delete")
 				defer span.End()
 
 				in := domain.DeleteInput{ID: a.req.GetId()}
@@ -151,7 +151,7 @@ func Test_grpcEndpoint_Delete(t *testing.T) {
 				deleteMock := mockz.NewMockDelete(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Delete")
 				defer span.End()
 
 				in := domain.DeleteInput{ID: a.req.GetId()}
@@ -202,7 +202,7 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 				findMock := mockz.NewMockFind(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Find")
 				defer span.End()
 
 				in := domain.FindInput{ID: a.req.GetId()}
@@ -234,7 +234,7 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 				findMock := mockz.NewMockFind(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Find")
 				defer span.End()
 
 				in := domain.FindInput{ID: a.req.GetId()}
@@ -295,7 +295,7 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Fetch")
 				defer span.End()
 
 				in := domain.FetchInput{
@@ -341,7 +341,7 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Fetch")
 				defer span.End()
 
 				in := domain.FetchInput{
@@ -409,7 +409,7 @@ func Test_grpcEndpoint_UpdateStatus(t *testing.T) {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.UpdateStatus")
 				defer span.End()
 
 				in := domain.UpdateStatusInput{
@@ -444,7 +444,7 @@ func Test_grpcEndpoint_UpdateStatus(t *testing.T) {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.UpdateStatus")
 				defer span.End()
 
 				in := domain.UpdateStatusInput{
@@ -506,7 +506,7 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 				updateMock := mockz.NewMockUpdate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Update")
 				defer span.End()
 
 				in := domain.UpdateInput{
@@ -548,7 +548,7 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 				updateMock := mockz.NewMockUpdate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.grpcEndpoint.Update")
 				defer span.End()
 
 				in := domain.UpdateInput{

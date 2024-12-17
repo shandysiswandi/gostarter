@@ -35,7 +35,7 @@ func Test_httpEndpoint_Create(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Create")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -57,7 +57,7 @@ func Test_httpEndpoint_Create(t *testing.T) {
 				createMock := mockz.NewMockCreate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Create")
 				defer span.End()
 
 				in := domain.CreateInput{
@@ -88,7 +88,7 @@ func Test_httpEndpoint_Create(t *testing.T) {
 				createMock := mockz.NewMockCreate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Create")
 				defer span.End()
 
 				in := domain.CreateInput{
@@ -140,7 +140,7 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Delete")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -163,7 +163,7 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 				deleteMock := mockz.NewMockDelete(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Delete")
 				defer span.End()
 
 				in := domain.DeleteInput{ID: 1}
@@ -191,7 +191,7 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 				deleteMock := mockz.NewMockDelete(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Delete")
 				defer span.End()
 
 				in := domain.DeleteInput{ID: 1}
@@ -240,7 +240,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Find")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -262,7 +262,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 				findMock := mockz.NewMockFind(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Find")
 				defer span.End()
 
 				in := domain.FindInput{ID: 11}
@@ -296,7 +296,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 				findMock := mockz.NewMockFind(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Find")
 				defer span.End()
 
 				in := domain.FindInput{ID: 11}
@@ -354,7 +354,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Fetch")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Fetch")
 				defer span.End()
 
 				in := domain.FetchInput{
@@ -399,7 +399,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 				fetchMock := mockz.NewMockFetch(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Fetch")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Fetch")
 				defer span.End()
 
 				in := domain.FetchInput{
@@ -461,7 +461,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.UpdateStatus")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -483,7 +483,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.UpdateStatus")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -506,7 +506,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.UpdateStatus")
 				defer span.End()
 
 				in := domain.UpdateStatusInput{ID: 2, Status: "done"}
@@ -535,7 +535,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.UpdateStatus")
 				defer span.End()
 
 				in := domain.UpdateStatusInput{ID: 2, Status: "done"}
@@ -584,7 +584,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.UpdateStatus")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -607,7 +607,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Update")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -630,7 +630,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 				updateMock := mockz.NewMockUpdate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Update")
 				defer span.End()
 
 				in := domain.UpdateInput{
@@ -670,7 +670,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 				updateMock := mockz.NewMockUpdate(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.httpEndpoint.Update")
 				defer span.End()
 
 				in := domain.UpdateInput{

@@ -6,16 +6,22 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shopspring/decimal"
 )
 
 var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
 
 type httpEndpoint struct {
+	tel *telemetry.Telemetry
+
 	paymentTopupUC domain.PaymentTopup
 }
 
-func (e *httpEndpoint) PaymentTopup(c framework.Context) (any, error) {
+func (h *httpEndpoint) PaymentTopup(c framework.Context) (any, error) {
+	ctx, span := h.tel.Tracer().Start(c.Context(), "payment.inbound.httpEndpoint.PaymentTopup")
+	defer span.End()
+
 	var req PaymentTopupRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
 		return nil, errInvalidBody
@@ -26,7 +32,7 @@ func (e *httpEndpoint) PaymentTopup(c framework.Context) (any, error) {
 		return nil, errInvalidBody
 	}
 
-	resp, err := e.paymentTopupUC.Call(c.Context(), domain.PaymentTopupInput{
+	resp, err := h.paymentTopupUC.Call(ctx, domain.PaymentTopupInput{
 		ReferenceID: req.ReferenceID,
 		Amount:      amo,
 	})
