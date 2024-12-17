@@ -25,7 +25,7 @@ func NewSQLPayment(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry)
 }
 
 func (st *SQLPayment) FindAccountByUserID(ctx context.Context, userID uint64) (*domain.Account, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindAccountByUserID")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "payment.outbound.SQLPayment.FindAccountByUserID")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -40,7 +40,7 @@ func (st *SQLPayment) FindAccountByUserID(ctx context.Context, userID uint64) (*
 }
 
 func (st *SQLPayment) FindTopupByReferenceID(ctx context.Context, refID string) (*domain.Topup, error) {
-	ctx, span := st.telemetry.Tracer().Start(ctx, "outbound.FindTopupByReferenceID")
+	ctx, span := st.telemetry.Tracer().Start(ctx, "payment.outbound.SQLPayment.FindTopupByReferenceID")
 	defer span.End()
 
 	query := func() (string, []any, error) {
