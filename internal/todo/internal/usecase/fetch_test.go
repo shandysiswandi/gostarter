@@ -54,7 +54,11 @@ func TestFetch_Execute(t *testing.T) {
 			name: "ErrorStore",
 			args: args{
 				ctx: context.Background(),
-				in:  domain.FetchInput{},
+				in: domain.FetchInput{
+					Cursor: "NTY",
+					Limit:  "1",
+					Status: "",
+				},
 			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to fetch todo", assert.AnError),
@@ -71,7 +75,9 @@ func TestFetch_Execute(t *testing.T) {
 					"cursor": cursor,
 					"limit":  limit,
 				}
-				store.EXPECT().Fetch(ctx, filter).Return(nil, assert.AnError)
+				store.EXPECT().
+					Fetch(ctx, filter).
+					Return(nil, assert.AnError)
 
 				return &Fetch{
 					telemetry: mtel,
@@ -81,11 +87,14 @@ func TestFetch_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.Background(), in: domain.FetchInput{
-				Cursor: "",
-				Limit:  "1",
-				Status: "done",
-			}},
+			args: args{
+				ctx: context.Background(),
+				in: domain.FetchInput{
+					Cursor: "",
+					Limit:  "1",
+					Status: "done",
+				},
+			},
 			want: &domain.FetchOutput{
 				Todos: []domain.Todo{{
 					ID:          1,
@@ -112,7 +121,7 @@ func TestFetch_Execute(t *testing.T) {
 					"limit":  limit,
 					"status": enum.New(enum.Parse[domain.TodoStatus](a.in.Status)),
 				}
-				store.EXPECT().Fetch(ctx, filter).Return([]domain.Todo{
+				todos := []domain.Todo{
 					{
 						ID:          1,
 						UserID:      2,
@@ -127,7 +136,10 @@ func TestFetch_Execute(t *testing.T) {
 						Description: "test 2",
 						Status:      enum.New(domain.TodoStatusDone),
 					},
-				}, nil)
+				}
+				store.EXPECT().
+					Fetch(ctx, filter).
+					Return(todos, nil)
 
 				return &Fetch{
 					telemetry: mtel,

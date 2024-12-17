@@ -9,6 +9,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"google.golang.org/grpc"
 )
 
@@ -18,6 +19,7 @@ var (
 )
 
 type Inbound struct {
+	Telemetry  *telemetry.Telemetry
 	Router     *framework.Router
 	GQLRouter  *framework.Router
 	GRPCServer *grpc.Server
@@ -33,6 +35,8 @@ type Inbound struct {
 
 func (in Inbound) RegisterTodoServiceServer() {
 	he := &httpEndpoint{
+		tel: in.Telemetry,
+		//
 		createUC:       in.CreateUC,
 		deleteUC:       in.DeleteUC,
 		findUC:         in.FindUC,
@@ -47,6 +51,8 @@ func (in Inbound) RegisterTodoServiceServer() {
 	}
 
 	ge := &grpcEndpoint{
+		tel: in.Telemetry,
+		//
 		createUC:       in.CreateUC,
 		deleteUC:       in.DeleteUC,
 		findUC:         in.FindUC,
@@ -55,7 +61,9 @@ func (in Inbound) RegisterTodoServiceServer() {
 		updateUC:       in.UpdateUC,
 	}
 
-	gqe := &gqlEndpoint{
+	gql := &gqlEndpoint{
+		tel: in.Telemetry,
+		//
 		createUC:       in.CreateUC,
 		deleteUC:       in.DeleteUC,
 		findUC:         in.FindUC,
@@ -80,6 +88,6 @@ func (in Inbound) RegisterTodoServiceServer() {
 	pb.RegisterTodoServiceServer(in.GRPCServer, ge)
 
 	//
-	gqlServer := framework.HandlerGQL(ql.NewExecutableSchema(ql.Config{Resolvers: gqe}))
+	gqlServer := framework.HandlerGQL(ql.NewExecutableSchema(ql.Config{Resolvers: gql}))
 	in.GQLRouter.Handler(http.MethodPost, "/graphql", gqlServer)
 }

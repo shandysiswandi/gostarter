@@ -37,8 +37,7 @@ func (s *Delete) Call(ctx context.Context, in domain.DeleteInput) (*domain.Delet
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	err := s.store.Delete(ctx, in.ID)
-	if err != nil {
+	if err := s.store.Delete(ctx, in.ID); err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to delete", err)
 
 		return nil, goerror.NewServer("failed to delete todo", err)

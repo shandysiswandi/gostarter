@@ -11,7 +11,7 @@ type UpdateStatus interface {
 }
 
 type UpdateStatusInput struct {
-	ID     uint64 `validate:"gt=0"`
+	ID     uint64 `validate:"required,gt=0"`
 	Status string `validate:"required"`
 }
 

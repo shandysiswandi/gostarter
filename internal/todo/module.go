@@ -60,6 +60,7 @@ func New(dep Dependency) (*Expose, error) {
 		GQLRouter:  dep.GQLRouter,
 		GRPCServer: dep.GRPCServer,
 		CodecJSON:  dep.CodecJSON,
+		Telemetry:  dep.Telemetry,
 		//
 		CreateUC:       createUC,
 		DeleteUC:       deleteUC,

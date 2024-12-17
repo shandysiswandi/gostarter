@@ -3,7 +3,6 @@ package outbound
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -13,16 +12,6 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
-
-func testconvertArgs(args []any) []driver.Value {
-	var driverArgs []driver.Value
-
-	for _, arg := range args {
-		driverArgs = append(driverArgs, arg)
-	}
-
-	return driverArgs
-}
 
 func TestNewSQLUser(t *testing.T) {
 	type args struct {
@@ -104,7 +93,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLUser{
@@ -133,7 +122,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLUser{
@@ -171,7 +160,7 @@ func TestSQLUser_FindUserByEmail(t *testing.T) {
 					AddRow(1, "full name", "test@test.com", "password")
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLUser{
@@ -224,7 +213,7 @@ func TestSQLUser_Update(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLUser{
@@ -252,7 +241,7 @@ func TestSQLUser_Update(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLUser{
@@ -303,7 +292,7 @@ func TestSQLUser_DeleteTokenByAccess(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLUser{
@@ -330,7 +319,7 @@ func TestSQLUser_DeleteTokenByAccess(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLUser{

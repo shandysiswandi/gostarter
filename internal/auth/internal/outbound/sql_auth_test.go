@@ -3,7 +3,6 @@ package outbound
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"testing"
 	"time"
 
@@ -14,16 +13,6 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
-
-func testconvertArgs(args []any) []driver.Value {
-	var driverArgs []driver.Value
-
-	for _, arg := range args {
-		driverArgs = append(driverArgs, arg)
-	}
-
-	return driverArgs
-}
 
 func TestNewSQLAuth(t *testing.T) {
 	type args struct {
@@ -105,7 +94,7 @@ func TestSQLAuth_FindUserByEmail(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -134,7 +123,7 @@ func TestSQLAuth_FindUserByEmail(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLAuth{
@@ -171,7 +160,7 @@ func TestSQLAuth_FindUserByEmail(t *testing.T) {
 					AddRow(1, "test@test.com", "password")
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLAuth{
@@ -224,7 +213,7 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -252,7 +241,7 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				return &SQLAuth{
@@ -280,7 +269,7 @@ func TestSQLAuth_SaveUser(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -332,7 +321,7 @@ func TestSQLAuth_SaveAccount(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -360,7 +349,7 @@ func TestSQLAuth_SaveAccount(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				return &SQLAuth{
@@ -388,7 +377,7 @@ func TestSQLAuth_SaveAccount(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -442,7 +431,7 @@ func TestSQLAuth_UpdateUserPassword(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -471,7 +460,7 @@ func TestSQLAuth_UpdateUserPassword(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -532,7 +521,7 @@ func TestSQLAuth_FindTokenByUserID(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -568,7 +557,7 @@ func TestSQLAuth_FindTokenByUserID(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLAuth{
@@ -629,7 +618,7 @@ func TestSQLAuth_FindTokenByUserID(t *testing.T) {
 					)
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLAuth{
@@ -691,7 +680,7 @@ func TestSQLAuth_FindTokenByRefresh(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -727,7 +716,7 @@ func TestSQLAuth_FindTokenByRefresh(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLAuth{
@@ -788,7 +777,7 @@ func TestSQLAuth_FindTokenByRefresh(t *testing.T) {
 					)
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLAuth{
@@ -855,7 +844,7 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -897,7 +886,7 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				return &SQLAuth{
@@ -939,7 +928,7 @@ func TestSQLAuth_SaveToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -997,7 +986,7 @@ func TestSQLAuth_UpdateToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -1031,7 +1020,7 @@ func TestSQLAuth_UpdateToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -1085,7 +1074,7 @@ func TestSQLAuth_FindPasswordResetByUserID(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -1114,7 +1103,7 @@ func TestSQLAuth_FindPasswordResetByUserID(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLAuth{
@@ -1152,7 +1141,7 @@ func TestSQLAuth_FindPasswordResetByUserID(t *testing.T) {
 					AddRow(10, 101, "token", time.Time{})
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLAuth{
@@ -1207,7 +1196,7 @@ func TestSQLAuth_FindPasswordResetByToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -1236,7 +1225,7 @@ func TestSQLAuth_FindPasswordResetByToken(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(sql.ErrNoRows)
 
 				return &SQLAuth{
@@ -1274,7 +1263,7 @@ func TestSQLAuth_FindPasswordResetByToken(t *testing.T) {
 					AddRow(10, 101, "token", time.Time{})
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLAuth{
@@ -1327,7 +1316,7 @@ func TestSQLAuth_SavePasswordReset(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -1355,7 +1344,7 @@ func TestSQLAuth_SavePasswordReset(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				return &SQLAuth{
@@ -1383,7 +1372,7 @@ func TestSQLAuth_SavePasswordReset(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{
@@ -1431,7 +1420,7 @@ func TestSQLAuth_DeletePasswordReset(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLAuth{
@@ -1455,7 +1444,7 @@ func TestSQLAuth_DeletePasswordReset(t *testing.T) {
 					ToSQL()
 
 				mock.ExpectExec(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLAuth{

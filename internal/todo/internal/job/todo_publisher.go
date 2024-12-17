@@ -18,7 +18,7 @@ type todoPublisher struct {
 }
 
 func (e *todoPublisher) Start() error {
-	ctx, span := e.tel.Tracer().Start(context.Background(), "job.todoPublisher.Start")
+	ctx, span := e.tel.Tracer().Start(context.Background(), "todo.job.todoPublisher.Start")
 	defer span.End()
 
 	e.tel.Logger().Info(ctx, "todo publisher has started")

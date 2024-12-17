@@ -10,6 +10,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +33,14 @@ func Test_httpEndpoint_Create(t *testing.T) {
 			want:    nil,
 			wantErr: errInvalidBody,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
+
+				return &httpEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -47,13 +55,21 @@ func Test_httpEndpoint_Create(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.CreateInput{Title: "title", Description: "description"}
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
+
+				in := domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				}
 				createMock.EXPECT().
 					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -70,14 +86,22 @@ func Test_httpEndpoint_Create(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.CreateInput{Title: "title", Description: "description"}
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
+
+				in := domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				}
 				out := &domain.CreateOutput{ID: 12}
 				createMock.EXPECT().
 					Call(ctx, in).
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -114,8 +138,13 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				return &httpEndpoint{
+					tel:    tel,
 					findUC: nil,
 				}
 			},
@@ -132,6 +161,10 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: 1}
 				deleteMock.EXPECT().
@@ -139,6 +172,7 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -155,6 +189,10 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: 1}
 				out := &domain.DeleteOutput{ID: 1}
@@ -163,6 +201,7 @@ func Test_httpEndpoint_Delete(t *testing.T) {
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -199,7 +238,14 @@ func Test_httpEndpoint_Find(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
+
+				return &httpEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -214,6 +260,10 @@ func Test_httpEndpoint_Find(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: 11}
 				findMock.EXPECT().
@@ -221,6 +271,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -243,6 +294,10 @@ func Test_httpEndpoint_Find(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: 11}
 				out := &domain.Todo{
@@ -257,6 +312,7 @@ func Test_httpEndpoint_Find(t *testing.T) {
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -296,6 +352,10 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -307,6 +367,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -336,6 +397,10 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -357,6 +422,7 @@ func Test_httpEndpoint_Fetch(t *testing.T) {
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -393,9 +459,13 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
 
 				return &httpEndpoint{
-					findUC: nil,
+					tel: tel,
 				}
 			},
 		},
@@ -411,7 +481,14 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			want:    nil,
 			wantErr: errInvalidBody,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				return &httpEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -427,6 +504,10 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
 
 				in := domain.UpdateStatusInput{ID: 2, Status: "done"}
 				updateStatusMock.EXPECT().
@@ -434,6 +515,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStatusMock,
 				}
 			},
@@ -451,6 +533,10 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
 
 				in := domain.UpdateStatusInput{ID: 2, Status: "done"}
 				out := &domain.UpdateStatusOutput{ID: 2, Status: enum.New(domain.TodoStatusDone)}
@@ -459,6 +545,7 @@ func Test_httpEndpoint_UpdateStatus(t *testing.T) {
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStatusMock,
 				}
 			},
@@ -495,8 +582,13 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
 
 				return &httpEndpoint{
+					tel:    tel,
 					findUC: nil,
 				}
 			},
@@ -513,7 +605,14 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			want:    nil,
 			wantErr: errInvalidBody,
 			mockFn: func(ctx context.Context) *httpEndpoint {
-				return &httpEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
+
+				return &httpEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -529,6 +628,10 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          2,
@@ -541,6 +644,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 					Return(nil, assert.AnError)
 
 				return &httpEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},
@@ -564,6 +668,10 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          2,
@@ -583,6 +691,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 					Return(out, nil)
 
 				return &httpEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},

@@ -27,7 +27,7 @@ func NewSQLTodo(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *S
 }
 
 func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.Create")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -47,7 +47,7 @@ func (st *SQLTodo) Create(ctx context.Context, todo domain.Todo) error {
 }
 
 func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Delete")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.Delete")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -61,7 +61,7 @@ func (st *SQLTodo) Delete(ctx context.Context, id uint64) error {
 }
 
 func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Find")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.Find")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -76,7 +76,7 @@ func (st *SQLTodo) Find(ctx context.Context, id uint64) (*domain.Todo, error) {
 }
 
 func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error) {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.Fetch")
 	defer span.End()
 
 	cursor, hasCursor := filter["cursor"].(uint64)
@@ -106,7 +106,7 @@ func (st *SQLTodo) Fetch(ctx context.Context, filter map[string]any) ([]domain.T
 }
 
 func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts enum.Enum[domain.TodoStatus]) error {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.UpdateStatus")
 	defer span.End()
 
 	query := func() (string, []any, error) {
@@ -121,7 +121,7 @@ func (st *SQLTodo) UpdateStatus(ctx context.Context, id uint64, sts enum.Enum[do
 }
 
 func (st *SQLTodo) Update(ctx context.Context, todo domain.Todo) error {
-	ctx, span := st.tel.Tracer().Start(ctx, "outbound.SQLTodo.Create")
+	ctx, span := st.tel.Tracer().Start(ctx, "auth.outbound.SQLTodo.Update")
 	defer span.End()
 
 	query := func() (string, []any, error) {

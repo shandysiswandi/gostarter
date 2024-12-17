@@ -3,6 +3,7 @@ package dbops
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -411,6 +412,27 @@ func TestSQLGets(t *testing.T) {
 			if db != nil {
 				db.Close()
 			}
+		})
+	}
+}
+
+func TestAnyToValue(t *testing.T) {
+	tests := []struct {
+		name string
+		args []any
+		want []driver.Value
+	}{
+		{
+			name: "Success",
+			args: []any{1, "one", true},
+			want: []driver.Value{1, "one", true},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := AnyToValue(tt.args)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
