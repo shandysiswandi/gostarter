@@ -7,6 +7,8 @@ import (
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,22 +28,30 @@ func Test_grpcEndpoint_Create(t *testing.T) {
 			name: "ErrorCallUC",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.CreateRequest{Title: "title", Description: "description"},
+				req: &pb.CreateRequest{
+					Title:       "title",
+					Description: "description",
+				},
 			},
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
 
 				in := domain.CreateInput{
 					Title:       a.req.GetTitle(),
 					Description: a.req.GetDescription(),
 				}
 				createMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -50,12 +60,19 @@ func Test_grpcEndpoint_Create(t *testing.T) {
 			name: "Success",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.CreateRequest{Title: "title", Description: "description"},
+				req: &pb.CreateRequest{
+					Title:       "title",
+					Description: "description",
+				},
 			},
 			want:    &pb.CreateResponse{Id: 10},
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
 
 				in := domain.CreateInput{
 					Title:       a.req.GetTitle(),
@@ -63,10 +80,11 @@ func Test_grpcEndpoint_Create(t *testing.T) {
 				}
 				out := &domain.CreateOutput{ID: 10}
 				createMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -105,13 +123,18 @@ func Test_grpcEndpoint_Delete(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: a.req.GetId()}
 				deleteMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -126,14 +149,19 @@ func Test_grpcEndpoint_Delete(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: a.req.GetId()}
 				out := &domain.DeleteOutput{ID: 10}
 				deleteMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -172,13 +200,18 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: a.req.GetId()}
 				findMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -199,6 +232,10 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: a.req.GetId()}
 				out := &domain.Todo{
@@ -206,13 +243,14 @@ func Test_grpcEndpoint_Find(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDone,
+					Status:      enum.New(domain.TodoStatusDone),
 				}
 				findMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -255,6 +293,10 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -262,10 +304,11 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 					Status: a.req.Status.String(),
 				}
 				fetchMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -296,6 +339,10 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -308,16 +355,17 @@ func Test_grpcEndpoint_Fetch(t *testing.T) {
 						UserID:      11,
 						Title:       "title",
 						Description: "description",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					}},
 					NextCursor: "NTY",
 					HasMore:    true,
 				}
 				fetchMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -350,19 +398,30 @@ func Test_grpcEndpoint_UpdateStatus(t *testing.T) {
 			name: "ErrorCallUC",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.UpdateStatusRequest{Id: 10, Status: pb.Status_STATUS_DONE},
+				req: &pb.UpdateStatusRequest{
+					Id:     10,
+					Status: pb.Status_STATUS_DONE,
+				},
 			},
 			want:    nil,
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.UpdateStatusInput{ID: 10, Status: "STATUS_DONE"}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				in := domain.UpdateStatusInput{
+					ID:     10,
+					Status: "DONE",
+				}
 				updateStatusMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStatusMock,
 				}
 			},
@@ -371,20 +430,37 @@ func Test_grpcEndpoint_UpdateStatus(t *testing.T) {
 			name: "Success",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.UpdateStatusRequest{Id: 10, Status: pb.Status_STATUS_DONE},
+				req: &pb.UpdateStatusRequest{
+					Id:     10,
+					Status: pb.Status_STATUS_DONE,
+				},
 			},
-			want:    &pb.UpdateStatusResponse{Id: 10, Status: pb.Status_STATUS_DONE},
+			want: &pb.UpdateStatusResponse{
+				Id:     10,
+				Status: pb.Status_STATUS_DONE,
+			},
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				updateStatusMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.UpdateStatusInput{ID: 10, Status: "STATUS_DONE"}
-				out := &domain.UpdateStatusOutput{ID: 10, Status: domain.TodoStatusDone}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				in := domain.UpdateStatusInput{
+					ID:     10,
+					Status: "DONE",
+				}
+				out := &domain.UpdateStatusOutput{
+					ID:     10,
+					Status: enum.New(domain.TodoStatusDone),
+				}
 				updateStatusMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStatusMock,
 				}
 			},
@@ -428,18 +504,23 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *grpcEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          10,
 					Title:       "title",
 					Description: "description",
-					Status:      "STATUS_DROP",
+					Status:      "DROP",
 				}
 				updateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},
@@ -465,25 +546,30 @@ func Test_grpcEndpoint_Update(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *grpcEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          10,
 					Title:       "title",
 					Description: "description",
-					Status:      "STATUS_DROP",
+					Status:      "DROP",
 				}
 				out := &domain.Todo{
 					ID:          10,
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}
 				updateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &grpcEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},

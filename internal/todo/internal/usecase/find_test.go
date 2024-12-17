@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
@@ -50,8 +51,11 @@ func TestFind_Execute(t *testing.T) {
 		mockFn  func(a args) *Find
 	}{
 		{
-			name:    "ErrorValidation",
-			args:    args{ctx: context.Background(), in: domain.FindInput{}},
+			name: "ErrorValidation",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.FindInput{ID: 11},
+			},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Find {
@@ -61,7 +65,9 @@ func TestFind_Execute(t *testing.T) {
 				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(assert.AnError)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(assert.AnError)
 
 				return &Find{
 					telemetry: mtel,
@@ -71,8 +77,11 @@ func TestFind_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "ErrorStore",
-			args:    args{ctx: context.Background(), in: domain.FindInput{}},
+			name: "ErrorStore",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.FindInput{ID: 11},
+			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to find todo", assert.AnError),
 			mockFn: func(a args) *Find {
@@ -83,9 +92,13 @@ func TestFind_Execute(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				store.EXPECT().Find(ctx, a.in.ID).Return(nil, assert.AnError)
+				store.EXPECT().
+					Find(ctx, a.in.ID).
+					Return(nil, assert.AnError)
 
 				return &Find{
 					telemetry: mtel,
@@ -95,8 +108,11 @@ func TestFind_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "StoreNotFound",
-			args:    args{ctx: context.Background(), in: domain.FindInput{}},
+			name: "StoreNotFound",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.FindInput{ID: 11},
+			},
 			want:    nil,
 			wantErr: goerror.NewBusiness("todo not found", goerror.CodeNotFound),
 			mockFn: func(a args) *Find {
@@ -107,9 +123,13 @@ func TestFind_Execute(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				store.EXPECT().Find(ctx, a.in.ID).Return(nil, nil)
+				store.EXPECT().
+					Find(ctx, a.in.ID).
+					Return(nil, nil)
 
 				return &Find{
 					telemetry: mtel,
@@ -120,13 +140,16 @@ func TestFind_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.Background(), in: domain.FindInput{}},
+			args: args{
+				ctx: context.Background(),
+				in:  domain.FindInput{ID: 10},
+			},
 			want: &domain.Todo{
 				ID:          10,
 				UserID:      11,
 				Title:       "test 1",
 				Description: "test 2",
-				Status:      domain.TodoStatusDrop,
+				Status:      enum.New(domain.TodoStatusDrop),
 			},
 			wantErr: nil,
 			mockFn: func(a args) *Find {
@@ -137,15 +160,20 @@ func TestFind_Execute(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Find")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				store.EXPECT().Find(ctx, a.in.ID).Return(&domain.Todo{
+				todo := &domain.Todo{
 					ID:          10,
 					UserID:      11,
 					Title:       "test 1",
 					Description: "test 2",
-					Status:      domain.TodoStatusDrop,
-				}, nil)
+					Status:      enum.New(domain.TodoStatusDrop),
+				}
+				store.EXPECT().
+					Find(ctx, a.in.ID).
+					Return(todo, nil)
 
 				return &Find{
 					telemetry: mtel,

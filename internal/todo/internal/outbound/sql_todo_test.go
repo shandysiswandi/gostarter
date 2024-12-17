@@ -3,26 +3,16 @@ package outbound
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
-
-func testconvertArgs(args []any) []driver.Value {
-	var driverArgs []driver.Value
-
-	for _, arg := range args {
-		driverArgs = append(driverArgs, arg)
-	}
-
-	return driverArgs
-}
 
 func TestNewSQLTodo(t *testing.T) {
 	type args struct {
@@ -85,7 +75,7 @@ func TestSQLTodo_Create(t *testing.T) {
 					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).WillReturnError(assert.AnError)
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).WillReturnError(assert.AnError)
 
 				return &SQLTodo{
 					db:  db,
@@ -106,7 +96,7 @@ func TestSQLTodo_Create(t *testing.T) {
 					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				return &SQLTodo{
@@ -128,7 +118,7 @@ func TestSQLTodo_Create(t *testing.T) {
 					Vals([]any{a.todo.ID, a.todo.UserID, a.todo.Title, a.todo.Description, a.todo.Status}).
 					Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLTodo{
@@ -171,7 +161,7 @@ func TestSQLTodo_Delete(t *testing.T) {
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Delete("todos").
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLTodo{
@@ -191,7 +181,7 @@ func TestSQLTodo_Delete(t *testing.T) {
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Delete("todos").
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLTodo{
@@ -236,7 +226,7 @@ func TestSQLTodo_Find(t *testing.T) {
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectQuery(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLTodo{
@@ -254,7 +244,7 @@ func TestSQLTodo_Find(t *testing.T) {
 				UserID:      11,
 				Title:       "title test",
 				Description: "description test",
-				Status:      domain.TodoStatusInProgress,
+				Status:      enum.New(domain.TodoStatusInProgress),
 			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
@@ -266,7 +256,7 @@ func TestSQLTodo_Find(t *testing.T) {
 				row := sqlmock.NewRows([]string{"id", "user_id", "title", "description", "status"}).
 					AddRow(1, 11, "title test", "description test", "IN_PROGRESS")
 
-				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectQuery(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(row)
 
 				return &SQLTodo{
@@ -312,7 +302,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 				query, args, _ := goqu.Dialect(dbops.PostgresDriver).Select("id", "user_id", "title", "description", "status").
 					From("todos").Prepared(true).ToSQL()
 
-				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectQuery(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLTodo{
@@ -331,13 +321,13 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					UserID:      12,
 					Title:       "title test",
 					Description: "description test",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}, {
 					ID:          2,
 					UserID:      13,
 					Title:       "title test 2",
 					Description: "description test 2",
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				},
 			},
 			wantErr: nil,
@@ -351,7 +341,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					AddRow(1, 12, "title test", "description test", "DROP").
 					AddRow(2, 13, "title test 2", "description test 2", "INITIATE")
 
-				mock.ExpectQuery(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectQuery(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(rows)
 
 				return &SQLTodo{
@@ -366,7 +356,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 			args: args{ctx: context.Background(), in: map[string]any{
 				"cursor": uint64(1),
 				"limit":  int(1),
-				"status": domain.TodoStatusDone,
+				"status": enum.New(domain.TodoStatusDone),
 			}},
 			want: []domain.Todo{
 				{
@@ -374,14 +364,14 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					UserID:      12,
 					Title:       "title test",
 					Description: "description test",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				},
 				{
 					ID:          2,
 					UserID:      13,
 					Title:       "title test 2",
 					Description: "description test 2",
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				},
 			},
 			wantErr: nil,
@@ -402,7 +392,7 @@ func TestSQLTodo_Fetch(t *testing.T) {
 					AddRow(2, 13, "title test 2", "description test 2", "INITIATE")
 
 				mock.ExpectQuery(query).
-					WithArgs(testconvertArgs(args)...).
+					WithArgs(dbops.AnyToValue(args)...).
 					WillReturnRows(rows)
 
 				return &SQLTodo{
@@ -429,7 +419,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		id  uint64
-		sts domain.TodoStatus
+		sts enum.Enum[domain.TodoStatus]
 	}
 	tests := []struct {
 		name    string
@@ -438,8 +428,12 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name:    "Error",
-			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDrop},
+			name: "Error",
+			args: args{
+				ctx: context.Background(),
+				id:  1,
+				sts: enum.New(domain.TodoStatusDrop),
+			},
 			wantErr: assert.AnError,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -448,7 +442,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 					Set(map[string]any{"status": a.sts}).
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLTodo{
@@ -459,8 +453,12 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), id: 1, sts: domain.TodoStatusDone},
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				id:  1,
+				sts: enum.New(domain.TodoStatusDone),
+			},
 			wantErr: nil,
 			mockFn: func(a args) (*SQLTodo, func() error) {
 				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -469,7 +467,7 @@ func TestSQLTodo_UpdateStatus(t *testing.T) {
 					Set(map[string]any{"status": a.sts}).
 					Where(goqu.Ex{"id": a.id}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLTodo{
@@ -516,7 +514,7 @@ func TestSQLTodo_Update(t *testing.T) {
 					"status":      a.todo.Status,
 				}).Where(goqu.Ex{"id": a.todo.ID}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnError(assert.AnError)
 
 				return &SQLTodo{
@@ -540,7 +538,7 @@ func TestSQLTodo_Update(t *testing.T) {
 					"status":      a.todo.Status,
 				}).Where(goqu.Ex{"id": a.todo.ID}).Prepared(true).ToSQL()
 
-				mock.ExpectExec(query).WithArgs(testconvertArgs(args)...).
+				mock.ExpectExec(query).WithArgs(dbops.AnyToValue(args)...).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				return &SQLTodo{

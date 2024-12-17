@@ -3,6 +3,7 @@ package todo
 import (
 	"testing"
 
+	"github.com/doug-martin/goqu/v9"
 	configMock "github.com/shandysiswandi/gostarter/pkg/config/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/stretchr/testify/assert"
@@ -18,17 +19,21 @@ func TestNew(t *testing.T) {
 		{
 			name: "Success",
 			dep: func() Dependency {
-				mc := new(configMock.MockConfig)
-
-				mc.EXPECT().GetString("database.driver").Return("mysql").Once()
-				mc.EXPECT().GetBool("feature.flag.graphql.playground").Return(true).Once()
+				mc := configMock.NewMockConfig(t)
 				mc.EXPECT().GetBool("feature.flag.todo.job").Return(true).Once()
 
 				return Dependency{
-					Config:     mc,
-					Router:     framework.NewRouter(),
-					GQLRouter:  framework.NewRouter(),
-					GRPCServer: grpc.NewServer(),
+					Database:     nil,
+					QueryBuilder: goqu.DialectWrapper{},
+					Messaging:    nil,
+					Config:       mc,
+					UIDNumber:    nil,
+					CodecJSON:    nil,
+					Validator:    nil,
+					Router:       framework.NewRouter(),
+					GQLRouter:    framework.NewRouter(),
+					GRPCServer:   grpc.NewServer(),
+					Telemetry:    nil,
 				}
 			},
 			wantErr: nil,

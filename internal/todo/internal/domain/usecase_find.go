@@ -9,5 +9,5 @@ type Find interface {
 }
 
 type FindInput struct {
-	ID uint64 `validate:"gt=0"`
+	ID uint64 `validate:"required,gt=0"`
 }

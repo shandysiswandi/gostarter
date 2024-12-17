@@ -15,7 +15,6 @@ func TestInbound_RegisterTodoServiceServer(t *testing.T) {
 		{
 			name: "Success",
 			in: func() Inbound {
-
 				return Inbound{
 					Router:         framework.NewRouter(),
 					GQLRouter:      framework.NewRouter(),

@@ -50,8 +50,11 @@ func TestDelete_Call(t *testing.T) {
 		mockFn  func(a args) *Delete
 	}{
 		{
-			name:    "ErrorValidation",
-			args:    args{ctx: context.Background(), in: domain.DeleteInput{}},
+			name: "ErrorValidation",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.DeleteInput{ID: 12},
+			},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Delete {
@@ -61,7 +64,9 @@ func TestDelete_Call(t *testing.T) {
 				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(assert.AnError)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(assert.AnError)
 
 				return &Delete{
 					telemetry: mtel,
@@ -71,8 +76,11 @@ func TestDelete_Call(t *testing.T) {
 			},
 		},
 		{
-			name:    "ErrorStore",
-			args:    args{ctx: context.Background(), in: domain.DeleteInput{}},
+			name: "ErrorStore",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.DeleteInput{ID: 12},
+			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to delete todo", assert.AnError),
 			mockFn: func(a args) *Delete {
@@ -83,9 +91,13 @@ func TestDelete_Call(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				store.EXPECT().Delete(ctx, a.in.ID).Return(assert.AnError)
+				store.EXPECT().
+					Delete(ctx, a.in.ID).
+					Return(assert.AnError)
 
 				return &Delete{
 					telemetry: mtel,
@@ -95,9 +107,12 @@ func TestDelete_Call(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), in: domain.DeleteInput{ID: 111}},
-			want:    &domain.DeleteOutput{ID: 111},
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				in:  domain.DeleteInput{ID: 12},
+			},
+			want:    &domain.DeleteOutput{ID: 12},
 			wantErr: nil,
 			mockFn: func(a args) *Delete {
 				mtel := telemetry.NewTelemetry()
@@ -107,9 +122,12 @@ func TestDelete_Call(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.Delete")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				store.EXPECT().Delete(ctx, a.in.ID).Return(nil)
+				store.EXPECT().
+					Delete(ctx, a.in.ID).Return(nil)
 
 				return &Delete{
 					telemetry: mtel,

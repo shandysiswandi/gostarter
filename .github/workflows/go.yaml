@@ -33,14 +33,6 @@ jobs:
         with:
           version: "v1.62.2"
 
-      - name: Cache Redis installation
-        uses: actions/cache@v4
-        with:
-          path: /usr/bin/redis-server
-          key: redis-install-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            redis-install-${{ runner.os }}-
-
       - name: Start MySQL, Postgres and Redis
         run: |
           if [ ! -f /usr/bin/redis-server ]; then 
@@ -58,7 +50,7 @@ jobs:
 
       - name: Run tests and validate coverage
         run: |
-          go test $(go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') -coverprofile=coverage.out -race
+          go test $(go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') -coverprofile=coverage.out -race -parallel 4
 
           # Check the coverage percentage
           COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')

@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/pagination"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -50,8 +51,15 @@ func TestFetch_Execute(t *testing.T) {
 		mockFn  func(a args) *Fetch
 	}{
 		{
-			name:    "ErrorStore",
-			args:    args{ctx: context.Background(), in: domain.FetchInput{}},
+			name: "ErrorStore",
+			args: args{
+				ctx: context.Background(),
+				in: domain.FetchInput{
+					Cursor: "NTY",
+					Limit:  "1",
+					Status: "",
+				},
+			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to fetch todo", assert.AnError),
 			mockFn: func(a args) *Fetch {
@@ -67,7 +75,9 @@ func TestFetch_Execute(t *testing.T) {
 					"cursor": cursor,
 					"limit":  limit,
 				}
-				store.EXPECT().Fetch(ctx, filter).Return(nil, assert.AnError)
+				store.EXPECT().
+					Fetch(ctx, filter).
+					Return(nil, assert.AnError)
 
 				return &Fetch{
 					telemetry: mtel,
@@ -77,18 +87,21 @@ func TestFetch_Execute(t *testing.T) {
 		},
 		{
 			name: "Success",
-			args: args{ctx: context.Background(), in: domain.FetchInput{
-				Cursor: "",
-				Limit:  "1",
-				Status: "done",
-			}},
+			args: args{
+				ctx: context.Background(),
+				in: domain.FetchInput{
+					Cursor: "",
+					Limit:  "1",
+					Status: "done",
+				},
+			},
 			want: &domain.FetchOutput{
 				Todos: []domain.Todo{{
 					ID:          1,
 					UserID:      2,
 					Title:       "test 1",
 					Description: "test 1",
-					Status:      domain.TodoStatusDone,
+					Status:      enum.New(domain.TodoStatusDone),
 				}},
 				NextCursor: "Mg",
 				HasMore:    true,
@@ -106,24 +119,27 @@ func TestFetch_Execute(t *testing.T) {
 				filter := map[string]any{
 					"cursor": cursor,
 					"limit":  limit,
-					"status": domain.ParseTodoStatus(a.in.Status),
+					"status": enum.New(enum.Parse[domain.TodoStatus](a.in.Status)),
 				}
-				store.EXPECT().Fetch(ctx, filter).Return([]domain.Todo{
+				todos := []domain.Todo{
 					{
 						ID:          1,
 						UserID:      2,
 						Title:       "test 1",
 						Description: "test 1",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					},
 					{
 						ID:          2,
 						UserID:      2,
 						Title:       "test 2",
 						Description: "test 2",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					},
-				}, nil)
+				}
+				store.EXPECT().
+					Fetch(ctx, filter).
+					Return(todos, nil)
 
 				return &Fetch{
 					telemetry: mtel,

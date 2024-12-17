@@ -6,6 +6,7 @@ package dbops
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"log"
 )
@@ -164,4 +165,13 @@ func SQLGets[T any, PT Row[T]](ctx context.Context, q Queryer, qp QueryProvider)
 	}
 
 	return entities, nil
+}
+
+func AnyToValue(args []any) []driver.Value {
+	driverArgs := make([]driver.Value, 0, len(args))
+	for _, arg := range args {
+		driverArgs = append(driverArgs, arg)
+	}
+
+	return driverArgs
 }

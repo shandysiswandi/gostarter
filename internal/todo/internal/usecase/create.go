@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -53,7 +54,7 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 		UserID:      userID,
 		Title:       in.Title,
 		Description: in.Description,
-		Status:      domain.TodoStatusInitiate,
+		Status:      enum.New(domain.TodoStatusInitiate),
 	})
 	if errors.Is(err, domain.ErrTodoNotCreated) {
 		s.telemetry.Logger().Warn(ctx, "todo created but db not affected")

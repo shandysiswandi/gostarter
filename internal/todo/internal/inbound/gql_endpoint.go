@@ -6,6 +6,7 @@ import (
 
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 func getString(ptr *string) string {
@@ -27,6 +28,8 @@ func getStatusString(status *ql.Status) string {
 type gqlEndpoint struct {
 	ql.Resolver
 
+	tel *telemetry.Telemetry
+
 	findUC         domain.Find
 	fetchUC        domain.Fetch
 	createUC       domain.Create
@@ -35,11 +38,14 @@ type gqlEndpoint struct {
 	updateStatusUC domain.UpdateStatus
 }
 
-func (e *gqlEndpoint) Mutation() ql.MutationResolver { return e }
+func (l *gqlEndpoint) Mutation() ql.MutationResolver { return l }
 
-func (e *gqlEndpoint) Query() ql.QueryResolver { return e }
+func (l *gqlEndpoint) Query() ql.QueryResolver { return l }
 
-func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) (*ql.FetchOutput, error) {
+func (l *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) (*ql.FetchOutput, error) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Fetch")
+	defer span.End()
+
 	input := domain.FetchInput{}
 	if in != nil {
 		input = domain.FetchInput{
@@ -49,7 +55,7 @@ func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) (*ql.FetchOu
 		}
 	}
 
-	resp, err := e.fetchUC.Call(ctx, input)
+	resp, err := l.fetchUC.Call(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +80,16 @@ func (e *gqlEndpoint) Fetch(ctx context.Context, in *ql.FetchInput) (*ql.FetchOu
 	}, nil
 }
 
-func (e *gqlEndpoint) Find(ctx context.Context, id string) (*ql.Todo, error) {
+func (l *gqlEndpoint) Find(ctx context.Context, id string) (*ql.Todo, error) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Find")
+	defer span.End()
+
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.findUC.Call(ctx, domain.FindInput{ID: idu64})
+	resp, err := l.findUC.Call(ctx, domain.FindInput{ID: idu64})
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +103,11 @@ func (e *gqlEndpoint) Find(ctx context.Context, id string) (*ql.Todo, error) {
 	}, nil
 }
 
-func (e *gqlEndpoint) Create(ctx context.Context, in ql.CreateInput) (string, error) {
-	resp, err := e.createUC.Call(ctx, domain.CreateInput{Title: in.Title, Description: in.Description})
+func (l *gqlEndpoint) Create(ctx context.Context, in ql.CreateInput) (string, error) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Create")
+	defer span.End()
+
+	resp, err := l.createUC.Call(ctx, domain.CreateInput{Title: in.Title, Description: in.Description})
 	if err != nil {
 		return "", err
 	}
@@ -103,13 +115,16 @@ func (e *gqlEndpoint) Create(ctx context.Context, in ql.CreateInput) (string, er
 	return strconv.FormatUint(resp.ID, 10), nil
 }
 
-func (e *gqlEndpoint) Delete(ctx context.Context, id string) (string, error) {
+func (l *gqlEndpoint) Delete(ctx context.Context, id string) (string, error) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Delete")
+	defer span.End()
+
 	idu64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return "", errFailedParseToUint
 	}
 
-	resp, err := e.deleteUC.Call(ctx, domain.DeleteInput{ID: idu64})
+	resp, err := l.deleteUC.Call(ctx, domain.DeleteInput{ID: idu64})
 	if err != nil {
 		return "", err
 	}
@@ -117,15 +132,18 @@ func (e *gqlEndpoint) Delete(ctx context.Context, id string) (string, error) {
 	return strconv.FormatUint(resp.ID, 10), nil
 }
 
-func (e *gqlEndpoint) UpdateStatus(ctx context.Context, in ql.UpdateStatusInput) (
+func (l *gqlEndpoint) UpdateStatus(ctx context.Context, in ql.UpdateStatusInput) (
 	*ql.UpdateStatusOutput, error,
 ) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+	defer span.End()
+
 	idu64, err := strconv.ParseUint(in.ID, 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.updateStatusUC.Call(ctx, domain.UpdateStatusInput{ID: idu64, Status: in.Status.String()})
+	resp, err := l.updateStatusUC.Call(ctx, domain.UpdateStatusInput{ID: idu64, Status: in.Status.String()})
 	if err != nil {
 		return nil, err
 	}
@@ -136,13 +154,16 @@ func (e *gqlEndpoint) UpdateStatus(ctx context.Context, in ql.UpdateStatusInput)
 	}, nil
 }
 
-func (e *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.Todo, error) {
+func (l *gqlEndpoint) Update(ctx context.Context, in ql.UpdateInput) (*ql.Todo, error) {
+	ctx, span := l.tel.Tracer().Start(ctx, "todo.inbound.gqlEndpoint.Update")
+	defer span.End()
+
 	idu64, err := strconv.ParseUint(in.ID, 10, 64)
 	if err != nil {
 		return nil, errFailedParseToUint
 	}
 
-	resp, err := e.updateUC.Call(ctx, domain.UpdateInput{
+	resp, err := l.updateUC.Call(ctx, domain.UpdateInput{
 		ID:          idu64,
 		Title:       in.Title,
 		Description: in.Description,

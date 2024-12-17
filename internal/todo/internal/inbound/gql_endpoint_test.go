@@ -7,6 +7,8 @@ import (
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +27,7 @@ func Test_gqlEndpoint_Mutation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := tt.e.Mutation()
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, tt.e.Mutation())
 		})
 	}
 }
@@ -46,8 +47,7 @@ func Test_gqlEndpoint_Query(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := tt.e.Query()
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, tt.e.Query())
 		})
 	}
 }
@@ -81,6 +81,10 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -88,10 +92,11 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 					Status: "UNKNOWN",
 				}
 				fetchMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -122,6 +127,10 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				fetchMock := mockz.NewMockFetch(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Fetch")
+				defer span.End()
 
 				in := domain.FetchInput{
 					Cursor: "Mg",
@@ -134,16 +143,17 @@ func Test_gqlEndpoint_Fetch(t *testing.T) {
 						UserID:      11,
 						Title:       "title",
 						Description: "description",
-						Status:      domain.TodoStatusDone,
+						Status:      enum.New(domain.TodoStatusDone),
 					}},
 					NextCursor: "NTY",
 					HasMore:    true,
 				}
 				fetchMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:     tel,
 					fetchUC: fetchMock,
 				}
 			},
@@ -180,7 +190,14 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(a args) *gqlEndpoint {
-				return &gqlEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
+
+				return &gqlEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -193,13 +210,18 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: 10}
 				findMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -220,6 +242,10 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				findMock := mockz.NewMockFind(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Find")
+				defer span.End()
 
 				in := domain.FindInput{ID: 10}
 				out := &domain.Todo{
@@ -227,13 +253,14 @@ func Test_gqlEndpoint_Find(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusDrop,
+					Status:      enum.New(domain.TodoStatusDrop),
 				}
 				findMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:    tel,
 					findUC: findMock,
 				}
 			},
@@ -271,13 +298,21 @@ func Test_gqlEndpoint_Create(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.CreateInput{Title: "title", Description: "description"}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
+
+				in := domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				}
 				createMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -292,14 +327,22 @@ func Test_gqlEndpoint_Create(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				createMock := mockz.NewMockCreate(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.CreateInput{Title: "title", Description: "description"}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Create")
+				defer span.End()
+
+				in := domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				}
 				out := &domain.CreateOutput{ID: 10}
 				createMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					createUC: createMock,
 				}
 			},
@@ -336,7 +379,14 @@ func Test_gqlEndpoint_Delete(t *testing.T) {
 			want:    "",
 			wantErr: errFailedParseToUint,
 			mockFn: func(a args) *gqlEndpoint {
-				return &gqlEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
+
+				return &gqlEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -349,13 +399,18 @@ func Test_gqlEndpoint_Delete(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: 10}
 				deleteMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -370,14 +425,19 @@ func Test_gqlEndpoint_Delete(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				deleteMock := mockz.NewMockDelete(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Delete")
+				defer span.End()
 
 				in := domain.DeleteInput{ID: 10}
 				out := &domain.DeleteOutput{ID: 10}
 				deleteMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					deleteUC: deleteMock,
 				}
 			},
@@ -414,7 +474,14 @@ func Test_gqlEndpoint_UpdateStatus(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(a args) *gqlEndpoint {
-				return &gqlEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				return &gqlEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -427,13 +494,21 @@ func Test_gqlEndpoint_UpdateStatus(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				updateStateMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.UpdateStatusInput{ID: 10, Status: ql.StatusDone.String()}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				in := domain.UpdateStatusInput{
+					ID:     10,
+					Status: ql.StatusDone.String(),
+				}
 				updateStateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStateMock,
 				}
 			},
@@ -448,14 +523,25 @@ func Test_gqlEndpoint_UpdateStatus(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				updateStateMock := mockz.NewMockUpdateStatus(t)
+				tel := telemetry.NewTelemetry()
 
-				in := domain.UpdateStatusInput{ID: 10, Status: ql.StatusDone.String()}
-				out := &domain.UpdateStatusOutput{ID: 10, Status: domain.TodoStatusDone}
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.UpdateStatus")
+				defer span.End()
+
+				in := domain.UpdateStatusInput{
+					ID:     10,
+					Status: ql.StatusDone.String(),
+				}
+				out := &domain.UpdateStatusOutput{
+					ID:     10,
+					Status: enum.New(domain.TodoStatusDone),
+				}
 				updateStateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:            tel,
 					updateStatusUC: updateStateMock,
 				}
 			},
@@ -497,7 +583,14 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 			want:    nil,
 			wantErr: errFailedParseToUint,
 			mockFn: func(a args) *gqlEndpoint {
-				return &gqlEndpoint{}
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
+
+				return &gqlEndpoint{
+					tel: tel,
+				}
 			},
 		},
 		{
@@ -515,6 +608,10 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *gqlEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          10,
@@ -523,10 +620,11 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 					Status:      ql.StatusInProgress.String(),
 				}
 				updateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(nil, assert.AnError)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},
@@ -552,6 +650,10 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *gqlEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(a.ctx, "todo.inbound.gqlEndpoint.Update")
+				defer span.End()
 
 				in := domain.UpdateInput{
 					ID:          10,
@@ -564,13 +666,14 @@ func Test_gqlEndpoint_Update(t *testing.T) {
 					UserID:      11,
 					Title:       "title",
 					Description: "description",
-					Status:      domain.TodoStatusInProgress,
+					Status:      enum.New(domain.TodoStatusInProgress),
 				}
 				updateMock.EXPECT().
-					Call(a.ctx, in).
+					Call(ctx, in).
 					Return(out, nil)
 
 				return &gqlEndpoint{
+					tel:      tel,
 					updateUC: updateMock,
 				}
 			},

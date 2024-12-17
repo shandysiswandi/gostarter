@@ -7,6 +7,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
@@ -56,8 +57,14 @@ func TestCreate_Execute(t *testing.T) {
 		mockFn  func(a args) *Create
 	}{
 		{
-			name:    "ErrorValidation",
-			args:    args{ctx: ctx, in: domain.CreateInput{}},
+			name: "ErrorValidation",
+			args: args{
+				ctx: ctx,
+				in: domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				},
+			},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *Create {
@@ -67,7 +74,9 @@ func TestCreate_Execute(t *testing.T) {
 				_, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(assert.AnError)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(assert.AnError)
 
 				return &Create{
 					telemetry: tel,
@@ -78,8 +87,13 @@ func TestCreate_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "ErrorNotAffected",
-			args:    args{ctx: ctx, in: domain.CreateInput{}},
+			name: "ErrorNotAffected",
+			args: args{
+				ctx: ctx,
+				in: domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				}},
 			want:    nil,
 			wantErr: goerror.NewBusiness("failed to create todo", goerror.CodeUnknown),
 			mockFn: func(a args) *Create {
@@ -91,18 +105,24 @@ func TestCreate_Execute(t *testing.T) {
 				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				idgen.EXPECT().Generate().Return(101)
+				idgen.EXPECT().
+					Generate().
+					Return(101)
 
 				input := domain.Todo{
 					ID:          101,
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
-				store.EXPECT().Create(ctx, input).Return(domain.ErrTodoNotCreated)
+				store.EXPECT().
+					Create(ctx, input).
+					Return(domain.ErrTodoNotCreated)
 
 				return &Create{
 					telemetry: tel,
@@ -113,8 +133,14 @@ func TestCreate_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "ErrorStore",
-			args:    args{ctx: ctx, in: domain.CreateInput{}},
+			name: "ErrorStore",
+			args: args{
+				ctx: ctx,
+				in: domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				},
+			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to create todo", assert.AnError),
 			mockFn: func(a args) *Create {
@@ -126,18 +152,24 @@ func TestCreate_Execute(t *testing.T) {
 				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				idgen.EXPECT().Generate().Return(101)
+				idgen.EXPECT().
+					Generate().
+					Return(101)
 
 				input := domain.Todo{
 					ID:          101,
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
-				store.EXPECT().Create(ctx, input).Return(assert.AnError)
+				store.EXPECT().
+					Create(ctx, input).
+					Return(assert.AnError)
 
 				return &Create{
 					telemetry: tel,
@@ -148,8 +180,14 @@ func TestCreate_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: ctx, in: domain.CreateInput{}},
+			name: "Success",
+			args: args{
+				ctx: ctx,
+				in: domain.CreateInput{
+					Title:       "title",
+					Description: "description",
+				},
+			},
 			want:    &domain.CreateOutput{ID: 101},
 			wantErr: nil,
 			mockFn: func(a args) *Create {
@@ -161,18 +199,24 @@ func TestCreate_Execute(t *testing.T) {
 				ctx, span := tel.Tracer().Start(a.ctx, "todo.usecase.Create")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				idgen.EXPECT().Generate().Return(101)
+				idgen.EXPECT().
+					Generate().
+					Return(101)
 
 				input := domain.Todo{
 					ID:          101,
 					UserID:      11,
 					Title:       a.in.Title,
 					Description: a.in.Description,
-					Status:      domain.TodoStatusInitiate,
+					Status:      enum.New(domain.TodoStatusInitiate),
 				}
-				store.EXPECT().Create(ctx, input).Return(nil)
+				store.EXPECT().
+					Create(ctx, input).
+					Return(nil)
 
 				return &Create{
 					telemetry: tel,

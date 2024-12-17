@@ -1,6 +1,10 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/shandysiswandi/gostarter/pkg/enum"
+)
 
 var (
 	ErrTodoNotFound   = errors.New("todo not found")
@@ -14,7 +18,7 @@ type Todo struct {
 	UserID      uint64
 	Title       string
 	Description string
-	Status      TodoStatus
+	Status      enum.Enum[TodoStatus]
 }
 
 func (t *Todo) ScanColumn() []any {

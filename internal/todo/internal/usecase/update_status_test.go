@@ -6,6 +6,7 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
+	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
@@ -37,7 +38,7 @@ func TestNewUpdateStatus(t *testing.T) {
 	}
 }
 
-func TestUpdateStatus_Execute(t *testing.T) {
+func TestUpdateStatus_Call(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		in  domain.UpdateStatusInput
@@ -50,8 +51,14 @@ func TestUpdateStatus_Execute(t *testing.T) {
 		mockFn  func(a args) *UpdateStatus
 	}{
 		{
-			name:    "ErrorValidation",
-			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{}},
+			name: "ErrorValidation",
+			args: args{
+				ctx: context.Background(),
+				in: domain.UpdateStatusInput{
+					ID:     10,
+					Status: "done",
+				},
+			},
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
 			mockFn: func(a args) *UpdateStatus {
@@ -61,7 +68,9 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				_, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(assert.AnError)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(assert.AnError)
 
 				return &UpdateStatus{
 					telemetry: mtel,
@@ -71,8 +80,14 @@ func TestUpdateStatus_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "ErrorStore",
-			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{}},
+			name: "ErrorStore",
+			args: args{
+				ctx: context.Background(),
+				in: domain.UpdateStatusInput{
+					ID:     10,
+					Status: "done",
+				},
+			},
 			want:    nil,
 			wantErr: goerror.NewServer("failed to update status todo", assert.AnError),
 			mockFn: func(a args) *UpdateStatus {
@@ -83,10 +98,14 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
-				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(assert.AnError)
+				sts := enum.New(enum.Parse[domain.TodoStatus](a.in.Status))
+				store.EXPECT().
+					UpdateStatus(ctx, a.in.ID, sts).
+					Return(assert.AnError)
 
 				return &UpdateStatus{
 					telemetry: mtel,
@@ -96,9 +115,18 @@ func TestUpdateStatus_Execute(t *testing.T) {
 			},
 		},
 		{
-			name:    "Success",
-			args:    args{ctx: context.Background(), in: domain.UpdateStatusInput{ID: 1}},
-			want:    &domain.UpdateStatusOutput{ID: 1, Status: domain.TodoStatusUnknown},
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				in: domain.UpdateStatusInput{
+					ID:     10,
+					Status: "done",
+				},
+			},
+			want: &domain.UpdateStatusOutput{
+				ID:     10,
+				Status: enum.New(domain.TodoStatusUnknown),
+			},
 			wantErr: nil,
 			mockFn: func(a args) *UpdateStatus {
 				mtel := telemetry.NewTelemetry()
@@ -108,10 +136,14 @@ func TestUpdateStatus_Execute(t *testing.T) {
 				ctx, span := mtel.Tracer().Start(a.ctx, "todo.usecase.UpdateStatus")
 				defer span.End()
 
-				validator.EXPECT().Validate(a.in).Return(nil)
+				validator.EXPECT().
+					Validate(a.in).
+					Return(nil)
 
-				sts := domain.ParseTodoStatus(a.in.Status)
-				store.EXPECT().UpdateStatus(ctx, a.in.ID, sts).Return(nil)
+				sts := enum.New(enum.Parse[domain.TodoStatus](a.in.Status))
+				store.EXPECT().
+					UpdateStatus(ctx, a.in.ID, sts).
+					Return(nil)
 
 				return &UpdateStatus{
 					telemetry: mtel,
