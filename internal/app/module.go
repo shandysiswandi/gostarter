@@ -1,10 +1,3 @@
-// Package app provides a structured framework for initializing, configuring,
-// and managing the core components of the application. It handles the setup
-// of essential services such as logging, configuration management, database
-// connections, Redis client, HTTP router and server, utility libraries, and
-// background tasks. The package ensures that all components are properly
-// initialized at startup and gracefully shut down when the application stops,
-// offering a robust foundation for building and maintaining the application.
 package app
 
 import (
@@ -18,9 +11,9 @@ import (
 
 func (a *App) initModules() {
 	a.moduleAuth()
-	a.moduleUser()
-	a.moduleTodo()
 	a.modulePayment()
+	a.moduleTodo()
+	a.moduleUser()
 }
 
 func (a *App) moduleAuth() {
@@ -45,17 +38,19 @@ func (a *App) moduleAuth() {
 	}
 }
 
-func (a *App) moduleUser() {
-	if a.config.GetBool("module.flag.user") {
-		_, err := user.New(user.Dependency{
+func (a *App) modulePayment() {
+	if a.config.GetBool("module.flag.payment") {
+		_, err := payment.New(payment.Dependency{
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
+			Transaction:  a.transaction,
+			UIDNumber:    a.uidNumber,
 			Validator:    a.validator,
 			Router:       a.httpRouter,
 			Telemetry:    a.telemetry,
 		})
 		if err != nil {
-			log.Fatalln("failed to init module user", err)
+			log.Fatalln("failed to init module payment", err)
 		}
 	}
 }
@@ -83,20 +78,17 @@ func (a *App) moduleTodo() {
 	}
 }
 
-func (a *App) modulePayment() {
-	if a.config.GetBool("module.flag.payment") {
-		_, err := payment.New(payment.Dependency{
+func (a *App) moduleUser() {
+	if a.config.GetBool("module.flag.user") {
+		_, err := user.New(user.Dependency{
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
-			Transaction:  a.transaction,
-			UIDNumber:    a.uidNumber,
 			Validator:    a.validator,
 			Router:       a.httpRouter,
-			GRPCServer:   a.grpcServer,
 			Telemetry:    a.telemetry,
 		})
 		if err != nil {
-			log.Fatalln("failed to init module payment", err)
+			log.Fatalln("failed to init module user", err)
 		}
 	}
 }

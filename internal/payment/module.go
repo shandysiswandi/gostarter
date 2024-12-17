@@ -14,7 +14,6 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/uid"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
-	"google.golang.org/grpc"
 )
 
 type Expose struct{}
@@ -25,7 +24,6 @@ type Dependency struct {
 	QueryBuilder goqu.DialectWrapper
 	Telemetry    *telemetry.Telemetry
 	Router       *framework.Router
-	GRPCServer   *grpc.Server
 	Validator    validation.Validator
 	UIDNumber    uid.NumberID
 	Hash         hash.Hash

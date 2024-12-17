@@ -1,10 +1,3 @@
-// Package app provides a structured framework for initializing, configuring,
-// and managing the core components of the application. It handles the setup
-// of essential services such as logging, configuration management, database
-// connections, Redis client, HTTP router and server, utility libraries, and
-// background tasks. The package ensures that all components are properly
-// initialized at startup and gracefully shut down when the application stops,
-// offering a robust foundation for building and maintaining the application.
 package app
 
 import (

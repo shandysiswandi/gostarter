@@ -39,6 +39,9 @@ func NewPaymentTopup(dep Dependency, s PaymentTopupStore) *PaymentTopup {
 func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 	*domain.PaymentTopupOutput, error,
 ) {
+	ctx, span := pt.telemetry.Tracer().Start(ctx, "payment.usecase.PaymentTopup")
+	defer span.End()
+
 	if err := pt.validator.Validate(in); err != nil {
 		pt.telemetry.Logger().Warn(ctx, "validation failed")
 
@@ -46,12 +49,11 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 	}
 
 	clm := jwt.GetClaim(ctx)
-
 	acc, err := pt.store.FindAccountByUserID(ctx, clm.AuthID)
 	if err != nil {
 		pt.telemetry.Logger().Error(ctx, "account fail to find", err, logger.KeyVal("user_id", clm.AuthID))
 
-		return nil, goerror.NewServer("failed to find account", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if acc == nil {
@@ -64,7 +66,7 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 	if err != nil {
 		pt.telemetry.Logger().Error(ctx, "todo fail to create", err)
 
-		return nil, goerror.NewServer("failed to create todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if top != nil {
