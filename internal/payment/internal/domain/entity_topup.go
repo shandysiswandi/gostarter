@@ -10,5 +10,10 @@ type Topup struct {
 }
 
 func (t *Topup) ScanColumn() []any {
-	return []any{&t.ID, &t.TransactionID, &t.ReferenceID, &t.Amount}
+	return []any{
+		&t.ID,
+		&t.TransactionID,
+		&t.ReferenceID,
+		&t.Amount,
+	}
 }

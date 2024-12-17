@@ -11,5 +11,11 @@ type Transfer struct {
 }
 
 func (t *Transfer) ScanColumn() []any {
-	return []any{&t.ID, &t.TransactionID, &t.SenderID, &t.RecipientID, &t.Amount}
+	return []any{
+		&t.ID,
+		&t.TransactionID,
+		&t.SenderID,
+		&t.RecipientID,
+		&t.Amount,
+	}
 }

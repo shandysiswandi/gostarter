@@ -9,5 +9,9 @@ type Account struct {
 }
 
 func (a *Account) ScanColumn() []any {
-	return []any{&a.ID, &a.UserID, &a.Balanace}
+	return []any{
+		&a.ID,
+		&a.UserID,
+		&a.Balanace,
+	}
 }
