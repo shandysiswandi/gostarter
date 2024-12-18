@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/doug-martin/goqu/v9"
@@ -306,8 +307,371 @@ func TestSQLPayment_FindTopupByReferenceID(t *testing.T) {
 	}
 }
 
-func TestSQLPayment_SaveTopup(t *testing.T) {}
+func TestSQLPayment_SaveTopup(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		t   domain.Topup
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLPayment, func() error)
+	}{
+		{
+			name: "ErrorWhenExec",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Topup{
+					ID:            10,
+					TransactionID: 20,
+					ReferenceID:   "uuid",
+					Amount:        decimal.NewFromInt(100),
+				},
+			},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
-func TestSQLPayment_SaveTransaction(t *testing.T) {}
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("topups").
+					Cols("id", "transaction_id", "reference_id", "amount").
+					Vals([]any{a.t.ID, a.t.TransactionID, a.t.ReferenceID, a.t.Amount}).
+					Prepared(true).
+					ToSQL()
 
-func TestSQLPayment_UpdateAccount(t *testing.T) {}
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "ErrorNoRowsAffected",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Topup{
+					ID:            10,
+					TransactionID: 20,
+					ReferenceID:   "uuid",
+					Amount:        decimal.NewFromInt(100),
+				},
+			},
+			wantErr: domain.ErrAccountNoRowsAffected,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("topups").
+					Cols("id", "transaction_id", "reference_id", "amount").
+					Vals([]any{a.t.ID, a.t.TransactionID, a.t.ReferenceID, a.t.Amount}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Topup{
+					ID:            10,
+					TransactionID: 20,
+					ReferenceID:   "uuid",
+					Amount:        decimal.NewFromInt(100),
+				},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("topups").
+					Cols("id", "transaction_id", "reference_id", "amount").
+					Vals([]any{a.t.ID, a.t.TransactionID, a.t.ReferenceID, a.t.Amount}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.SaveTopup(tt.args.ctx, tt.args.t)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
+func TestSQLPayment_SaveTransaction(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		t   domain.Transaction
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLPayment, func() error)
+	}{
+		{
+			name: "ErrorWhenExec",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Transaction{
+					ID:       10,
+					UserID:   20,
+					Amount:   decimal.NewFromInt(100),
+					Type:     domain.TransactionTypeDebit,
+					Status:   domain.TransactionStatusPending,
+					Remark:   "remark",
+					CreateAt: time.Time{},
+				},
+			},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("transactions").
+					Cols("id", "user_id", "amount", "type", "status", "remark", "created_at").
+					Vals([]any{
+						a.t.ID,
+						a.t.UserID,
+						a.t.Amount,
+						a.t.Type,
+						a.t.Status,
+						a.t.Remark,
+						a.t.CreateAt,
+					}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "ErrorNoRowsAffected",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Transaction{
+					ID:       10,
+					UserID:   20,
+					Amount:   decimal.NewFromInt(100),
+					Type:     domain.TransactionTypeDebit,
+					Status:   domain.TransactionStatusPending,
+					Remark:   "remark",
+					CreateAt: time.Time{},
+				},
+			},
+			wantErr: domain.ErrTransactionNoRowsAffected,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("transactions").
+					Cols("id", "user_id", "amount", "type", "status", "remark", "created_at").
+					Vals([]any{
+						a.t.ID,
+						a.t.UserID,
+						a.t.Amount,
+						a.t.Type,
+						a.t.Status,
+						a.t.Remark,
+						a.t.CreateAt,
+					}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				t: domain.Transaction{
+					ID:       10,
+					UserID:   20,
+					Amount:   decimal.NewFromInt(100),
+					Type:     domain.TransactionTypeDebit,
+					Status:   domain.TransactionStatusPending,
+					Remark:   "remark",
+					CreateAt: time.Time{},
+				},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Insert("transactions").
+					Cols("id", "user_id", "amount", "type", "status", "remark", "created_at").
+					Vals([]any{
+						a.t.ID,
+						a.t.UserID,
+						a.t.Amount,
+						a.t.Type,
+						a.t.Status,
+						a.t.Remark,
+						a.t.CreateAt,
+					}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.SaveTransaction(tt.args.ctx, tt.args.t)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
+func TestSQLPayment_UpdateAccount(t *testing.T) {
+	type args struct {
+		ctx  context.Context
+		data map[string]any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr error
+		mockFn  func(a args) (*SQLPayment, func() error)
+	}{
+		{
+			name: "ErrorWhenExec",
+			args: args{
+				ctx: context.Background(),
+				data: map[string]any{
+					"id":      uint64(11),
+					"balance": decimal.NewFromFloat(100),
+				},
+			},
+			wantErr: assert.AnError,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("accounts").
+					Set(map[string]any{
+						"balance": decimal.NewFromFloat(100),
+					}).
+					Where(goqu.Ex{"id": uint64(11)}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnError(assert.AnError)
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+		{
+			name: "Success",
+			args: args{
+				ctx: context.Background(),
+				data: map[string]any{
+					"id":      uint64(11),
+					"balance": decimal.NewFromFloat(100),
+				},
+			},
+			wantErr: nil,
+			mockFn: func(a args) (*SQLPayment, func() error) {
+				db, mock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
+				query, args, _ := goqu.Dialect(dbops.MySQLDriver).
+					Update("accounts").
+					Set(map[string]any{
+						"balance": decimal.NewFromFloat(100),
+					}).
+					Where(goqu.Ex{"id": uint64(11)}).
+					Prepared(true).
+					ToSQL()
+
+				mock.ExpectExec(query).
+					WithArgs(dbops.AnyToValue(args)...).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				return &SQLPayment{
+					db:        db,
+					qu:        goqu.Dialect(dbops.MySQLDriver),
+					telemetry: telemetry.NewTelemetry(),
+				}, db.Close
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s, dbMockCloser := tt.mockFn(tt.args)
+			defer dbMockCloser()
+
+			err := s.UpdateAccount(tt.args.ctx, tt.args.data)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}

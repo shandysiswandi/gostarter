@@ -83,10 +83,24 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 		return nil, goerror.NewBusiness("account not found", goerror.CodeNotFound)
 	}
 
-	err = pt.trx.Transaction(ctx, func(cc context.Context) error {
+	if err := pt.doTransaction(ctx, in, acc, clm.AuthID); err != nil {
+		return nil, err
+	}
+
+	return &domain.PaymentTopupOutput{
+		ReferenceID: in.ReferenceID,
+		Amount:      in.Amount,
+		Balance:     acc.Balanace.Add(in.Amount),
+	}, nil
+}
+
+func (pt *PaymentTopup) doTransaction(ctx context.Context, in domain.PaymentTopupInput,
+	acc *domain.Account, userID uint64,
+) error {
+	return pt.trx.Transaction(ctx, func(cc context.Context) error {
 		trx := domain.Transaction{
 			ID:       pt.uidnumber.Generate(),
-			UserID:   clm.AuthID,
+			UserID:   userID,
 			Amount:   in.Amount,
 			Type:     domain.TransactionTypeDebit,
 			Status:   domain.TransactionStatusPending,
@@ -126,13 +140,4 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.PaymentTopupOutput{
-		ReferenceID: in.ReferenceID,
-		Amount:      in.Amount,
-		Balance:     acc.Balanace.Add(in.Amount),
-	}, nil
 }
