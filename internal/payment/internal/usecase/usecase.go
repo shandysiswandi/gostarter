@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
@@ -20,4 +21,5 @@ type Dependency struct {
 	Transaction dbops.Tx
 	Telemetry   *telemetry.Telemetry
 	Goroutine   *goroutine.Manager
+	Clock       clock.Clocker
 }

@@ -68,6 +68,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
       POSTGRES_DB: gostarter
+      TZ: Asia/Jakarta
     healthcheck:
       test: ["CMD-SHELL", "pg_isready --username=user --dbname=gostarter"]
       interval: 10s
@@ -82,6 +83,7 @@ services:
       MYSQL_DATABASE: gostarter
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+      TZ: Asia/Jakarta
     ports:
       - "3306:3306"
     volumes:

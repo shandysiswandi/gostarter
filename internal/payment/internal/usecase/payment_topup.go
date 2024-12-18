@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/domain"
+	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/dbops"
 	"github.com/shandysiswandi/gostarter/pkg/goerror"
 	"github.com/shandysiswandi/gostarter/pkg/jwt"
@@ -16,12 +17,16 @@ import (
 type PaymentTopupStore interface {
 	FindAccountByUserID(ctx context.Context, userID uint64) (*domain.Account, error)
 	FindTopupByReferenceID(ctx context.Context, refID string) (*domain.Topup, error)
+	SaveTopup(ctx context.Context, topup domain.Topup) error
+	SaveTransaction(ctx context.Context, topup domain.Transaction) error
+	UpdateAccount(ctx context.Context, data map[string]any) error
 }
 
 type PaymentTopup struct {
 	telemetry *telemetry.Telemetry
 	validator validation.Validator
 	uidnumber uid.NumberID
+	clock     clock.Clocker
 	trx       dbops.Tx
 	store     PaymentTopupStore
 }
@@ -31,6 +36,7 @@ func NewPaymentTopup(dep Dependency, s PaymentTopupStore) *PaymentTopup {
 		telemetry: dep.Telemetry,
 		uidnumber: dep.UIDNumber,
 		validator: dep.Validator,
+		clock:     dep.Clock,
 		trx:       dep.Transaction,
 		store:     s,
 	}
@@ -48,10 +54,25 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
+	top, err := pt.store.FindTopupByReferenceID(ctx, in.ReferenceID)
+	if err != nil {
+		pt.telemetry.Logger().Error(ctx, "failed to get topup by ref_id", err,
+			logger.KeyVal("reference_id", in.ReferenceID))
+
+		return nil, goerror.NewServerInternal(err)
+	}
+
+	if top != nil {
+		pt.telemetry.Logger().Warn(ctx, "duplicate request topup by ref_id",
+			logger.KeyVal("reference_id", in.ReferenceID))
+
+		return nil, goerror.NewBusiness("duplicate request topup", goerror.CodeConflict)
+	}
+
 	clm := jwt.GetClaim(ctx)
 	acc, err := pt.store.FindAccountByUserID(ctx, clm.AuthID)
 	if err != nil {
-		pt.telemetry.Logger().Error(ctx, "account fail to find", err, logger.KeyVal("user_id", clm.AuthID))
+		pt.telemetry.Logger().Error(ctx, "failed to find account", err, logger.KeyVal("user_id", clm.AuthID))
 
 		return nil, goerror.NewServerInternal(err)
 	}
@@ -62,25 +83,47 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 		return nil, goerror.NewBusiness("account not found", goerror.CodeNotFound)
 	}
 
-	top, err := pt.store.FindTopupByReferenceID(ctx, in.ReferenceID)
-	if err != nil {
-		pt.telemetry.Logger().Error(ctx, "todo fail to create", err)
+	err = pt.trx.Transaction(ctx, func(cc context.Context) error {
+		trx := domain.Transaction{
+			ID:       pt.uidnumber.Generate(),
+			UserID:   clm.AuthID,
+			Amount:   in.Amount,
+			Type:     domain.TransactionTypeDebit,
+			Status:   domain.TransactionStatusPending,
+			Remark:   "top up balance",
+			CreateAt: pt.clock.Now(),
+		}
+		if err := pt.store.SaveTransaction(cc, trx); err != nil {
+			pt.telemetry.Logger().Error(ctx, "failed to save transaction", err,
+				logger.KeyVal("transaction_data", trx))
 
-		return nil, goerror.NewServerInternal(err)
-	}
+			return goerror.NewServerInternal(err)
+		}
 
-	if top != nil {
-		return &domain.PaymentTopupOutput{
-			ReferenceID: in.ReferenceID,
-			Amount:      in.Amount,
-			Balance:     acc.Balanace,
-		}, nil
-	}
+		topup := domain.Topup{
+			ID:            pt.uidnumber.Generate(),
+			TransactionID: trx.ID,
+			ReferenceID:   in.ReferenceID,
+			Amount:        in.Amount,
+		}
+		if err := pt.store.SaveTopup(cc, topup); err != nil {
+			pt.telemetry.Logger().Error(ctx, "failed to save topup", err,
+				logger.KeyVal("topup_data", topup))
 
-	err = pt.trx.Transaction(ctx, func(_ context.Context) error {
-		// update balance account
-		// create topUps
-		// create transaction
+			return goerror.NewServerInternal(err)
+		}
+
+		accUpdateData := map[string]any{
+			"id":      acc.ID,
+			"balance": acc.Balanace.Add(in.Amount),
+		}
+		if err := pt.store.UpdateAccount(cc, accUpdateData); err != nil {
+			pt.telemetry.Logger().Error(ctx, "failed to update account", err,
+				logger.KeyVal("account_update_data", accUpdateData))
+
+			return goerror.NewServerInternal(err)
+		}
+
 		return nil
 	})
 	if err != nil {

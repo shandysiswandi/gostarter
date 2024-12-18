@@ -1,6 +1,12 @@
 package domain
 
-import "github.com/shopspring/decimal"
+import (
+	"errors"
+
+	"github.com/shopspring/decimal"
+)
+
+var ErrAccountNoRowsAffected = errors.New("account not created or update")
 
 type Account struct {
 	ID       uint64

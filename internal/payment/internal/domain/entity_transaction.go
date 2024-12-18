@@ -1,11 +1,14 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/shandysiswandi/gostarter/pkg/enum"
 	"github.com/shopspring/decimal"
 )
+
+var ErrTransactionNoRowsAffected = errors.New("transaction not created or update")
 
 type TransactionStatus int
 

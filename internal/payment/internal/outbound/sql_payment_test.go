@@ -305,3 +305,9 @@ func TestSQLPayment_FindTopupByReferenceID(t *testing.T) {
 		})
 	}
 }
+
+func TestSQLPayment_SaveTopup(t *testing.T) {}
+
+func TestSQLPayment_SaveTransaction(t *testing.T) {}
+
+func TestSQLPayment_UpdateAccount(t *testing.T) {}

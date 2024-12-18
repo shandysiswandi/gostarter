@@ -140,6 +140,147 @@ func (_c *MockPaymentTopupStore_FindTopupByReferenceID_Call) RunAndReturn(run fu
 	return _c
 }
 
+// SaveTopup provides a mock function with given fields: ctx, topup
+func (_m *MockPaymentTopupStore) SaveTopup(ctx context.Context, topup domain.Topup) error {
+	ret := _m.Called(ctx, topup)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveTopup")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Topup) error); ok {
+		r0 = rf(ctx, topup)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockPaymentTopupStore_SaveTopup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveTopup'
+type MockPaymentTopupStore_SaveTopup_Call struct {
+	*mock.Call
+}
+
+// SaveTopup is a helper method to define mock.On call
+//   - ctx context.Context
+//   - topup domain.Topup
+func (_e *MockPaymentTopupStore_Expecter) SaveTopup(ctx interface{}, topup interface{}) *MockPaymentTopupStore_SaveTopup_Call {
+	return &MockPaymentTopupStore_SaveTopup_Call{Call: _e.mock.On("SaveTopup", ctx, topup)}
+}
+
+func (_c *MockPaymentTopupStore_SaveTopup_Call) Run(run func(ctx context.Context, topup domain.Topup)) *MockPaymentTopupStore_SaveTopup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.Topup))
+	})
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_SaveTopup_Call) Return(_a0 error) *MockPaymentTopupStore_SaveTopup_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_SaveTopup_Call) RunAndReturn(run func(context.Context, domain.Topup) error) *MockPaymentTopupStore_SaveTopup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SaveTransaction provides a mock function with given fields: ctx, topup
+func (_m *MockPaymentTopupStore) SaveTransaction(ctx context.Context, topup domain.Transaction) error {
+	ret := _m.Called(ctx, topup)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveTransaction")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Transaction) error); ok {
+		r0 = rf(ctx, topup)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockPaymentTopupStore_SaveTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveTransaction'
+type MockPaymentTopupStore_SaveTransaction_Call struct {
+	*mock.Call
+}
+
+// SaveTransaction is a helper method to define mock.On call
+//   - ctx context.Context
+//   - topup domain.Transaction
+func (_e *MockPaymentTopupStore_Expecter) SaveTransaction(ctx interface{}, topup interface{}) *MockPaymentTopupStore_SaveTransaction_Call {
+	return &MockPaymentTopupStore_SaveTransaction_Call{Call: _e.mock.On("SaveTransaction", ctx, topup)}
+}
+
+func (_c *MockPaymentTopupStore_SaveTransaction_Call) Run(run func(ctx context.Context, topup domain.Transaction)) *MockPaymentTopupStore_SaveTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.Transaction))
+	})
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_SaveTransaction_Call) Return(_a0 error) *MockPaymentTopupStore_SaveTransaction_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_SaveTransaction_Call) RunAndReturn(run func(context.Context, domain.Transaction) error) *MockPaymentTopupStore_SaveTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateAccount provides a mock function with given fields: ctx, data
+func (_m *MockPaymentTopupStore) UpdateAccount(ctx context.Context, data map[string]interface{}) error {
+	ret := _m.Called(ctx, data)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateAccount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}) error); ok {
+		r0 = rf(ctx, data)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockPaymentTopupStore_UpdateAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateAccount'
+type MockPaymentTopupStore_UpdateAccount_Call struct {
+	*mock.Call
+}
+
+// UpdateAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - data map[string]interface{}
+func (_e *MockPaymentTopupStore_Expecter) UpdateAccount(ctx interface{}, data interface{}) *MockPaymentTopupStore_UpdateAccount_Call {
+	return &MockPaymentTopupStore_UpdateAccount_Call{Call: _e.mock.On("UpdateAccount", ctx, data)}
+}
+
+func (_c *MockPaymentTopupStore_UpdateAccount_Call) Run(run func(ctx context.Context, data map[string]interface{})) *MockPaymentTopupStore_UpdateAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(map[string]interface{}))
+	})
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_UpdateAccount_Call) Return(_a0 error) *MockPaymentTopupStore_UpdateAccount_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockPaymentTopupStore_UpdateAccount_Call) RunAndReturn(run func(context.Context, map[string]interface{}) error) *MockPaymentTopupStore_UpdateAccount_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockPaymentTopupStore creates a new instance of MockPaymentTopupStore. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockPaymentTopupStore(t interface {

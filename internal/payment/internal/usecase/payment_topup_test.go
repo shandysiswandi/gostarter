@@ -83,6 +83,49 @@ func TestPaymentTopup_Call(t *testing.T) {
 			},
 		},
 		{
+			name: "ErrorStoreFindTopupByReferenceID",
+			args: args{
+				ctx: ctxJWT,
+				in: domain.PaymentTopupInput{
+					ReferenceID: "uuid",
+					Amount:      decimal.NewFromFloat(123.45),
+				},
+			},
+			want:    nil,
+			wantErr: goerror.NewServerInternal(assert.AnError),
+			mockFn: func(a args) *PaymentTopup {
+				tel := telemetry.NewTelemetry()
+				validatorMock := mv.NewMockValidator(t)
+				storeMock := mockz.NewMockPaymentTopupStore(t)
+
+				ctx, span := tel.Tracer().Start(a.ctx, "payment.usecase.PaymentTopup")
+				defer span.End()
+
+				validatorMock.EXPECT().
+					Validate(a.in).
+					Return(nil)
+
+				account := &domain.Account{
+					ID:       89,
+					UserID:   11,
+					Balanace: decimal.NewFromInt(900),
+				}
+				storeMock.EXPECT().
+					FindAccountByUserID(ctx, uint64(11)).
+					Return(account, nil)
+
+				storeMock.EXPECT().
+					FindTopupByReferenceID(ctx, a.in.ReferenceID).
+					Return(nil, assert.AnError)
+
+				return &PaymentTopup{
+					telemetry: tel,
+					validator: validatorMock,
+					store:     storeMock,
+				}
+			},
+		},
+		{
 			name: "ErrorStoreFindAccountByUserID",
 			args: args{
 				ctx: ctxJWT,
@@ -142,102 +185,6 @@ func TestPaymentTopup_Call(t *testing.T) {
 				storeMock.EXPECT().
 					FindAccountByUserID(ctx, uint64(11)).
 					Return(nil, nil)
-
-				return &PaymentTopup{
-					telemetry: tel,
-					validator: validatorMock,
-					store:     storeMock,
-				}
-			},
-		},
-		{
-			name: "ErrorStoreFindTopupByReferenceID",
-			args: args{
-				ctx: ctxJWT,
-				in: domain.PaymentTopupInput{
-					ReferenceID: "uuid",
-					Amount:      decimal.NewFromFloat(123.45),
-				},
-			},
-			want:    nil,
-			wantErr: goerror.NewServerInternal(assert.AnError),
-			mockFn: func(a args) *PaymentTopup {
-				tel := telemetry.NewTelemetry()
-				validatorMock := mv.NewMockValidator(t)
-				storeMock := mockz.NewMockPaymentTopupStore(t)
-
-				ctx, span := tel.Tracer().Start(a.ctx, "payment.usecase.PaymentTopup")
-				defer span.End()
-
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(nil)
-
-				account := &domain.Account{
-					ID:       89,
-					UserID:   11,
-					Balanace: decimal.NewFromInt(900),
-				}
-				storeMock.EXPECT().
-					FindAccountByUserID(ctx, uint64(11)).
-					Return(account, nil)
-
-				storeMock.EXPECT().
-					FindTopupByReferenceID(ctx, a.in.ReferenceID).
-					Return(nil, assert.AnError)
-
-				return &PaymentTopup{
-					telemetry: tel,
-					validator: validatorMock,
-					store:     storeMock,
-				}
-			},
-		},
-		{
-			name: "SuccessStoreFindTopupByReferenceIDExists",
-			args: args{
-				ctx: ctxJWT,
-				in: domain.PaymentTopupInput{
-					ReferenceID: "uuid",
-					Amount:      decimal.NewFromFloat(123.45),
-				},
-			},
-			want: &domain.PaymentTopupOutput{
-				ReferenceID: "uuid",
-				Amount:      decimal.NewFromFloat(123.45),
-				Balance:     decimal.NewFromFloat(900),
-			},
-			wantErr: nil,
-			mockFn: func(a args) *PaymentTopup {
-				tel := telemetry.NewTelemetry()
-				validatorMock := mv.NewMockValidator(t)
-				storeMock := mockz.NewMockPaymentTopupStore(t)
-
-				ctx, span := tel.Tracer().Start(a.ctx, "payment.usecase.PaymentTopup")
-				defer span.End()
-
-				validatorMock.EXPECT().
-					Validate(a.in).
-					Return(nil)
-
-				account := &domain.Account{
-					ID:       89,
-					UserID:   11,
-					Balanace: decimal.NewFromFloat(900),
-				}
-				storeMock.EXPECT().
-					FindAccountByUserID(ctx, uint64(11)).
-					Return(account, nil)
-
-				topup := &domain.Topup{
-					ID:            33,
-					TransactionID: 123,
-					ReferenceID:   "uuid",
-					Amount:        decimal.NewFromFloat(123),
-				}
-				storeMock.EXPECT().
-					FindTopupByReferenceID(ctx, a.in.ReferenceID).
-					Return(topup, nil)
 
 				return &PaymentTopup{
 					telemetry: tel,

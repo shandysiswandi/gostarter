@@ -48,6 +48,9 @@ func (a *App) modulePayment() {
 			Validator:    a.validator,
 			Router:       a.httpRouter,
 			Telemetry:    a.telemetry,
+			Hash:         nil,
+			SecHash:      nil,
+			Clock:        a.clock,
 		})
 		if err != nil {
 			log.Fatalln("failed to init module payment", err)
