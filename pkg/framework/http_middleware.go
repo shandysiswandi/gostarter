@@ -98,6 +98,12 @@ func (mj *middlewareJWT) handle(h http.Handler) http.Handler {
 		}
 
 		clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+		if clm == nil {
+			writeJSON(w, map[string]string{"error": "invalid token"}, http.StatusUnauthorized)
+
+			return
+		}
+
 		if !clm.VerifyAudience(mj.audience, true) {
 			writeJSON(w, map[string]string{"error": "invalid token audience"}, http.StatusUnauthorized)
 

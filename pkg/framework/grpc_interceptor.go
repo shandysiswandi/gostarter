@@ -79,6 +79,10 @@ func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler,
 	}
 
 	clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(md["authorization"][0], "Bearer "))
+	if clm == nil {
+		return nil, goerror.NewBusiness("invalid token", goerror.CodeUnauthorized)
+	}
+
 	if !clm.VerifyAudience(audience, true) {
 		return nil, goerror.NewBusiness("invalid token audience", goerror.CodeUnauthorized)
 	}

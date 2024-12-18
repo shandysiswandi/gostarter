@@ -144,6 +144,16 @@ func TestJWT(t *testing.T) {
 			expectedMessage: "OK",
 		},
 		{
+			name: "ErrorInvalidToken",
+			path: "/continue",
+			mockFn: func(r *http.Request) {
+				r.Header.Set("Authorization", "Bearer a.a.a")
+			},
+			handlerFunc:     nil,
+			expectedStatus:  http.StatusUnauthorized,
+			expectedMessage: "{\"error\":\"invalid token\"}\n",
+		},
+		{
 			name: "ErrorInvalidAudience",
 			path: "/continue",
 			mockFn: func(r *http.Request) {
