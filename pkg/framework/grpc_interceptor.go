@@ -75,7 +75,7 @@ func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler,
 ) (any, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, goerror.NewServer("internal server error", nil)
+		return nil, goerror.NewServerInternal(nil)
 	}
 
 	clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(md["authorization"][0], "Bearer "))

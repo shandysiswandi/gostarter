@@ -41,7 +41,7 @@ func (s *Find) Call(ctx context.Context, in domain.FindInput) (*domain.Todo, err
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to find", err)
 
-		return nil, goerror.NewServer("failed to find todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	if todo == nil {

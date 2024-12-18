@@ -61,7 +61,7 @@ func TestFetch_Execute(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewServer("failed to fetch todo", assert.AnError),
+			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Fetch {
 				mtel := telemetry.NewTelemetry()
 				store := mockz.NewMockFetchStore(t)

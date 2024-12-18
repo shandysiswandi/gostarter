@@ -83,7 +83,7 @@ func TestFind_Execute(t *testing.T) {
 				in:  domain.FindInput{ID: 11},
 			},
 			want:    nil,
-			wantErr: goerror.NewServer("failed to find todo", assert.AnError),
+			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Find {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

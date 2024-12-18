@@ -40,7 +40,7 @@ func (s *Delete) Call(ctx context.Context, in domain.DeleteInput) (*domain.Delet
 	if err := s.store.Delete(ctx, in.ID); err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to delete", err)
 
-		return nil, goerror.NewServer("failed to delete todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.DeleteOutput{ID: in.ID}, nil

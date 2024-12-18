@@ -326,39 +326,6 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNewServer(t *testing.T) {
-	type args struct {
-		msg string
-		err error
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr error
-	}{
-		{
-			name: "NewServer",
-			args: args{
-				msg: "internal",
-				err: assert.AnError,
-			},
-			wantErr: &GoError{
-				err:     assert.AnError,
-				msg:     "internal",
-				errType: TypeServer,
-				code:    CodeInternal,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			err := NewServer(tt.args.msg, tt.args.err)
-			assert.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
 func TestNewServerInternal(t *testing.T) {
 	type args struct {
 		err error

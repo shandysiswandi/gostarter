@@ -47,7 +47,7 @@ func (s *Fetch) Call(ctx context.Context, in domain.FetchInput) (*domain.FetchOu
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to fetch", err)
 
-		return nil, goerror.NewServer("failed to fetch todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	nextCursor := ""

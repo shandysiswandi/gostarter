@@ -142,7 +142,7 @@ func TestCreate_Execute(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewServer("failed to create todo", assert.AnError),
+			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Create {
 				validator := vm.NewMockValidator(t)
 				idgen := um.NewMockNumberID(t)

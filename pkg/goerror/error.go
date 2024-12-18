@@ -154,11 +154,6 @@ func New(err error, msg string, et Type, code Code) error {
 	}
 }
 
-// NewServer creates a server-type error with the provided message and error.
-func NewServer(msg string, err error) error {
-	return New(err, msg, TypeServer, CodeInternal)
-}
-
 // NewServerInternal creates a server-type error with the provided error.
 func NewServerInternal(err error) error {
 	return New(err, "internal server error", TypeServer, CodeInternal)

@@ -98,7 +98,7 @@ func TestUpdate_Execute(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewServer("failed to update todo", assert.AnError),
+			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Update {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

@@ -82,7 +82,7 @@ func TestDelete_Call(t *testing.T) {
 				in:  domain.DeleteInput{ID: 12},
 			},
 			want:    nil,
-			wantErr: goerror.NewServer("failed to delete todo", assert.AnError),
+			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Delete {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

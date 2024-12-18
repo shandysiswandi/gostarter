@@ -65,7 +65,7 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to create", err)
 
-		return nil, goerror.NewServer("failed to create todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.CreateOutput{ID: id}, nil

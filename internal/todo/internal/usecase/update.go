@@ -55,7 +55,7 @@ func (s *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.Todo,
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "todo fail to update", err)
 
-		return nil, goerror.NewServer("failed to update todo", err)
+		return nil, goerror.NewServerInternal(err)
 	}
 
 	return &domain.Todo{
