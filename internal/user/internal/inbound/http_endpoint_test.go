@@ -113,7 +113,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			name: "ErrorDecodeBody",
 			c: func() framework.Context {
 				body := bytes.NewBufferString("fake request")
-				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				c := framework.NewTestContext(http.MethodPatch, "/me/profile", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -137,7 +137,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			name: "ErrorCallUC",
 			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"name":"full name"}`)
-				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				c := framework.NewTestContext(http.MethodPatch, "/me/profile", body)
 				return c.Build()
 			},
 			want:    nil,
@@ -166,7 +166,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 			name: "Success",
 			c: func() framework.Context {
 				body := bytes.NewBufferString(`{"name":"full name"}`)
-				c := framework.NewTestContext(http.MethodGet, "/me/update", body)
+				c := framework.NewTestContext(http.MethodPatch, "/me/profile", body)
 				return c.Build()
 			},
 			want: User{

@@ -12,6 +12,15 @@ install:
 	@go install github.com/cespare/reflex@latest
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin latest
 
+tools:
+	@go install golang.org/x/tools/gopls@latest
+	@go install github.com/cweill/gotests/gotests@latest
+	@go install github.com/fatih/gomodifytags@latest
+	@go install github.com/josharian/impl@latest
+	@go install github.com/haya14busa/goplay/cmd/goplay@latest
+	@go install github.com/go-delve/delve/cmd/dlv@latest
+	@go install honnef.co/go/tools/cmd/staticcheck@latest
+
 run:
 	@reflex -r '\.go$$' -s -- go run main.go
 

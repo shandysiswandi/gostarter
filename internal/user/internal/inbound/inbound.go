@@ -23,6 +23,6 @@ func (in Inbound) RegisterUserServiceServer() {
 	}
 
 	in.Router.Endpoint(http.MethodGet, "/me/profile", he.Profile)
-	in.Router.Endpoint(http.MethodPatch, "/me/update", he.Update)
+	in.Router.Endpoint(http.MethodPatch, "/me/profile", he.Update)
 	in.Router.Endpoint(http.MethodPost, "/me/logout", he.Logout)
 }

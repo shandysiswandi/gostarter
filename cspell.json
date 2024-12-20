@@ -31,7 +31,8 @@
     "api/gen-proto/**",
     "config/**",
     "go.mod",
-    "go.sum"
+    "go.sum",
+    "Makefile"
   ],
   "words": [
     "bufbuild",

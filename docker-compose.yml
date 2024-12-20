@@ -76,7 +76,7 @@ services:
       retries: 5
 
   mysql:
-    image: mysql:8.0-debian
+    image: mysql:8.0
     pull_policy: missing
     environment:
       MYSQL_ROOT_PASSWORD: root_password
