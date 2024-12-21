@@ -1,4 +1,4 @@
-# Go Starter
+# Go Starter develop
 
 Go Starter is an opinionated, production-ready server API framework written in Go. It is designed to help developers quickly set up robust, scalable, and secure web services with minimal configuration. With a focus on simplicity, extensibility, and best practices, Go Starter provides a strong foundation for building and deploying production-grade applications.
 
