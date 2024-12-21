@@ -58,8 +58,7 @@ func Recovery(h http.Handler) http.Handler {
 				}
 
 				// Print the stack trace for debugging purposes.
-				// debug.PrintStack()
-				debugger.Stack()
+				debugger.Stack("/app/")
 
 				// Send a default fallback response to the client.
 				_ = json.NewEncoder(w).Encode(map[string]string{

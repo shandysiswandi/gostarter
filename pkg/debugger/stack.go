@@ -6,12 +6,15 @@ import (
 	"strings"
 )
 
-func Stack() {
+func Stack(prefix string) {
 	lines := strings.Split(string(debug.Stack()), "\n")
 	var formattedLines []string
 	for _, line := range lines {
 		if strings.Contains(line, ".go") {
-			formattedLines = append(formattedLines, line)
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, prefix) {
+				formattedLines = append(formattedLines, strings.TrimPrefix(line, prefix))
+			}
 		}
 	}
 

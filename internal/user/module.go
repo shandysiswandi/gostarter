@@ -37,7 +37,8 @@ func New(dep Dependency) (*Expose, error) {
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
 	inbound := inbound.Inbound{
-		Router: dep.Router,
+		Router:    dep.Router,
+		Telemetry: dep.Telemetry,
 		//
 		ProfileUC: profile,
 		UpdateUC:  update,

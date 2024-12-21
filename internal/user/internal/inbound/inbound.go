@@ -5,10 +5,12 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type Inbound struct {
-	Router *framework.Router
+	Router    *framework.Router
+	Telemetry *telemetry.Telemetry
 	//
 	ProfileUC domain.Profile
 	UpdateUC  domain.Update
@@ -17,6 +19,8 @@ type Inbound struct {
 
 func (in Inbound) RegisterUserServiceServer() {
 	he := &httpEndpoint{
+		tel: in.Telemetry,
+		//
 		profileUC: in.ProfileUC,
 		updateUC:  in.UpdateUC,
 		logoutUC:  in.LogoutUC,
