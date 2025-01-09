@@ -1,8 +1,9 @@
 package filter
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithHeaders(t *testing.T) {
@@ -10,17 +11,27 @@ func TestWithHeaders(t *testing.T) {
 		header []string
 	}
 	tests := []struct {
-		name string
-		args args
-		want OptionFilter
+		name   string
+		args   args
+		want   []string
+		mockFn func(a args) *Filter
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Success",
+			args: args{header: []string{"test"}},
+			want: []string{"test"},
+			mockFn: func(a args) *Filter {
+				f := &Filter{}
+				WithHeaders(a.header...)(f)
+				return f
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithHeaders(tt.args.header...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithHeaders() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			got := tt.mockFn(tt.args).headers
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -30,17 +41,27 @@ func TestWithQueries(t *testing.T) {
 		query []string
 	}
 	tests := []struct {
-		name string
-		args args
-		want OptionFilter
+		name   string
+		args   args
+		want   []string
+		mockFn func(a args) *Filter
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Success",
+			args: args{query: []string{"test"}},
+			want: []string{"test"},
+			mockFn: func(a args) *Filter {
+				f := &Filter{}
+				WithQueries(a.query...)(f)
+				return f
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithQueries(tt.args.query...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithQueries() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			got := tt.mockFn(tt.args).queries
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -50,17 +71,27 @@ func TestWithFields(t *testing.T) {
 		field []string
 	}
 	tests := []struct {
-		name string
-		args args
-		want OptionFilter
+		name   string
+		args   args
+		want   []string
+		mockFn func(a args) *Filter
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Success",
+			args: args{field: []string{"test"}},
+			want: []string{"test"},
+			mockFn: func(a args) *Filter {
+				f := &Filter{}
+				WithFields(a.field...)(f)
+				return f
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithFields(tt.args.field...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithFields() = %v, want %v", got, tt.want)
-			}
+			t.Parallel()
+			got := tt.mockFn(tt.args).fields
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
