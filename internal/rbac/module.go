@@ -41,13 +41,15 @@ func New(dep Dependency) (*Expose, error) {
 	}
 
 	cr := usecase.NewCreateRole(ucDep, sqlRBAC)
+	cp := usecase.NewCreatePermission(ucDep, sqlRBAC)
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
 	inbound := inbound.Inbound{
 		Router:    dep.Router,
 		Telemetry: dep.Telemetry,
 		//
-		CreateRole: cr,
+		CreateRole:       cr,
+		CreatePermission: cp,
 	}
 	inbound.RegisterRBACServiceServer()
 

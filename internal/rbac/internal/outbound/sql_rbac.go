@@ -59,3 +59,38 @@ func (st *SQLRBAC) FindRoleByName(ctx context.Context, name string) (*domain.Rol
 
 	return dbops.SQLGet[domain.Role](ctx, st.db, query)
 }
+
+func (st *SQLRBAC) SavePermission(ctx context.Context, r domain.Permission) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.SavePermission")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Insert("permissions").
+			Cols("id", "name", "description").
+			Vals([]any{r.ID, r.Name, r.Description}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	err := dbops.Exec(ctx, st.db, query, true)
+	if errors.Is(err, dbops.ErrZeroRowsAffected) {
+		return domain.ErrPermissionNotCreated
+	}
+
+	return err
+}
+
+func (st *SQLRBAC) FindPermissionByName(ctx context.Context, name string) (*domain.Permission, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.FindPermissionByName")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Select("id", "name", "description").
+			From("permissions").
+			Where(goqu.Ex{"name": name}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.SQLGet[domain.Permission](ctx, st.db, query)
+}

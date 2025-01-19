@@ -12,15 +12,18 @@ type Inbound struct {
 	Router    *framework.Router
 	Telemetry *telemetry.Telemetry
 	//
-	CreateRole domain.CreateRole
+	CreateRole       domain.CreateRole
+	CreatePermission domain.CreatePermission
 }
 
 func (in Inbound) RegisterRBACServiceServer() {
 	he := &httpEndpoint{
 		telemetry: in.Telemetry,
 		//
-		createRoleUC: in.CreateRole,
+		createRoleUC:       in.CreateRole,
+		createPermissionUC: in.CreatePermission,
 	}
 
 	in.Router.Endpoint(http.MethodPost, "/rbac/roles", he.CreateRole)
+	in.Router.Endpoint(http.MethodPost, "/rbac/permissions", he.CreatePermission)
 }

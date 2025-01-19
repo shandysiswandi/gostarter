@@ -17,6 +17,7 @@ This framework is suitable for a wide range of use cases, from microservices to 
 ### Modules
 
 - Authentication
+- RBAC
 - User
 - Todo
 - Payment
