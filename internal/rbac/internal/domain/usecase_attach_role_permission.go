@@ -9,8 +9,8 @@ type AttachRolePermission interface {
 }
 
 type AttachRolePermissionInput struct {
-	RoleID       uint64 `validate:"required,gt=0"`
-	PermissionID uint64 `validate:"required,gt=0"`
+	RoleID        uint64   `validate:"required,gt=0"`
+	PermissionIDs []uint64 `validate:"required,dive,gt=0"`
 }
 
 type AttachRolePermissionOutput struct {
