@@ -95,7 +95,21 @@ func TestWithZapLogger(t *testing.T) {
 			mockFn: func(a args) *Telemetry {
 				tel := NewTelemetry()
 
-				WithZapLogger("", logger.InfoLevel)(tel)
+				WithZapLogger("", logger.InfoLevel, false)(tel)
+
+				return tel
+			},
+		},
+		{
+			name: "SuccessWithFile",
+			args: args{
+				serviceName: "gostarter",
+				level:       logger.InfoLevel,
+			},
+			mockFn: func(a args) *Telemetry {
+				tel := NewTelemetry()
+
+				WithZapLogger("file", logger.InfoLevel, true)(tel)
 
 				return tel
 			},

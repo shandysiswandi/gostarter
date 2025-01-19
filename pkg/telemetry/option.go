@@ -47,9 +47,13 @@ func WithLogFilter(keys ...string) Option {
 	}
 }
 
-func WithZapLogger(serviceName string, lvl logger.Level) Option {
+func WithZapLogger(serviceName string, lvl logger.Level, enableLogFile bool) Option {
 	return func(t *Telemetry) {
-		lo := logger.NewZapLogger(serviceName, lvl)
+		svcName := ""
+		if enableLogFile {
+			svcName = serviceName + ".log"
+		}
+		lo := logger.NewZapLogger(svcName, lvl)
 		t.logger = lo
 		t.flushers = append(t.flushers, lo.Close)
 	}

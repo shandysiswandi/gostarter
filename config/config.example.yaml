@@ -3,6 +3,7 @@ server.address.gql: localhost:8181
 server.address.grpc: localhost:50000
 
 telemetry.name: gostarter
+telemetry.log.file.enable: false
 telemetry.otlp.grpc.address: localhost:4317
 telemetry.otlp.http.address: localhost:4318
 

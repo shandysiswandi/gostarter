@@ -56,7 +56,7 @@ func TestTelemetry_Close(t *testing.T) {
 			name:    "ErrorWithZapLogger",
 			wantErr: errors.New("sync /dev/stdout: invalid argument"),
 			mockFn: func() *Telemetry {
-				return NewTelemetry(WithZapLogger("", logger.InfoLevel))
+				return NewTelemetry(WithZapLogger("", logger.InfoLevel, false))
 			},
 		},
 	}

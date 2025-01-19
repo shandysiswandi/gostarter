@@ -61,7 +61,11 @@ func (a *App) initTelemetry() {
 		telemetry.WithServiceName(a.config.GetString("telemetry.name")),
 		telemetry.WithVerbose(),
 		telemetry.WithLogFilter(filterKeys...),
-		telemetry.WithZapLogger(a.config.GetString("telemetry.name"), logger.InfoLevel),
+		telemetry.WithZapLogger(
+			a.config.GetString("telemetry.name"),
+			logger.InfoLevel,
+			a.config.GetBool("telemetry.log.file.enable"),
+		),
 		telemetry.WithOTLP(a.config.GetString("telemetry.otlp.grpc.address")),
 	)
 }
