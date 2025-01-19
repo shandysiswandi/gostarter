@@ -13,7 +13,9 @@ type Inbound struct {
 	Telemetry *telemetry.Telemetry
 	//
 	CreateRole       domain.CreateRole
+	FindRole         domain.FindRole
 	CreatePermission domain.CreatePermission
+	FindPermission   domain.FindPermission
 }
 
 func (in Inbound) RegisterRBACServiceServer() {
@@ -21,9 +23,14 @@ func (in Inbound) RegisterRBACServiceServer() {
 		telemetry: in.Telemetry,
 		//
 		createRoleUC:       in.CreateRole,
+		findRoleUC:         in.FindRole,
 		createPermissionUC: in.CreatePermission,
+		findPermissionUC:   in.FindPermission,
 	}
 
 	in.Router.Endpoint(http.MethodPost, "/rbac/roles", he.CreateRole)
+	in.Router.Endpoint(http.MethodGet, "/rbac/roles/:id", he.FindRole)
+	//
 	in.Router.Endpoint(http.MethodPost, "/rbac/permissions", he.CreatePermission)
+	in.Router.Endpoint(http.MethodGet, "/rbac/permissions/:id", he.FindPermission)
 }

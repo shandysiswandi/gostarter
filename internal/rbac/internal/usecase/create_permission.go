@@ -31,20 +31,20 @@ func NewCreatePermission(dep Dependency, s CreatePermissionStore) *CreatePermiss
 	}
 }
 
-func (cr *CreatePermission) Call(ctx context.Context, in domain.CreatePermissionInput) (
+func (cp *CreatePermission) Call(ctx context.Context, in domain.CreatePermissionInput) (
 	*domain.CreatePermissionOutput, error) {
-	ctx, span := cr.tele.Tracer().Start(ctx, "rbac.usecase.CreatePermission")
+	ctx, span := cp.tele.Tracer().Start(ctx, "rbac.usecase.CreatePermission")
 	defer span.End()
 
-	if err := cr.validator.Validate(in); err != nil {
-		cr.tele.Logger().Warn(ctx, "validation failed")
+	if err := cp.validator.Validate(in); err != nil {
+		cp.tele.Logger().Warn(ctx, "validation failed")
 
 		return nil, goerror.NewInvalidInput("validation input fail", err)
 	}
 
-	perm, err := cr.store.FindPermissionByName(ctx, in.Name)
+	perm, err := cp.store.FindPermissionByName(ctx, in.Name)
 	if err != nil {
-		cr.tele.Logger().Error(ctx, "failed to find permission by name", err)
+		cp.tele.Logger().Error(ctx, "failed to find permission by name", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}
@@ -53,12 +53,12 @@ func (cr *CreatePermission) Call(ctx context.Context, in domain.CreatePermission
 	}
 
 	permData := domain.Permission{
-		ID:          cr.uidnumber.Generate(),
+		ID:          cp.uidnumber.Generate(),
 		Name:        in.Name,
 		Description: in.Description,
 	}
-	if err := cr.store.SavePermission(ctx, permData); err != nil {
-		cr.tele.Logger().Error(ctx, "failed to save permission", err)
+	if err := cp.store.SavePermission(ctx, permData); err != nil {
+		cp.tele.Logger().Error(ctx, "failed to save permission", err)
 
 		return nil, goerror.NewServerInternal(err)
 	}

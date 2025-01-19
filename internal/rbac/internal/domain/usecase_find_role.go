@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type FindRole interface {
-	Call(ctx context.Context, in FindRoleInput) (*Permission, error)
+	Call(ctx context.Context, in FindRoleInput) (*Role, error)
 }
 
 type FindRoleInput struct {

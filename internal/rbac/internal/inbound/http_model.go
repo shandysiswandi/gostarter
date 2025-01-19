@@ -1,5 +1,17 @@
 package inbound
 
+type Role struct {
+	ID          uint64 `json:"id,string"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type Permission struct {
+	ID          uint64 `json:"id,string"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type (
 	CreateRoleRequest struct {
 		Name        string `json:"name"`
