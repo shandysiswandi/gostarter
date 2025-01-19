@@ -24,6 +24,21 @@ func NewSQLUser(db *sql.DB, qu goqu.DialectWrapper, tel *telemetry.Telemetry) *S
 	}
 }
 
+func (st *SQLUser) FindUser(ctx context.Context, id uint64) (*domain.User, error) {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.FindUser")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Select("id", "name", "email", "password").
+			From("users").
+			Where(goqu.Ex{"id": id}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.SQLGet[domain.User](ctx, st.db, query)
+}
+
 func (st *SQLUser) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.FindUserByEmail")
 	defer span.End()
@@ -50,6 +65,21 @@ func (st *SQLUser) Update(ctx context.Context, user map[string]any) error {
 		return st.qu.Update("users").
 			Set(user).
 			Where(goqu.Ex{"id": id}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.Exec(ctx, st.db, query)
+}
+
+func (st *SQLUser) UpdatePassword(ctx context.Context, user domain.User) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "user.outbound.SQLAuth.UpdatePassword")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Update("users").
+			Set(map[string]any{"password": user.Password}).
+			Where(goqu.Ex{"id": user.ID}).
 			Prepared(true).
 			ToSQL()
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/user/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
+	"github.com/shandysiswandi/gostarter/pkg/hash"
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
@@ -18,6 +19,7 @@ type Dependency struct {
 	Database     *sql.DB
 	QueryBuilder goqu.DialectWrapper
 	Validator    validation.Validator
+	Hash         hash.Hash
 	Router       *framework.Router
 	Telemetry    *telemetry.Telemetry
 }
@@ -30,9 +32,11 @@ func New(dep Dependency) (*Expose, error) {
 	ucDep := usecase.Dependency{
 		Telemetry: dep.Telemetry,
 		Validator: dep.Validator,
+		Hash:      dep.Hash,
 	}
 	profile := usecase.NewProfile(ucDep, sqlUser)
 	update := usecase.NewUpdate(ucDep, sqlUser)
+	updatePassword := usecase.NewUpdatePassword(ucDep, sqlUser)
 	logout := usecase.NewLogout(ucDep, sqlUser)
 
 	// This block initializes REST, SSE, gRPC, and graphQL API endpoints to handle core user workflows:
@@ -40,9 +44,10 @@ func New(dep Dependency) (*Expose, error) {
 		Router:    dep.Router,
 		Telemetry: dep.Telemetry,
 		//
-		ProfileUC: profile,
-		UpdateUC:  update,
-		LogoutUC:  logout,
+		ProfileUC:        profile,
+		UpdateUC:         update,
+		UpdatePasswordUC: updatePassword,
+		LogoutUC:         logout,
 	}
 	inbound.RegisterUserServiceServer()
 

@@ -107,6 +107,7 @@ func (a *App) moduleUser() {
 			Database:     a.database,
 			QueryBuilder: a.queryBuilder,
 			Validator:    a.validator,
+			Hash:         a.hash,
 			Router:       a.httpRouter,
 			Telemetry:    a.telemetry,
 		})

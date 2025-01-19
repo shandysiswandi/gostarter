@@ -12,9 +12,10 @@ import (
 type httpEndpoint struct {
 	tel *telemetry.Telemetry
 
-	profileUC domain.Profile
-	updateUC  domain.Update
-	logoutUC  domain.Logout
+	profileUC        domain.Profile
+	updateUC         domain.Update
+	updatePasswordUC domain.UpdatePassword
+	logoutUC         domain.Logout
 }
 
 func (h *httpEndpoint) Profile(c framework.Context) (any, error) {
@@ -43,6 +44,30 @@ func (h *httpEndpoint) Update(c framework.Context) (any, error) {
 	}
 
 	resp, err := h.updateUC.Call(ctx, domain.UpdateInput{Name: req.Name})
+	if err != nil {
+		return nil, err
+	}
+
+	return User{
+		ID:    resp.ID,
+		Name:  resp.Name,
+		Email: resp.Email,
+	}, nil
+}
+
+func (h *httpEndpoint) UpdatePassword(c framework.Context) (any, error) {
+	ctx, span := h.tel.Tracer().Start(c.Context(), "user.inbound.httpEndpoint.UpdatePassword")
+	defer span.End()
+
+	var req UpdatePasswordRequest
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, goerror.NewInvalidFormat("invalid request body")
+	}
+
+	resp, err := h.updatePasswordUC.Call(ctx, domain.UpdatePasswordInput{
+		CurrentPassword: req.CurrentPassword,
+		NewPassword:     req.NewPassword,
+	})
 	if err != nil {
 		return nil, err
 	}

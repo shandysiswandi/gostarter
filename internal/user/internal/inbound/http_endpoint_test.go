@@ -214,6 +214,128 @@ func Test_httpEndpoint_Update(t *testing.T) {
 	}
 }
 
+func Test_httpEndpoint_UpdatePassword(t *testing.T) {
+	tests := []struct {
+		name    string
+		c       func() framework.Context
+		want    any
+		wantErr error
+		mockFn  func(ctx context.Context) *httpEndpoint
+	}{
+		{
+			name: "ErrorDecodeBody",
+			c: func() framework.Context {
+				body := bytes.NewBufferString("fake request")
+				c := framework.NewTestContext(http.MethodPatch, "/me/password", body)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updatePasswordMock := mockz.NewMockUpdatePassword(t)
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "user.inbound.httpEndpoint.UpdatePassword")
+				defer span.End()
+
+				return &httpEndpoint{
+					tel:              tel,
+					profileUC:        nil,
+					updateUC:         nil,
+					updatePasswordUC: updatePasswordMock,
+					logoutUC:         nil,
+				}
+			},
+		},
+		{
+			name: "ErrorCallUC",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"current_password":"password","new_password":"new_password"}`)
+				c := framework.NewTestContext(http.MethodPatch, "/me/password", body)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: assert.AnError,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updatePasswordMock := mockz.NewMockUpdatePassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "user.inbound.httpEndpoint.UpdatePassword")
+				defer span.End()
+
+				in := domain.UpdatePasswordInput{
+					CurrentPassword: "password",
+					NewPassword:     "new_password",
+				}
+				updatePasswordMock.EXPECT().
+					Call(ctx, in).
+					Return(nil, assert.AnError)
+
+				return &httpEndpoint{
+					tel:              tel,
+					profileUC:        nil,
+					updateUC:         nil,
+					updatePasswordUC: updatePasswordMock,
+					logoutUC:         nil,
+				}
+			},
+		},
+		{
+			name: "Success",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"current_password":"password","new_password":"new_password"}`)
+				c := framework.NewTestContext(http.MethodPatch, "/me/password", body)
+				return c.Build()
+			},
+			want: User{
+				ID:    21,
+				Name:  "full name",
+				Email: "full@name.com",
+			},
+			wantErr: nil,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				updatePasswordMock := mockz.NewMockUpdatePassword(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "user.inbound.httpEndpoint.UpdatePassword")
+				defer span.End()
+
+				in := domain.UpdatePasswordInput{
+					CurrentPassword: "password",
+					NewPassword:     "new_password",
+				}
+				out := &domain.User{
+					ID:       21,
+					Name:     "full name",
+					Email:    "full@name.com",
+					Password: "***",
+				}
+				updatePasswordMock.EXPECT().
+					Call(ctx, in).
+					Return(out, nil)
+
+				return &httpEndpoint{
+					tel:              tel,
+					profileUC:        nil,
+					updateUC:         nil,
+					updatePasswordUC: updatePasswordMock,
+					logoutUC:         nil,
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			c := tt.c()
+			e := tt.mockFn(c.Context())
+			got, err := e.UpdatePassword(c)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_httpEndpoint_Logout(t *testing.T) {
 	tests := []struct {
 		name    string
