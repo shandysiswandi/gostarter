@@ -15,17 +15,17 @@ func TestNewJWTSymetric(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *JWTSymetric
+		want *Symetric
 	}{
 		{
 			name: "Test with non-empty secret",
 			args: args{secret: []byte("test")},
-			want: &JWTSymetric{secret: []byte("test")},
+			want: &Symetric{secret: []byte("test")},
 		},
 		{
 			name: "Test with empty secret",
 			args: args{secret: []byte("")},
-			want: &JWTSymetric{secret: []byte("")},
+			want: &Symetric{secret: []byte("")},
 		},
 	}
 	for _, tt := range tests {
@@ -43,7 +43,7 @@ func TestJWTSymetric_Generate(t *testing.T) {
 		arg     *Claim
 		want    string
 		wantErr error
-		mockFn  func() *JWTSymetric
+		mockFn  func() *Symetric
 	}{
 		{
 			name: "Success",
@@ -60,7 +60,7 @@ func TestJWTSymetric_Generate(t *testing.T) {
 			},
 			wantErr: nil,
 			want:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoX2lkIjoiMTAxIiwiaXNzIjoidGVzdCIsInN1YiI6InRlc3QiLCJhdWQiOlsidGVzdCJdLCJleHAiOjIwNDg1MTg4MDAsIm5iZiI6MTczMjk4NjAwMCwiaWF0IjoxNzMyOTg2MDAwfQ.X6oa_41wmqWyjoT8ckg7Psj-jzJXEutW3luh--leVoc",
-			mockFn: func() *JWTSymetric {
+			mockFn: func() *Symetric {
 				return NewJWTSymetric([]byte("test"))
 			},
 		},
@@ -82,7 +82,7 @@ func TestJWTSymetric_Verify(t *testing.T) {
 		token   string
 		want    *Claim
 		wantErr bool
-		mockFn  func(t string) *JWTSymetric
+		mockFn  func(t string) *Symetric
 	}{
 		{
 			name:  "Success",
@@ -99,7 +99,7 @@ func TestJWTSymetric_Verify(t *testing.T) {
 				},
 			},
 			wantErr: false,
-			mockFn: func(t string) *JWTSymetric {
+			mockFn: func(t string) *Symetric {
 				return NewJWTSymetric([]byte("test"))
 			},
 		},
@@ -108,7 +108,7 @@ func TestJWTSymetric_Verify(t *testing.T) {
 			token:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoX2lkIjoiMTAxIiwiaXNzIjoidGVzdCIsInN1YiI6InRlc3QiLCJhdWQiOlsidGVzdCJdLCJleHAiOjExMDE4MzQwMDAsIm5iZiI6MTczMjk4NjAwMCwiaWF0IjoxNzMyOTg2MDAwfQ.UmgDfeLb-d_L7ZKq-33inhqoLR2jfXnmh3_jPaf9LoQ",
 			want:    nil,
 			wantErr: true,
-			mockFn: func(t string) *JWTSymetric {
+			mockFn: func(t string) *Symetric {
 				return NewJWTSymetric([]byte("test"))
 			},
 		},
@@ -117,7 +117,7 @@ func TestJWTSymetric_Verify(t *testing.T) {
 			token:   "",
 			want:    nil,
 			wantErr: true,
-			mockFn: func(t string) *JWTSymetric {
+			mockFn: func(t string) *Symetric {
 				return NewJWTSymetric([]byte("test"))
 			},
 		},

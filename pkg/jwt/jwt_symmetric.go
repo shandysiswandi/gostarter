@@ -6,20 +6,20 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type JWTSymetric struct {
+type Symetric struct {
 	secret []byte
 }
 
-func NewJWTSymetric(secret []byte) *JWTSymetric {
-	return &JWTSymetric{secret: secret}
+func NewJWTSymetric(secret []byte) *Symetric {
+	return &Symetric{secret: secret}
 }
 
-func (js *JWTSymetric) Generate(c *Claim) (string, error) {
+func (js *Symetric) Generate(c *Claim) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, c).SignedString(js.secret)
 }
 
-func (js *JWTSymetric) Verify(token string) (*Claim, error) {
-	tkn, err := jwt.ParseWithClaims(token, &Claim{}, func(t *jwt.Token) (interface{}, error) {
+func (js *Symetric) Verify(token string) (*Claim, error) {
+	tkn, err := jwt.ParseWithClaims(token, &Claim{}, func(*jwt.Token) (interface{}, error) {
 		return js.secret, nil
 	})
 	if errors.Is(err, jwt.ErrTokenExpired) {

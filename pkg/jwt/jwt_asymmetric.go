@@ -10,12 +10,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type JWTAsymmetric struct {
+type Asymmetric struct {
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
 }
 
-func NewJWTAsymmetric(private, public string) (*JWTAsymmetric, error) {
+func NewJWTAsymmetric(private, public string) (*Asymmetric, error) {
 	privateKeyBytes, err := base64.StdEncoding.DecodeString(private)
 	if err != nil {
 		return nil, err
@@ -57,17 +57,17 @@ func NewJWTAsymmetric(private, public string) (*JWTAsymmetric, error) {
 		return nil, ErrInvalidRSAPublicKey
 	}
 
-	return &JWTAsymmetric{
+	return &Asymmetric{
 		privateKey: rsaPrivateKey,
 		publicKey:  rsaPublicKey,
 	}, nil
 }
 
-func (ja *JWTAsymmetric) Generate(c *Claim) (string, error) {
+func (ja *Asymmetric) Generate(c *Claim) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodRS256, c).SignedString(ja.privateKey)
 }
 
-func (ja *JWTAsymmetric) Verify(token string) (*Claim, error) {
+func (ja *Asymmetric) Verify(token string) (*Claim, error) {
 	tkn, err := jwt.ParseWithClaims(token, &Claim{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, jwt.ErrTokenSignatureInvalid
