@@ -1,3 +1,4 @@
+//nolint:dupl // this is not duplicate
 package usecase
 
 import (
@@ -28,7 +29,8 @@ func NewFetchPermission(dep Dependency, s FetchPermissionStore) *FetchPermission
 }
 
 func (fr *FetchPermission) Call(ctx context.Context, in domain.FetchPermissionInput) (
-	*domain.FetchPermissionOutput, error) {
+	*domain.FetchPermissionOutput, error,
+) {
 	ctx, span := fr.tele.Tracer().Start(ctx, "rbac.usecase.FetchPermission")
 	defer span.End()
 

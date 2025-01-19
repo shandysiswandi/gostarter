@@ -93,6 +93,7 @@ func (sr *SQLRBAC) FindRoleByName(ctx context.Context, name string) (*domain.Rol
 	return dbops.SQLGet[domain.Role](ctx, sr.db, query)
 }
 
+//nolint:dupl // #11 this is not duplicate with #12
 func (sr *SQLRBAC) FetchRole(ctx context.Context, filter map[string]any) ([]domain.Role, error) {
 	ctx, span := sr.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.FetchRole")
 	defer span.End()
@@ -191,6 +192,7 @@ func (sr *SQLRBAC) FindPermissionByName(ctx context.Context, name string) (*doma
 	return dbops.SQLGet[domain.Permission](ctx, sr.db, query)
 }
 
+//nolint:dupl // #12 this is not duplicate with #11
 func (sr *SQLRBAC) FetchPermission(ctx context.Context, filter map[string]any) ([]domain.Permission, error) {
 	ctx, span := sr.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.FetchPermission")
 	defer span.End()

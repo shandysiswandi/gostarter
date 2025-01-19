@@ -1,3 +1,4 @@
+//nolint:dupl // this is not duplicate
 package usecase
 
 import (
