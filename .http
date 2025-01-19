@@ -436,6 +436,22 @@ Authorization: Bearer {{$global.accessToken}}
 ?? body name exists
 ?? body description exists
 ###
+PUT {{url_http}}/rbac/roles/{{$global.roleId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "name": "update i want to be a tester",
+  "description": "update this is example role for testing"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body name exists
+?? body description exists
+###
 POST {{url_http}}/rbac/permissions HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{$global.accessToken}}
@@ -457,6 +473,23 @@ Authorization: Bearer {{$global.accessToken}}
 GET {{url_http}}/rbac/permissions/{{$global.permissionId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{$global.accessToken}}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists
+?? body name exists
+?? body description exists
+
+###
+PUT {{url_http}}/rbac/permissions/{{$global.permissionId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "name": "update i want to be a tester",
+  "description": "update this is example permissions for testing"
+}
 
 ?? status == 200
 ?? duration < 100

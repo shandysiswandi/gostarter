@@ -20,8 +20,10 @@ type httpEndpoint struct {
 
 	createRoleUC       domain.CreateRole
 	findRoleUC         domain.FindRole
+	updateRoleUC       domain.UpdateRole
 	createPermissionUC domain.CreatePermission
 	findPermissionUC   domain.FindPermission
+	updatePermissionUC domain.UpdatePermission
 }
 
 func (h *httpEndpoint) CreateRole(c framework.Context) (any, error) {
@@ -59,7 +61,37 @@ func (h *httpEndpoint) FindRole(c framework.Context) (any, error) {
 	}
 
 	return Role{
+		ID:          resp.ID,
+		Name:        resp.Name,
+		Description: resp.Description,
+	}, nil
+}
+
+func (h *httpEndpoint) UpdateRole(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "rbac.inbound.httpEndpoint.UpdateRole")
+	defer span.End()
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return nil, errFailedParseToUint
+	}
+
+	var req UpdateRoleRequest
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
+	}
+
+	resp, err := h.updateRoleUC.Call(ctx, domain.UpdateRoleInput{
 		ID:          id,
+		Name:        req.Name,
+		Description: req.Description,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return Role{
+		ID:          resp.ID,
 		Name:        resp.Name,
 		Description: resp.Description,
 	}, nil
@@ -80,7 +112,7 @@ func (h *httpEndpoint) FindPermission(c framework.Context) (any, error) {
 	}
 
 	return Permission{
-		ID:          id,
+		ID:          resp.ID,
 		Name:        resp.Name,
 		Description: resp.Description,
 	}, nil
@@ -104,4 +136,34 @@ func (h *httpEndpoint) CreatePermission(c framework.Context) (any, error) {
 	}
 
 	return CreatePermissionResponse{ID: resp.ID}, nil
+}
+
+func (h *httpEndpoint) UpdatePermission(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "rbac.inbound.httpEndpoint.UpdatePermission")
+	defer span.End()
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return nil, errFailedParseToUint
+	}
+
+	var req UpdateRoleRequest
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
+	}
+
+	resp, err := h.updatePermissionUC.Call(ctx, domain.UpdatePermissionInput{
+		ID:          id,
+		Name:        req.Name,
+		Description: req.Description,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return Permission{
+		ID:          resp.ID,
+		Name:        resp.Name,
+		Description: resp.Description,
+	}, nil
 }

@@ -75,14 +75,32 @@ func (st *SQLRBAC) FindRoleByName(ctx context.Context, name string) (*domain.Rol
 	return dbops.SQLGet[domain.Role](ctx, st.db, query)
 }
 
-func (st *SQLRBAC) SavePermission(ctx context.Context, r domain.Permission) error {
+func (st *SQLRBAC) EditRole(ctx context.Context, r domain.Role) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.EditRole")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Update("roles").
+			Set(map[string]any{
+				"name":        r.Name,
+				"description": r.Description,
+			}).
+			Where(goqu.Ex{"id": r.ID}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.Exec(ctx, st.db, query)
+}
+
+func (st *SQLRBAC) SavePermission(ctx context.Context, p domain.Permission) error {
 	ctx, span := st.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.SavePermission")
 	defer span.End()
 
 	query := func() (string, []any, error) {
 		return st.qu.Insert("permissions").
 			Cols("id", "name", "description").
-			Vals([]any{r.ID, r.Name, r.Description}).
+			Vals([]any{p.ID, p.Name, p.Description}).
 			Prepared(true).
 			ToSQL()
 	}
@@ -93,6 +111,24 @@ func (st *SQLRBAC) SavePermission(ctx context.Context, r domain.Permission) erro
 	}
 
 	return err
+}
+
+func (st *SQLRBAC) EditPermission(ctx context.Context, p domain.Permission) error {
+	ctx, span := st.telemetry.Tracer().Start(ctx, "rbac.outbound.SQLRBAC.EditPermission")
+	defer span.End()
+
+	query := func() (string, []any, error) {
+		return st.qu.Update("permissions").
+			Set(map[string]any{
+				"name":        p.Name,
+				"description": p.Description,
+			}).
+			Where(goqu.Ex{"id": p.ID}).
+			Prepared(true).
+			ToSQL()
+	}
+
+	return dbops.Exec(ctx, st.db, query)
 }
 
 func (st *SQLRBAC) FindPermission(ctx context.Context, id uint64) (*domain.Permission, error) {

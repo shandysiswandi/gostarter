@@ -24,6 +24,13 @@ type (
 )
 
 type (
+	UpdateRoleRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+)
+
+type (
 	CreatePermissionRequest struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
@@ -31,5 +38,12 @@ type (
 
 	CreatePermissionResponse struct {
 		ID uint64 `json:"id,string"`
+	}
+)
+
+type (
+	UpdatePermissionRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}
 )
