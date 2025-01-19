@@ -406,3 +406,17 @@ Authorization: Bearer {{$global.accessToken}}
 ?? body reference_id exists
 ?? body amount exists
 ?? body balance exists
+###
+POST {{url_http}}/rbac/roles HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "name": "i want to be a tester",
+  "description": "this is example role for testing"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body id exists

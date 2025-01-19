@@ -31,9 +31,6 @@ func UnaryTelemetryServerInterceptor(tel *telemetry.Telemetry, sid func() string
 
 		return opts
 
-	case telemetry.NOOP:
-		return nil
-
 	default:
 		return nil
 	}

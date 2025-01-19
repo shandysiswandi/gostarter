@@ -22,7 +22,7 @@ tools:
 	@go install honnef.co/go/tools/cmd/staticcheck@latest
 
 run:
-	@reflex -r '\.go$$' -s -- go run main.go
+	@reflex -r '\.go$$' -s -- sh -c "LOCAL=true go run main.go"
 
 lint:
 	@golangci-lint run

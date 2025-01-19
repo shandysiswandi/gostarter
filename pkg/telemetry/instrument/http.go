@@ -33,9 +33,6 @@ func UseTelemetryServer(tel *telemetry.Telemetry) func(http.Handler) http.Handle
 					otelhttp.WithTracerProvider(tel.TracerProvider()))
 				hand.ServeHTTP(w, r)
 
-			case telemetry.NOOP:
-				h.ServeHTTP(w, r)
-
 			default:
 				h.ServeHTTP(w, r)
 			}

@@ -66,6 +66,23 @@ func (a *App) initTelemetry() {
 	)
 }
 
+// initJWT initializes the JWT (JSON Web Token) for the application.
+// It checks the configuration to determine whether to use asymmetric or symmetric encryption for the JWT.
+func (a *App) initJWT() {
+	if a.config.GetString("jwt.algorithm") == "asymmetric" {
+		jewete, err := jwt.NewJWTAsymmetric(
+			a.config.GetString("jwt.private.key"),
+			a.config.GetString("jwt.public.key"),
+		)
+		if err != nil {
+			log.Fatalln("failed to init json web token (jwt)", err)
+		}
+		a.jwt = jewete
+	} else {
+		a.jwt = jwt.NewJWTSymetric([]byte(a.config.GetString("jwt.secret")))
+	}
+}
+
 // initLibraries initializes various utility libraries used throughout the application,
 // such as UID generators, clock, codecs for JSON and MsgPack, and the validation library.
 // If any library fails to initialize, the application will log a fatal error and terminate.
@@ -80,22 +97,13 @@ func (a *App) initLibraries() {
 		log.Fatalln("failed to init validation proto validator", err)
 	}
 
-	jewete, err := jwt.NewJSONWebToken(
-		a.config.GetString("jwt.private.key"),
-		a.config.GetString("jwt.public.key"),
-	)
-	if err != nil {
-		log.Fatalln("failed to init json web token (jwt)", err)
-	}
-
-	a.jwt = jewete
 	a.uidNumber = snow
 	a.protoValidator = pvalidator
 
 	a.clock = clock.New()
 	a.uuid = uid.NewUUIDString()
 	a.hash = hash.NewBcryptHash(10)
-	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("secret.hash.sha256"))
+	a.secHash = hash.NewHMACSHA256Hash(a.config.GetString("hash.sha256.secret"))
 	a.codecJSON = codec.NewJSONCodec()
 	a.goroutine = goroutine.NewManager(100)
 	a.codecMsgPack = codec.NewMsgPackCodec()

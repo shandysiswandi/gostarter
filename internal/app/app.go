@@ -72,6 +72,7 @@ func New() *App {
 
 	app.initConfig()
 	app.initTelemetry()
+	app.initJWT()
 	app.initLibraries()
 	app.initDatabase()
 	app.initRedis()

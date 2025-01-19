@@ -24,7 +24,10 @@ redis.addr: localhost:6379
 
 jwt.public.key: base64ofpublickey
 jwt.private.key: base64ofprivatekey
-secret.hash.sha256: secret
+jwt.secret: secret
+jwt.algorithm: asymmetric # asymmetric or symmetric
+
+hash.sha256.secret: secret
 
 init.flag.messaging: false
 
@@ -32,6 +35,7 @@ feature.flag.graphql.playground: false
 feature.flag.todo.job: false
 
 module.flag.auth: true
+module.flag.rbac: true
 module.flag.user: true
 module.flag.todo: true
 module.flag.payment: true

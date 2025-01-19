@@ -5,7 +5,10 @@
     {
       "languageId": "go",
       "allowCompoundWords": false,
-      "includeRegExpList": ["CStyleComment", "string"],
+      "includeRegExpList": [
+        "CStyleComment",
+        "string"
+      ],
       "ignoreRegExpList": [
         // ignore multiline imports
         "import\\s*\\((.|[\r\n])*?\\)",
@@ -72,6 +75,7 @@
     "redismock",
     "redispubsub",
     "shandysiswandi",
+    "SQLRBAC",
     "sslmode",
     "todos",
     "topup",

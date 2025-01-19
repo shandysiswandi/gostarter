@@ -5,12 +5,14 @@ import (
 
 	"github.com/shandysiswandi/gostarter/internal/auth"
 	"github.com/shandysiswandi/gostarter/internal/payment"
+	"github.com/shandysiswandi/gostarter/internal/rbac"
 	"github.com/shandysiswandi/gostarter/internal/todo"
 	"github.com/shandysiswandi/gostarter/internal/user"
 )
 
 func (a *App) initModules() {
 	a.moduleAuth()
+	a.moduleRBAC()
 	a.modulePayment()
 	a.moduleTodo()
 	a.moduleUser()
@@ -34,6 +36,24 @@ func (a *App) moduleAuth() {
 		})
 		if err != nil {
 			log.Fatalln("failed to init module auth", err)
+		}
+	}
+}
+
+func (a *App) moduleRBAC() {
+	if a.config.GetBool("module.flag.rbac") {
+		_, err := rbac.New(rbac.Dependency{
+			Database:     a.database,
+			Transaction:  a.transaction,
+			QueryBuilder: a.queryBuilder,
+			Telemetry:    a.telemetry,
+			Router:       a.httpRouter,
+			Validator:    a.validator,
+			UIDNumber:    a.uidNumber,
+			Clock:        a.clock,
+		})
+		if err != nil {
+			log.Fatalln("failed to init module rbac", err)
 		}
 	}
 }
