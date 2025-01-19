@@ -425,6 +425,24 @@ Authorization: Bearer {{$global.accessToken}}
   if (response.parsedBody.id) $global.roleId = response.parsedBody.id;
 }}
 ###
+GET {{url_http}}/rbac/roles?name=want HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "name": "i want to be a tester",
+  "description": "this is example role for testing"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body roles exists
+?? js response.parsedBody.roles.length == 1
+?? body pagination exists
+?? body pagination.next_cursor exists
+?? body pagination.has_more exists
+###
 GET {{url_http}}/rbac/roles/{{$global.roleId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{$global.accessToken}}
@@ -469,6 +487,24 @@ Authorization: Bearer {{$global.accessToken}}
 {{
   if (response.parsedBody.id) $global.permissionId = response.parsedBody.id;
 }}
+###
+GET {{url_http}}/rbac/permissions?name=tester HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{$global.accessToken}}
+
+{
+  "name": "i want to be a tester",
+  "description": "this is example role for testing"
+}
+
+?? status == 200
+?? duration < 100
+?? header content-type == application/json; charset=utf-8
+?? body permissions exists
+?? js response.parsedBody.permissions.length == 1
+?? body pagination exists
+?? body pagination.next_cursor exists
+?? body pagination.has_more exists
 ###
 GET {{url_http}}/rbac/permissions/{{$global.permissionId}} HTTP/1.1
 Content-Type: application/json

@@ -18,11 +18,14 @@ var (
 type httpEndpoint struct {
 	telemetry *telemetry.Telemetry
 
-	createRoleUC       domain.CreateRole
-	findRoleUC         domain.FindRole
-	updateRoleUC       domain.UpdateRole
+	createRoleUC domain.CreateRole
+	findRoleUC   domain.FindRole
+	fetchRoleUC  domain.FetchRole
+	updateRoleUC domain.UpdateRole
+	//
 	createPermissionUC domain.CreatePermission
 	findPermissionUC   domain.FindPermission
+	fetchPermissionUC  domain.FetchPermission
 	updatePermissionUC domain.UpdatePermission
 }
 
@@ -64,6 +67,37 @@ func (h *httpEndpoint) FindRole(c framework.Context) (any, error) {
 		ID:          resp.ID,
 		Name:        resp.Name,
 		Description: resp.Description,
+	}, nil
+}
+
+func (h *httpEndpoint) FetchRole(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "rbac.inbound.httpEndpoint.FetchRole")
+	defer span.End()
+
+	resp, err := h.fetchRoleUC.Call(ctx, domain.FetchRoleInput{
+		Cursor: c.Query("cursor"),
+		Limit:  c.Query("limit"),
+		Name:   c.Query("name"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	roles := make([]Role, 0)
+	for _, role := range resp.Roles {
+		roles = append(roles, Role{
+			ID:          role.ID,
+			Name:        role.Name,
+			Description: role.Description,
+		})
+	}
+
+	return FetchRoleResponse{
+		Roles: roles,
+		Pagination: Pagination{
+			NextCursor: resp.NextCursor,
+			HasMore:    resp.HasMore,
+		},
 	}, nil
 }
 
@@ -115,6 +149,37 @@ func (h *httpEndpoint) FindPermission(c framework.Context) (any, error) {
 		ID:          resp.ID,
 		Name:        resp.Name,
 		Description: resp.Description,
+	}, nil
+}
+
+func (h *httpEndpoint) FetchPermission(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "rbac.inbound.httpEndpoint.FetchPermission")
+	defer span.End()
+
+	resp, err := h.fetchPermissionUC.Call(ctx, domain.FetchPermissionInput{
+		Cursor: c.Query("cursor"),
+		Limit:  c.Query("limit"),
+		Name:   c.Query("name"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	perms := make([]Permission, 0)
+	for _, perm := range resp.Permissions {
+		perms = append(perms, Permission{
+			ID:          perm.ID,
+			Name:        perm.Name,
+			Description: perm.Description,
+		})
+	}
+
+	return FetchPermissionResponse{
+		Permissions: perms,
+		Pagination: Pagination{
+			NextCursor: resp.NextCursor,
+			HasMore:    resp.HasMore,
+		},
 	}, nil
 }
 

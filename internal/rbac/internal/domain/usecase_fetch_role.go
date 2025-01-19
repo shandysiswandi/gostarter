@@ -9,7 +9,9 @@ type FetchRole interface {
 }
 
 type FetchRoleInput struct {
-	Name string `validate:"max=50"`
+	Cursor string
+	Limit  string
+	Name   string
 }
 
 type FetchRoleOutput struct {

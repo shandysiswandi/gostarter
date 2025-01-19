@@ -9,7 +9,9 @@ type FetchPermission interface {
 }
 
 type FetchPermissionInput struct {
-	Name string `validate:"max=50"`
+	Cursor string
+	Limit  string
+	Name   string
 }
 
 type FetchPermissionOutput struct {
