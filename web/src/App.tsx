@@ -1,13 +1,20 @@
-import Header from "./components/Header"
+import { Routes, Route } from "react-router";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
   return (
-    <>
-      <Header />
-      <div>Content</div>
-      <div>Footer</div>
-      {/* https://github.com/nyash04/daisyui-landing-page/tree/master */}
-      {/* https://github.com/robbins23/daisyui-admin-dashboard-template */}
-    </>
+    <Routes>
+      <Route index element={<Home />} />
+      <Route path="login" element={<Login />} />
+      <Route path="register" element={<Register />} />
+      <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route path="reset-password" element={<ResetPassword />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }

@@ -1,6 +1,6 @@
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-base-100 py-2">
+    <header className="bg-base-100 sticky top-0 z-50 py-2">
       <div className="container">
         <div className="navbar px-0">
           <div className="navbar-start">
@@ -13,7 +13,7 @@ export default function Header() {
               </label>
               <ul
                 tabIndex={0}
-                className="menu-compact menu dropdown-content mt-1 w-52 rounded-box bg-base-200 p-2 shadow"
+                className="menu-compact menu dropdown-content rounded-box bg-base-200 mt-1 w-52 p-2 shadow"
               >
                 <li>
                   <a href="#!">Home</a>
@@ -54,7 +54,7 @@ export default function Header() {
             </ul>
           </div>
           <div className="navbar-end">
-              <a href="#!">LOGIN</a>
+            <a href="#!">LOGIN</a>
           </div>
         </div>
       </div>
