@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useDocumentTitle } from "@/hooks";
 
 export default function ResetPassword() {
+  useDocumentTitle("Reset Your Password");
+
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",

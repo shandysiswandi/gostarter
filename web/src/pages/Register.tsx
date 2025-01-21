@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import { useState } from "react";
+import { useDocumentTitle } from "@/hooks";
 
 export default function Register() {
+  useDocumentTitle("Sign Up");
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",

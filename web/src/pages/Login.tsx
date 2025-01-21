@@ -1,7 +1,12 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
+import { useDocumentTitle } from "@/hooks";
 
 export default function Login() {
+  useDocumentTitle("Sign In");
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -39,6 +44,8 @@ export default function Login() {
 
       setIsLoading(false);
       setFormData({ email: "", password: "", rememberMe: false });
+
+      navigate("/dashboard");
     }, 1000);
 
     // await api call to send reset password link

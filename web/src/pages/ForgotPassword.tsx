@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import { useState } from "react";
+import { useDocumentTitle } from "@/hooks";
 
 export default function ForgotPassword() {
+  useDocumentTitle("Forgot Password");
+
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

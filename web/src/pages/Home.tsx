@@ -1,6 +1,9 @@
 import { Link } from "react-router";
+import { useDocumentTitle } from "@/hooks";
 
 export default function Home() {
+  useDocumentTitle("Home");
+
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
       <Link

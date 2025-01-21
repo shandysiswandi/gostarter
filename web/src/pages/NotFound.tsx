@@ -1,6 +1,9 @@
 import { Link } from "react-router";
+import { useDocumentTitle } from "@/hooks";
 
-export default function Login() {
+export default function NotFound() {
+  useDocumentTitle("Not Found");
+
   return (
     <div className="flex h-screen items-center bg-gray-100 text-gray-800">
       <div className="container mx-auto flex flex-col items-center justify-center">
