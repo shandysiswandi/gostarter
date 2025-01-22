@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { useState } from "react";
 import { useDocumentTitle } from "@/hooks";
 
-export default function ForgotPassword() {
+const ForgotPassword: React.FC = () => {
   useDocumentTitle("Forgot Password");
 
   const [email, setEmail] = useState("");
@@ -86,3 +86,5 @@ export default function ForgotPassword() {
     </div>
   );
 }
+
+export default ForgotPassword;

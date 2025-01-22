@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-gray-800 text-white lg:w-64">
+    <div className="bg-violet-800 text-white lg:w-64">
       <button className="p-4 lg:hidden" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? "Close" : "Open"} Menu
       </button>
-      <div className={`lg:block ${isOpen ? "block" : "hidden"} space-y-4 p-4`}>
+      <div className={`lg:block ${isOpen ? "block" : "hidden"}`}>
         <a href="#" className="block rounded p-2 hover:bg-gray-700">
           Dashboard
         </a>

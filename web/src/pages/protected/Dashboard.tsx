@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { useDocumentTitle } from "@/hooks";
 
-export default function NotFound() {
+const Dashboard: React.FC = () => {
   useDocumentTitle("Dashboard");
 
   return (
@@ -29,3 +29,5 @@ export default function NotFound() {
     </div>
   );
 }
+
+export default Dashboard;

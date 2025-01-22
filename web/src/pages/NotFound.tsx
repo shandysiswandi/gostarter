@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { useDocumentTitle } from "@/hooks";
 
-export default function NotFound() {
+const NotFound: React.FC = () => {
   useDocumentTitle("Not Found");
 
   return (
@@ -29,3 +29,4 @@ export default function NotFound() {
     </div>
   );
 }
+export default NotFound;

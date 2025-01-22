@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { useDocumentTitle } from "@/hooks";
 
-export default function Home() {
+const Home: React.FC = () => {
   useDocumentTitle("Home");
 
   return (
@@ -15,3 +15,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home;

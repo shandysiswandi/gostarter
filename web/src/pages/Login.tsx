@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks";
 
-export default function Login() {
+const Login: React.FC = () => {
   useDocumentTitle("Sign In");
 
   const navigate = useNavigate();
@@ -140,3 +140,5 @@ export default function Login() {
     </div>
   );
 }
+
+export default Login;
