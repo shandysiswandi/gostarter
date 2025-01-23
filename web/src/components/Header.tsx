@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { MagnifyingGlassIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 const Header: React.FC = () => {
@@ -9,7 +9,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="shadow-bottom z-20 bg-white py-4">
+    <header className="shadow-bottom sticky top-0 z-20 lg:ml-64 h-16 bg-white">
       <div className="container mx-auto flex h-full items-center justify-between px-6 text-purple-600">
         <button
           className="focus:shadow-outline-purple -ml-1 mr-5 rounded-md p-1 focus:outline-none lg:hidden"
@@ -24,7 +24,7 @@ const Header: React.FC = () => {
               <MagnifyingGlassIcon className="h-4 w-4" aria-hidden="true" />
             </div>
             <input
-              className="text w-full rounded-lg bg-gray-100 py-3 pl-8 text-gray-700 outline-purple-500"
+              className="text w-full rounded-lg bg-gray-100 py-2 pl-8 text-gray-700 outline-purple-500"
               placeholder="Search something..."
               aria-label="Search"
             />
@@ -35,11 +35,11 @@ const Header: React.FC = () => {
           <li className="relative">
             <button
               onClick={toggleDropdown}
-              className="focus:shadow-outline-purple rounded-md focus:outline-none "
+              className="focus:shadow-outline-purple rounded-md focus:outline-none"
               aria-label="Toggle dropdown"
             >
               <img
-                className="h-10 w-10 rounded-full object-cover border-2 border-purple-400"
+                className="h-10 w-10 rounded-full border-2 border-purple-400 object-cover"
                 src="https://picsum.photos/150"
                 alt="User avatar"
               />

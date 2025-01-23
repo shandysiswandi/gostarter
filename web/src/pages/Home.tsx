@@ -14,6 +14,6 @@ const Home: React.FC = () => {
       </Link>
     </div>
   );
-}
+};
 
 export default Home;

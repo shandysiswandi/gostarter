@@ -20,6 +20,6 @@ const Loading: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Loading;

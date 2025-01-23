@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router";
 import { lazy, Suspense } from "react";
 import Loading from "@/components/Loading";
+import DashboardLayout from "./components/DashbordLayout";
 
 // Lazy load pages
 const Home = lazy(() => import("@/pages/Home"));
@@ -21,10 +22,11 @@ export default function App() {
         <Route path="register" element={<Register />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
-        {/*  */}
-        <Route path="dashboard" element={<Dashboard />} />
 
-        {/*  */}
+        <Route element={<DashboardLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

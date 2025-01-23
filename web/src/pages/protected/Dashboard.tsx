@@ -1,33 +1,24 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import { useDocumentTitle } from "@/hooks";
 
 const Dashboard: React.FC = () => {
   useDocumentTitle("Dashboard");
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+    <>
+      <h1 className="mb-4 text-2xl font-bold text-gray-800">Dashboard</h1>
 
-      <div className="flex flex-1 flex-col">
-        <Header />
-
-        <main className="p-4">
-          <div className="rounded bg-white p-4 shadow">
-            <h2 className="mb-4 text-2xl font-bold">
-              Welcome to the Dashboard
-            </h2>
+      <div className="rounded-xl bg-white px-4 pb-4 pt-1 shadow">
+        {[...Array(20).keys()].map((i) => (
+          <div key={i} className="mt-4 rounded bg-gray-200 p-4">
+            <h3 className="text-lg font-semibold">Section {i + 1}</h3>
             <p className="text-gray-700">
-              Here is the main content of the dashboard.
+              This is the content of section {i + 1}.
             </p>
           </div>
-        </main>
-
-        <Footer />
+        ))}
       </div>
-    </div>
+    </>
   );
-}
+};
 
 export default Dashboard;
