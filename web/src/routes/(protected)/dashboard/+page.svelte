@@ -1,1 +1,7 @@
-<h1 class="text-3xl font-semibold">Welcome to my dashboard</h1>
+<script lang="ts">
+	import Summary from './summary.svelte';
+	import TopChannel from './TopChannel.svelte';
+</script>
+
+<Summary />
+<TopChannel />
