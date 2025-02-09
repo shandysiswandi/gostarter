@@ -1,8 +1,11 @@
-import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vitest/config';
+import { sveltekit } from '@sveltejs/kit/vite';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte(), tailwindcss()],
+	plugins: [sveltekit(), tailwindcss()],
+
+	test: {
+		include: ['src/**/*.{test,spec}.{js,ts}']
+	}
 });

@@ -1,9 +1,4 @@
-# Ignore artifacts:
-build
-coverage
-dist
-
-**/.git
-**/.svn
-**/.hg
-**/node_modules
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

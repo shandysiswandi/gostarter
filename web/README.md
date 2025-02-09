@@ -1,1 +1,1 @@
-# Svelte + TS + Vite + Tailwind
+# SvelteKit + TS + Vite + Tailwind
