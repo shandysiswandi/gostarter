@@ -2,7 +2,7 @@
 	import { Menu } from 'lucide-svelte';
 </script>
 
-<section class="grid grid-cols-4 gap-4">
+<section class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 	<div class="rounded-lg border border-gray-100 bg-white shadow">
 		<div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
 			<h3 class="text-sm font-medium tracking-tight">Today's Conversations</h3>

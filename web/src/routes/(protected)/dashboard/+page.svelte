@@ -1,7 +1,5 @@
 <script lang="ts">
-	import Summary from './summary.svelte';
-	import TopChannel from './TopChannel.svelte';
+	import Summary from '$lib/contents/Summary.svelte';
 </script>
 
 <Summary />
-<TopChannel />

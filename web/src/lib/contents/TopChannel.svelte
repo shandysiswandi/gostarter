@@ -33,7 +33,7 @@
 	<div class="rounded-lg border border-gray-100 bg-white p-5 shadow">
 		<h4 class="mb-6 text-xl font-bold text-black">Top Channels</h4>
 
-		<table class=" w-full table-fixed divide-y divide-gray-200">
+		<table class=" w-full table-fixed divide-y divide-gray-200 border">
 			<thead class="bg-gray-100">
 				<tr>
 					<th scope="col" class=" px-6 py-3 text-start text-xs font-medium uppercase text-gray-500">
