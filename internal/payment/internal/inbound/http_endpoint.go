@@ -10,7 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
+var errInvalidBody = goerror.NewInvalidFormat("Request payload malformed")
 
 type httpEndpoint struct {
 	tel *telemetry.Telemetry

@@ -36,7 +36,7 @@ func (ur *UpdateRole) Call(ctx context.Context, in domain.UpdateRoleInput) (*dom
 	if err := ur.validator.Validate(in); err != nil {
 		ur.tele.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	role, err := ur.store.FindRole(ctx, in.ID)

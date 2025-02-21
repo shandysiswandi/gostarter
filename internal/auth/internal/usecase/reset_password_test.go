@@ -61,7 +61,7 @@ func TestResetPassword_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -161,7 +161,7 @@ func TestResetPassword_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("token has expired", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized),
 			mockFn: func(a args) *ResetPassword {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)

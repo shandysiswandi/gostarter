@@ -63,7 +63,7 @@ func TestLogin_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -132,7 +132,7 @@ func TestLogin_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -169,7 +169,7 @@ func TestLogin_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *Login {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)

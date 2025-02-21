@@ -342,7 +342,7 @@ func TestNewServerInternal(t *testing.T) {
 			},
 			wantErr: &GoError{
 				err:     assert.AnError,
-				msg:     "internal server error",
+				msg:     "Internal server error",
 				errType: TypeServer,
 				code:    CodeInternal,
 			},

@@ -9,7 +9,7 @@ import (
 	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
-var errInvalidBody = goerror.NewInvalidFormat("invalid request body")
+var errInvalidBody = goerror.NewInvalidFormat("Request payload malformed")
 
 type httpEndpoint struct {
 	telemetry *telemetry.Telemetry

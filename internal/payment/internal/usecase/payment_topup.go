@@ -51,7 +51,7 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 	if err := pt.validator.Validate(in); err != nil {
 		pt.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	top, err := pt.store.FindTopupByReferenceID(ctx, in.ReferenceID)

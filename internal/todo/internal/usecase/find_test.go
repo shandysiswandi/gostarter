@@ -57,7 +57,7 @@ func TestFind_Execute(t *testing.T) {
 				in:  domain.FindInput{ID: 11},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Find {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

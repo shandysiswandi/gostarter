@@ -3,20 +3,26 @@ package framework
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 // Handler defines the type for endpoint handlers with context, request, and response writer.
 type Handler func(Context) (any, error)
 
-// StatusCoder is an interface for custom responses that allows them to specify their
-// HTTP status code. Types implementing this interface can control the HTTP status code
-// returned to the client.
-type StatusCoder interface {
-	StatusCode() int
+type errorResponse struct {
+	Message string            `json:"message"`
+	Error   map[string]string `json:"error,omitempty"`
+}
+
+type resultResponse struct {
+	Message string `json:"message"`
+	Data    any    `json:"data"`
 }
 
 type Router struct {
@@ -70,7 +76,9 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // It sets the content type to JSON and writes the appropriate HTTP status code.
 func defaultResultCodec(_ context.Context, w http.ResponseWriter, data any) {
 	code := http.StatusOK
-	if sc, ok := data.(StatusCoder); ok {
+	if sc, ok := data.(interface {
+		StatusCode() int
+	}); ok {
 		code = sc.StatusCode()
 	}
 
@@ -80,40 +88,55 @@ func defaultResultCodec(_ context.Context, w http.ResponseWriter, data any) {
 		return
 	}
 
-	writeJSON(w, data, code)
+	msg := "Successfully"
+	if m, ok := data.(interface {
+		Message() string
+	}); ok {
+		msg = m.Message()
+	}
+
+	writeJSON(w, resultResponse{Message: msg, Data: data}, code)
 }
 
 // defaultErrorCodec encodes error responses into JSON format.
 // It sets the content type to JSON and writes the appropriate HTTP status code.
 func defaultErrorCodec(_ context.Context, w http.ResponseWriter, err error) {
-	code := http.StatusInternalServerError
-	if sc, ok := err.(StatusCoder); ok {
-		code = sc.StatusCode()
+	var gerr *goerror.GoError
+	if !errors.As(err, &gerr) {
+		writeJSON(w, errorResponse{Message: "Internal server error"}, http.StatusInternalServerError)
+
+		return
 	}
 
-	writeJSON(w, map[string]string{"error": err.Error()}, code)
+	errResp := errorResponse{Message: gerr.Msg()}
+
+	if errs, ok := validation.AsV10Validator(gerr.Unwrap()); ok {
+		errResp.Error = errs.Values()
+	}
+
+	writeJSON(w, errResp, gerr.StatusCode())
 }
 
 // defaultNotFound is the default handler for unregistered routes.
 // It responds with a 404 Not Found status and a JSON error message.
 func defaultNotFound(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]string{"error": "endpoint not found"}, http.StatusNotFound)
+	writeJSON(w, errorResponse{Message: "endpoint not found"}, http.StatusNotFound)
 }
 
 // defaultMethodNotAllowed is the default handler for unsupported HTTP methods.
 // It responds with a 405 Method Not Allowed status and a JSON error message.
 func defaultMethodNotAllowed(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]string{"error": "method not allowed"}, http.StatusMethodNotAllowed)
+	writeJSON(w, errorResponse{Message: "method not allowed"}, http.StatusMethodNotAllowed)
 }
 
 // writeJSON is a utility function to write a JSON response to an http.ResponseWriter.
 // It encodes the provided data as JSON and writes it to the response body.
-// If an error occurs during encoding, it responds with an internal server error (500).
+// If an error occurs during encoding, it responds with an Internal server error (500).
 func writeJSON(w http.ResponseWriter, data any, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		log.Println("json.NewEncoder(w).Encode(data)", err)
 	}
 }

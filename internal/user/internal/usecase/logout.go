@@ -25,6 +25,7 @@ func NewLogout(dep Dependency, s LogoutStore) *Logout {
 	return &Logout{
 		tel:       dep.Telemetry,
 		validator: dep.Validator,
+		secHash:   dep.Hash,
 		store:     s,
 	}
 }
@@ -36,7 +37,7 @@ func (l *Logout) Call(ctx context.Context, in domain.LogoutInput) (*domain.Logou
 	if err := l.validator.Validate(in); err != nil {
 		l.tel.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	acHash, err := l.secHash.Hash(in.AccessToken)

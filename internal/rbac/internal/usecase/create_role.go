@@ -39,7 +39,7 @@ func (cr *CreateRole) Call(ctx context.Context, in domain.CreateRoleInput) (*dom
 	if err := cr.validator.Validate(in); err != nil {
 		cr.tele.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	role, err := cr.store.FindRoleByName(ctx, in.Name)

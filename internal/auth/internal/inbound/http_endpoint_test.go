@@ -30,7 +30,7 @@ func Test_httpEndpoint_Login(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
@@ -142,7 +142,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
@@ -246,7 +246,7 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
@@ -352,7 +352,7 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
@@ -454,7 +454,7 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 

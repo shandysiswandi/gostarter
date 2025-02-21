@@ -38,7 +38,7 @@ func (up *UpdatePermission) Call(ctx context.Context, in domain.UpdatePermission
 	if err := up.validator.Validate(in); err != nil {
 		up.tele.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	perm, err := up.store.FindPermission(ctx, in.ID)

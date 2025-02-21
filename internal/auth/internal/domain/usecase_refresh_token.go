@@ -7,7 +7,7 @@ type RefreshToken interface {
 }
 
 type RefreshTokenInput struct {
-	RefreshToken string `validate:"required,min=5"`
+	RefreshToken string `validate:"required,min=10"`
 }
 
 type RefreshTokenOutput struct {

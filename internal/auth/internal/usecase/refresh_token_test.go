@@ -63,7 +63,7 @@ func TestRefreshToken_Call(t *testing.T) {
 				in:  domain.RefreshTokenInput{RefreshToken: "token"},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -168,7 +168,7 @@ func TestRefreshToken_Call(t *testing.T) {
 				in:  domain.RefreshTokenInput{RefreshToken: "token"},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -208,7 +208,7 @@ func TestRefreshToken_Call(t *testing.T) {
 				in:  domain.RefreshTokenInput{RefreshToken: "token"},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("token has expired", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -256,7 +256,7 @@ func TestRefreshToken_Call(t *testing.T) {
 				in:  domain.RefreshTokenInput{RefreshToken: "token"},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized),
+			wantErr: goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized),
 			mockFn: func(a args) *RefreshToken {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)

@@ -9,7 +9,7 @@ type Register interface {
 type RegisterInput struct {
 	Name     string `validate:"required,min=5,max=100"`
 	Email    string `validate:"required,email,min=5,max=100"`
-	Password string `validate:"required,min=5,max=60"`
+	Password string `validate:"required,min=8,max=60"`
 }
 
 type RegisterOutput struct {

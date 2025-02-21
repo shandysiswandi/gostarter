@@ -55,7 +55,7 @@ func TestLogout_Call(t *testing.T) {
 				in:  domain.LogoutInput{AccessToken: "token"},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Logout {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)

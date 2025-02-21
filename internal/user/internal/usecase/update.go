@@ -36,7 +36,7 @@ func (p *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.User,
 	if err := p.validator.Validate(in); err != nil {
 		p.tel.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	var email string

@@ -8,7 +8,7 @@ type Login interface {
 
 type LoginInput struct {
 	Email    string `validate:"required,email,min=5,max=100"`
-	Password string `validate:"required"`
+	Password string `validate:"required,min=8,max=60"`
 }
 
 type LoginOutput struct {

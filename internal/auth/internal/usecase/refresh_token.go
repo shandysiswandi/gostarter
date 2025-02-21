@@ -58,7 +58,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	refHash, err := s.secHash.Hash(in.RefreshToken)
@@ -80,14 +80,14 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		s.telemetry.Logger().Warn(ctx, "token not found",
 			logger.KeyVal("refresh_token_hash", string(refHash)))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	if refToken.RefreshExpiredAt.Before(time.Now()) {
 		s.telemetry.Logger().Warn(ctx, "token has expired",
 			logger.KeyVal("refresh_token_hash", string(refHash)))
 
-		return nil, goerror.NewBusiness("token has expired", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized)
 	}
 
 	clm := jwt.ExtractClaimFromToken(in.RefreshToken)
@@ -95,7 +95,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		s.telemetry.Logger().Warn(ctx, "token is malformed",
 			logger.KeyVal("refresh_token_hash", string(refHash)))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	tgsIn := tokenGenSaverIn{email: clm.Subject, token: refToken, userID: refToken.UserID}

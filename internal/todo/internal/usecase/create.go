@@ -40,7 +40,7 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	id := s.uidnumber.Generate()

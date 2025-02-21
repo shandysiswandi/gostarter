@@ -66,7 +66,7 @@ func TestCreate_Execute(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Create {
 				validator := vm.NewMockValidator(t)
 				tel := telemetry.NewTelemetry()

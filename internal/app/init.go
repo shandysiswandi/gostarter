@@ -13,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/cors"
 	"github.com/shandysiswandi/gostarter/pkg/clock"
 	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/config"
@@ -101,8 +102,14 @@ func (a *App) initLibraries() {
 		log.Fatalln("failed to init validation proto validator", err)
 	}
 
+	validator, err := validation.NewV10Validator()
+	if err != nil {
+		log.Fatalln("failed to init validation v10 validator", err)
+	}
+
 	a.uidNumber = snow
 	a.protoValidator = pvalidator
+	a.validator = validator
 
 	a.clock = clock.New()
 	a.uuid = uid.NewUUIDString()
@@ -111,7 +118,6 @@ func (a *App) initLibraries() {
 	a.codecJSON = codec.NewJSONCodec()
 	a.goroutine = goroutine.NewManager(100)
 	a.codecMsgPack = codec.NewMsgPackCodec()
-	a.validator = validation.NewV10Validator()
 }
 
 // dsnMySQL constructs a Data Source Name (DSN) for connecting to a MySQL database
@@ -232,6 +238,7 @@ func (a *App) initHTTPServer() {
 		Handler: framework.Chain(
 			a.httpRouter,
 			framework.Recovery,
+			cors.Default().Handler,
 			instrument.UseTelemetryServer(a.telemetry),
 			framework.JWT("gostarter.access.token", "/auth"),
 		),

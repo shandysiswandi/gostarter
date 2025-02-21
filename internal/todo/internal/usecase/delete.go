@@ -34,7 +34,7 @@ func (s *Delete) Call(ctx context.Context, in domain.DeleteInput) (*domain.Delet
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	if err := s.store.Delete(ctx, in.ID); err != nil {

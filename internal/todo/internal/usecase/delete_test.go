@@ -56,7 +56,7 @@ func TestDelete_Call(t *testing.T) {
 				in:  domain.DeleteInput{ID: 12},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Delete {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

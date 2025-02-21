@@ -117,7 +117,7 @@ func Test_httpEndpoint_Update(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updateMock := mockz.NewMockUpdate(t)
 				tel := telemetry.NewTelemetry()
@@ -230,7 +230,7 @@ func Test_httpEndpoint_UpdatePassword(t *testing.T) {
 				return c.Build()
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidFormat("invalid request body"),
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				updatePasswordMock := mockz.NewMockUpdatePassword(t)
 				tel := telemetry.NewTelemetry()

@@ -40,7 +40,7 @@ func (h *httpEndpoint) Update(c framework.Context) (any, error) {
 
 	var req UpdateRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat("invalid request body")
+		return nil, goerror.NewInvalidFormat("Request payload malformed")
 	}
 
 	resp, err := h.updateUC.Call(ctx, domain.UpdateInput{Name: req.Name})
@@ -61,7 +61,7 @@ func (h *httpEndpoint) UpdatePassword(c framework.Context) (any, error) {
 
 	var req UpdatePasswordRequest
 	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
-		return nil, goerror.NewInvalidFormat("invalid request body")
+		return nil, goerror.NewInvalidFormat("Request payload malformed")
 	}
 
 	resp, err := h.updatePasswordUC.Call(ctx, domain.UpdatePasswordInput{

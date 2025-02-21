@@ -60,7 +60,7 @@ func TestUpdateStatus_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *UpdateStatus {
 				mtel := telemetry.NewTelemetry()
 				validator := vm.NewMockValidator(t)

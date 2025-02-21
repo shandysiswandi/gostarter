@@ -13,7 +13,7 @@ const (
 	CodeUnauthorized              // Error code for unauthorized access.
 	CodeForbidden                 // Error code for forbidden actions.
 	CodeTimeout                   // Error code for operation timeout.
-	CodeInternal                  // Error code for internal server errors.
+	CodeInternal                  // Error code for Internal server errors.
 )
 
 // String returns the string representation of the error Code.

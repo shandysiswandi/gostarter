@@ -61,7 +61,7 @@ func TestForgotPassword_Call(t *testing.T) {
 				in:  domain.ForgotPasswordInput{Email: "email"},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				validatorMock := mockValidation.NewMockValidator(t)
 

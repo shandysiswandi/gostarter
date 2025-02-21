@@ -70,7 +70,7 @@ func TestRecovery(t *testing.T) {
 				panic("something went wrong")
 			},
 			expectedStatus:  http.StatusInternalServerError,
-			expectedMessage: `{"error":"Internal Server Error"}`,
+			expectedMessage: `{"message":"Internal server error"}`,
 		},
 		{
 			name: "Abort handler panic",
@@ -113,8 +113,8 @@ func TestRecovery(t *testing.T) {
 					t.Errorf("response body is not valid JSON: %v", err)
 				}
 
-				if responseBody["error"] != "Internal Server Error" {
-					t.Errorf("expected error message %q, got %q", "Internal Server Error", responseBody["error"])
+				if responseBody["message"] != "Internal server error" {
+					t.Errorf("expected error message %q, got %q", "Internal server error", responseBody["message"])
 				}
 			}
 		})

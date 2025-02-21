@@ -63,7 +63,7 @@ func TestRegister_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewInvalidInput("validation input fail", assert.AnError),
+			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)
@@ -132,7 +132,7 @@ func TestRegister_Call(t *testing.T) {
 				},
 			},
 			want:    nil,
-			wantErr: goerror.NewBusiness("email already registered", goerror.CodeConflict),
+			wantErr: goerror.NewBusiness("Email already registered", goerror.CodeConflict),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
 				validatorMock := mockValidation.NewMockValidator(t)

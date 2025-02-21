@@ -37,7 +37,7 @@ func (s *UpdateStatus) Call(ctx context.Context, in domain.UpdateStatusInput) (
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	sts := enum.New(enum.Parse[domain.TodoStatus](in.Status))

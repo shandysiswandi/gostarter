@@ -26,7 +26,6 @@ output:
     - format: tab
   print-issued-lines: true
   print-linter-name: true
-  uniq-by-line: true
   path-prefix: ""
   sort-results: false
   show-stats: true
@@ -149,7 +148,6 @@ linters:
     - stylecheck
     - tagalign
     - tagliatelle
-    - tenv
     - testableexamples
     - testifylint
     - testpackage
@@ -173,6 +171,7 @@ linters:
     - wsl
 
 issues:
+  uniq-by-line: true
   exclude-dirs:
     - ".*/mocks"
     - ".*/mockz"

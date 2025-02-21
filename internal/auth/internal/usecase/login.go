@@ -58,7 +58,7 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 	if err := s.validator.Validate(in); err != nil {
 		s.tel.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	u, err := s.store.FindUserByEmail(ctx, in.Email)
@@ -71,13 +71,13 @@ func (s *Login) Call(ctx context.Context, in domain.LoginInput) (*domain.LoginOu
 	if u == nil {
 		s.tel.Logger().Warn(ctx, "user not found", logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	if !s.hash.Verify(u.Password, in.Password) {
 		s.tel.Logger().Warn(ctx, "password not match", logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	token, err := s.store.FindTokenByUserID(ctx, u.ID)

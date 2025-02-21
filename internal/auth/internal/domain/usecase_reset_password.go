@@ -8,7 +8,7 @@ type ResetPassword interface {
 
 type ResetPasswordInput struct {
 	Token    string `validate:"required,min=5"`
-	Password string `validate:"required,min=5,max=60"`
+	Password string `validate:"required,min=8,max=60"`
 }
 
 type ResetPasswordOutput struct {

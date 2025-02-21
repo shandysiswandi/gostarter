@@ -24,7 +24,7 @@ func UnaryServerRecovery(ctx context.Context, req any, _ *grpc.UnaryServerInfo, 
 			log.Printf("panic because: %v\n", r)
 			debug.PrintStack()
 
-			err = status.Error(codes.Internal, "internal server error")
+			err = status.Error(codes.Internal, "Internal server error")
 		}
 	}()
 

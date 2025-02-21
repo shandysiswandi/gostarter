@@ -2,6 +2,7 @@ package googlepubsub
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -23,6 +24,7 @@ func mockServerAndClient() (*pstest.Server, *pubsub.Client, *grpc.ClientConn) {
 }
 
 func TestNewClient(t *testing.T) {
+	os.Setenv("PUBSUB_EMULATOR_HOST", "localhost:8085")
 	type args struct {
 		ctx       context.Context
 		projectID string

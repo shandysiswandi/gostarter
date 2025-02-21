@@ -46,7 +46,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 	if err := s.validator.Validate(in); err != nil {
 		s.tele.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	user, err := s.store.FindUserByEmail(ctx, in.Email)
@@ -59,7 +59,7 @@ func (s *Register) Call(ctx context.Context, in domain.RegisterInput) (*domain.R
 	if user != nil {
 		s.tele.Logger().Warn(ctx, "user already exists", logger.KeyVal("email", in.Email))
 
-		return nil, goerror.NewBusiness("email already registered", goerror.CodeConflict)
+		return nil, goerror.NewBusiness("Email already registered", goerror.CodeConflict)
 	}
 
 	passHash, err := s.hash.Hash(in.Password)

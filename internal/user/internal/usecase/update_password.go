@@ -40,7 +40,7 @@ func (up *UpdatePassword) Call(ctx context.Context, in domain.UpdatePasswordInpu
 	if err := up.validator.Validate(in); err != nil {
 		up.tel.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	var uid uint64
@@ -58,13 +58,13 @@ func (up *UpdatePassword) Call(ctx context.Context, in domain.UpdatePasswordInpu
 	if user == nil {
 		up.tel.Logger().Warn(ctx, "user not found", logger.KeyVal("id", uid))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	if !up.hash.Verify(user.Password, in.CurrentPassword) {
 		up.tel.Logger().Warn(ctx, "password not match", logger.KeyVal("id", uid))
 
-		return nil, goerror.NewBusiness("invalid credentials", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid credentials", goerror.CodeUnauthorized)
 	}
 
 	passHash, err := up.hash.Hash(in.NewPassword)

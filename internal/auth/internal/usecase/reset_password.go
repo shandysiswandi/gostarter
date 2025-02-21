@@ -42,7 +42,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	ps, err := s.store.FindPasswordResetByToken(ctx, in.Token)
@@ -61,7 +61,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 	if ps.ExpiresAt.Before(time.Now()) {
 		s.telemetry.Logger().Warn(ctx, "password reset token has expired")
 
-		return nil, goerror.NewBusiness("token has expired", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized)
 	}
 
 	if err := s.store.DeletePasswordReset(ctx, ps.ID); err != nil {

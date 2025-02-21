@@ -156,7 +156,7 @@ func New(err error, msg string, et Type, code Code) error {
 
 // NewServerInternal creates a server-type error with the provided error.
 func NewServerInternal(err error) error {
-	return New(err, "internal server error", TypeServer, CodeInternal)
+	return New(err, "Internal server error", TypeServer, CodeInternal)
 }
 
 // NewBusiness creates a business-type error with the specified message and code.

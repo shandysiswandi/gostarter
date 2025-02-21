@@ -28,7 +28,7 @@ lint:
 	@golangci-lint run
 
 test:
-	@PUBSUB_EMULATOR_HOST=localhost:8085 go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
+	@go test $(shell go list ./pkg/... ./internal/... | grep -vE '/mocker|/mockz|/pkg/goerror/pb|/app') \
 	-coverprofile=coverage.out -race -parallel 4
 	@go tool cover -func=coverage.out | grep total
 	@if [ "$(HTML)" = "true" ]; then \

@@ -48,7 +48,7 @@ func (transportPOST) Do(w http.ResponseWriter, r *http.Request, exec graphql.Gra
 	dec := json.NewDecoder(r.Body)
 	dec.UseNumber()
 	if err := dec.Decode(params); err != nil {
-		data := exec.DispatchError(ctx, gqlerror.List{gqlerror.Errorf("invalid request body")})
+		data := exec.DispatchError(ctx, gqlerror.List{gqlerror.Errorf("Request payload malformed")})
 		writeJSON(w, data, http.StatusBadRequest)
 
 		return

@@ -27,7 +27,7 @@ func Chain(h http.Handler, mws ...Middleware) http.Handler {
 }
 
 // Recovery is a middleware that recovers from any panics that occur during the execution
-// of an HTTP handler and writes a 500 Internal Server Error response to the client.
+// of an HTTP handler and writes a 500 Internal server error response to the client.
 //
 // If a panic occurs, the middleware logs the panic message and stack trace,
 // and sends a JSON-encoded error message with a status code of 500.
@@ -58,11 +58,11 @@ func Recovery(h http.Handler) http.Handler {
 				}
 
 				// Print the stack trace for debugging purposes.
-				debugger.Stack("/app/")
+				debugger.Stack("/")
 
 				// Send a default fallback response to the client.
 				_ = json.NewEncoder(w).Encode(map[string]string{
-					"error": http.StatusText(http.StatusInternalServerError),
+					"message": "Internal server error",
 				})
 			}
 		}()

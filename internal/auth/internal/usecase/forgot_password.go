@@ -53,7 +53,7 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 	if err := s.validator.Validate(in); err != nil {
 		s.telemetry.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	user, err := s.store.FindUserByEmail(ctx, in.Email)

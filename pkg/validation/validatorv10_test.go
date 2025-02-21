@@ -21,7 +21,7 @@ func TestNewV10Validator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewV10Validator()
+			got, _ := NewV10Validator()
 			assert.NotNil(t, got)
 		})
 	}
@@ -82,7 +82,7 @@ func TestV10Validator_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			v := NewV10Validator()
+			v, _ := NewV10Validator()
 			err := v.Validate(tt.data)
 
 			if tt.wantErr {

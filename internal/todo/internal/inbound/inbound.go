@@ -15,7 +15,7 @@ import (
 
 var (
 	errFailedParseToUint = goerror.NewInvalidFormat("failed parse id to uint")
-	errInvalidBody       = goerror.NewInvalidFormat("invalid request body")
+	errInvalidBody       = goerror.NewInvalidFormat("Request payload malformed")
 )
 
 type Inbound struct {

@@ -41,7 +41,7 @@ func (cp *CreatePermission) Call(ctx context.Context, in domain.CreatePermission
 	if err := cp.validator.Validate(in); err != nil {
 		cp.tele.Logger().Warn(ctx, "validation failed")
 
-		return nil, goerror.NewInvalidInput("validation input fail", err)
+		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
 	perm, err := cp.store.FindPermissionByName(ctx, in.Name)
