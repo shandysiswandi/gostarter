@@ -1,13 +1,13 @@
 DRIVER ?= mysql
-DB_CONN ?= $(DB_USR):$(DB_PWD)@tcp(localhost:3306)/gostarter?parseTime=true
+DB_CONN ?= $(DB_USR):$(DB_PWD)@tcp(localhost:3306)/compose?parseTime=true
 
 ifeq ($(DRIVER), postgres)
 	DB_CONN = "postgres://${DB_USR}:${DB_PWD}@localhost:5432/gostarter?sslmode=disable"
 endif
 
 install:
-	@go install github.com/vektra/mockery/v2@v2.50.0
-	@go install github.com/bufbuild/buf/cmd/buf@v1.47.2
+	@go install github.com/vektra/mockery/v2@v2.53.0
+	@go install github.com/bufbuild/buf/cmd/buf@v1.50.0
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
 	@go install github.com/cespare/reflex@latest
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin latest

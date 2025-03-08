@@ -22,59 +22,12 @@ func (_m *MockResetPasswordStore) EXPECT() *MockResetPasswordStore_Expecter {
 	return &MockResetPasswordStore_Expecter{mock: &_m.Mock}
 }
 
-// DeletePasswordReset provides a mock function with given fields: ctx, id
-func (_m *MockResetPasswordStore) DeletePasswordReset(ctx context.Context, id uint64) error {
-	ret := _m.Called(ctx, id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeletePasswordReset")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
-		r0 = rf(ctx, id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockResetPasswordStore_DeletePasswordReset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePasswordReset'
-type MockResetPasswordStore_DeletePasswordReset_Call struct {
-	*mock.Call
-}
-
-// DeletePasswordReset is a helper method to define mock.On call
-//   - ctx context.Context
-//   - id uint64
-func (_e *MockResetPasswordStore_Expecter) DeletePasswordReset(ctx interface{}, id interface{}) *MockResetPasswordStore_DeletePasswordReset_Call {
-	return &MockResetPasswordStore_DeletePasswordReset_Call{Call: _e.mock.On("DeletePasswordReset", ctx, id)}
-}
-
-func (_c *MockResetPasswordStore_DeletePasswordReset_Call) Run(run func(ctx context.Context, id uint64)) *MockResetPasswordStore_DeletePasswordReset_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint64))
-	})
-	return _c
-}
-
-func (_c *MockResetPasswordStore_DeletePasswordReset_Call) Return(_a0 error) *MockResetPasswordStore_DeletePasswordReset_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockResetPasswordStore_DeletePasswordReset_Call) RunAndReturn(run func(context.Context, uint64) error) *MockResetPasswordStore_DeletePasswordReset_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// FindPasswordResetByToken provides a mock function with given fields: ctx, t
-func (_m *MockResetPasswordStore) FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
+// PasswordResetByToken provides a mock function with given fields: ctx, t
+func (_m *MockResetPasswordStore) PasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error) {
 	ret := _m.Called(ctx, t)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindPasswordResetByToken")
+		panic("no return value specified for PasswordResetByToken")
 	}
 
 	var r0 *domain.PasswordReset
@@ -99,41 +52,88 @@ func (_m *MockResetPasswordStore) FindPasswordResetByToken(ctx context.Context, 
 	return r0, r1
 }
 
-// MockResetPasswordStore_FindPasswordResetByToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindPasswordResetByToken'
-type MockResetPasswordStore_FindPasswordResetByToken_Call struct {
+// MockResetPasswordStore_PasswordResetByToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PasswordResetByToken'
+type MockResetPasswordStore_PasswordResetByToken_Call struct {
 	*mock.Call
 }
 
-// FindPasswordResetByToken is a helper method to define mock.On call
+// PasswordResetByToken is a helper method to define mock.On call
 //   - ctx context.Context
 //   - t string
-func (_e *MockResetPasswordStore_Expecter) FindPasswordResetByToken(ctx interface{}, t interface{}) *MockResetPasswordStore_FindPasswordResetByToken_Call {
-	return &MockResetPasswordStore_FindPasswordResetByToken_Call{Call: _e.mock.On("FindPasswordResetByToken", ctx, t)}
+func (_e *MockResetPasswordStore_Expecter) PasswordResetByToken(ctx interface{}, t interface{}) *MockResetPasswordStore_PasswordResetByToken_Call {
+	return &MockResetPasswordStore_PasswordResetByToken_Call{Call: _e.mock.On("PasswordResetByToken", ctx, t)}
 }
 
-func (_c *MockResetPasswordStore_FindPasswordResetByToken_Call) Run(run func(ctx context.Context, t string)) *MockResetPasswordStore_FindPasswordResetByToken_Call {
+func (_c *MockResetPasswordStore_PasswordResetByToken_Call) Run(run func(ctx context.Context, t string)) *MockResetPasswordStore_PasswordResetByToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockResetPasswordStore_FindPasswordResetByToken_Call) Return(_a0 *domain.PasswordReset, _a1 error) *MockResetPasswordStore_FindPasswordResetByToken_Call {
+func (_c *MockResetPasswordStore_PasswordResetByToken_Call) Return(_a0 *domain.PasswordReset, _a1 error) *MockResetPasswordStore_PasswordResetByToken_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockResetPasswordStore_FindPasswordResetByToken_Call) RunAndReturn(run func(context.Context, string) (*domain.PasswordReset, error)) *MockResetPasswordStore_FindPasswordResetByToken_Call {
+func (_c *MockResetPasswordStore_PasswordResetByToken_Call) RunAndReturn(run func(context.Context, string) (*domain.PasswordReset, error)) *MockResetPasswordStore_PasswordResetByToken_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateUserPassword provides a mock function with given fields: ctx, id, pass
-func (_m *MockResetPasswordStore) UpdateUserPassword(ctx context.Context, id uint64, pass string) error {
+// PasswordResetDelete provides a mock function with given fields: ctx, id
+func (_m *MockResetPasswordStore) PasswordResetDelete(ctx context.Context, id uint64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PasswordResetDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockResetPasswordStore_PasswordResetDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PasswordResetDelete'
+type MockResetPasswordStore_PasswordResetDelete_Call struct {
+	*mock.Call
+}
+
+// PasswordResetDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id uint64
+func (_e *MockResetPasswordStore_Expecter) PasswordResetDelete(ctx interface{}, id interface{}) *MockResetPasswordStore_PasswordResetDelete_Call {
+	return &MockResetPasswordStore_PasswordResetDelete_Call{Call: _e.mock.On("PasswordResetDelete", ctx, id)}
+}
+
+func (_c *MockResetPasswordStore_PasswordResetDelete_Call) Run(run func(ctx context.Context, id uint64)) *MockResetPasswordStore_PasswordResetDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint64))
+	})
+	return _c
+}
+
+func (_c *MockResetPasswordStore_PasswordResetDelete_Call) Return(_a0 error) *MockResetPasswordStore_PasswordResetDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockResetPasswordStore_PasswordResetDelete_Call) RunAndReturn(run func(context.Context, uint64) error) *MockResetPasswordStore_PasswordResetDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UserUpdatePassword provides a mock function with given fields: ctx, id, pass
+func (_m *MockResetPasswordStore) UserUpdatePassword(ctx context.Context, id uint64, pass string) error {
 	ret := _m.Called(ctx, id, pass)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateUserPassword")
+		panic("no return value specified for UserUpdatePassword")
 	}
 
 	var r0 error
@@ -146,32 +146,32 @@ func (_m *MockResetPasswordStore) UpdateUserPassword(ctx context.Context, id uin
 	return r0
 }
 
-// MockResetPasswordStore_UpdateUserPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateUserPassword'
-type MockResetPasswordStore_UpdateUserPassword_Call struct {
+// MockResetPasswordStore_UserUpdatePassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserUpdatePassword'
+type MockResetPasswordStore_UserUpdatePassword_Call struct {
 	*mock.Call
 }
 
-// UpdateUserPassword is a helper method to define mock.On call
+// UserUpdatePassword is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id uint64
 //   - pass string
-func (_e *MockResetPasswordStore_Expecter) UpdateUserPassword(ctx interface{}, id interface{}, pass interface{}) *MockResetPasswordStore_UpdateUserPassword_Call {
-	return &MockResetPasswordStore_UpdateUserPassword_Call{Call: _e.mock.On("UpdateUserPassword", ctx, id, pass)}
+func (_e *MockResetPasswordStore_Expecter) UserUpdatePassword(ctx interface{}, id interface{}, pass interface{}) *MockResetPasswordStore_UserUpdatePassword_Call {
+	return &MockResetPasswordStore_UserUpdatePassword_Call{Call: _e.mock.On("UserUpdatePassword", ctx, id, pass)}
 }
 
-func (_c *MockResetPasswordStore_UpdateUserPassword_Call) Run(run func(ctx context.Context, id uint64, pass string)) *MockResetPasswordStore_UpdateUserPassword_Call {
+func (_c *MockResetPasswordStore_UserUpdatePassword_Call) Run(run func(ctx context.Context, id uint64, pass string)) *MockResetPasswordStore_UserUpdatePassword_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint64), args[2].(string))
 	})
 	return _c
 }
 
-func (_c *MockResetPasswordStore_UpdateUserPassword_Call) Return(_a0 error) *MockResetPasswordStore_UpdateUserPassword_Call {
+func (_c *MockResetPasswordStore_UserUpdatePassword_Call) Return(_a0 error) *MockResetPasswordStore_UserUpdatePassword_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockResetPasswordStore_UpdateUserPassword_Call) RunAndReturn(run func(context.Context, uint64, string) error) *MockResetPasswordStore_UpdateUserPassword_Call {
+func (_c *MockResetPasswordStore_UserUpdatePassword_Call) RunAndReturn(run func(context.Context, uint64, string) error) *MockResetPasswordStore_UserUpdatePassword_Call {
 	_c.Call.Return(run)
 	return _c
 }

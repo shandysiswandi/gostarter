@@ -8,9 +8,9 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )

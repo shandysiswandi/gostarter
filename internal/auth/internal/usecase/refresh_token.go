@@ -4,20 +4,21 @@ import (
 	"context"
 	"time"
 
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/jwt"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 )
 
 type RefreshTokenStore interface {
-	FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error)
-	SaveToken(ctx context.Context, token domain.Token) error
-	UpdateToken(ctx context.Context, token domain.Token) error
+	TokenByRefresh(ctx context.Context, ref string) (*domain.Token, error)
+	TokenSave(ctx context.Context, token domain.Token) error
+	TokenUpdate(ctx context.Context, token domain.Token) error
 }
 
 type RefreshToken struct {
@@ -68,7 +69,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	refToken, err := s.store.FindTokenByRefresh(ctx, string(refHash))
+	refToken, err := s.store.TokenByRefresh(ctx, string(refHash))
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get token", err,
 			logger.KeyVal("refresh_token_hash", string(refHash)))
@@ -90,7 +91,7 @@ func (s *RefreshToken) Call(ctx context.Context, in domain.RefreshTokenInput) (
 		return nil, goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized)
 	}
 
-	clm := jwt.ExtractClaimFromToken(in.RefreshToken)
+	clm := lib.ExtractJWTClaim(in.RefreshToken)
 	if clm == nil {
 		s.telemetry.Logger().Warn(ctx, "token is malformed",
 			logger.KeyVal("refresh_token_hash", string(refHash)))

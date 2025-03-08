@@ -3,7 +3,7 @@ package domain
 import (
 	"context"
 
-	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/goreng/enum"
 )
 
 type UpdateStatus interface {

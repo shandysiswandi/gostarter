@@ -6,10 +6,10 @@ import (
 	"errors"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/enum"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/enum"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 )
 
 type SQLTodo struct {

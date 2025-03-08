@@ -4,14 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mockUID "github.com/shandysiswandi/gostarter/pkg/uid/mocker"
-	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,7 +64,7 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 
 				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
 				defer span.End()
@@ -85,7 +83,7 @@ func TestRegister_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorStoreFindUserByEmail",
+			name: "ErrorStoreUserByEmail",
 			args: args{
 				ctx: context.Background(),
 				in: domain.RegisterInput{
@@ -98,7 +96,7 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
@@ -109,7 +107,7 @@ func TestRegister_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, assert.AnError)
 
 				return &Register{
@@ -135,7 +133,7 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewBusiness("Email already registered", goerror.CodeConflict),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
@@ -152,7 +150,7 @@ func TestRegister_Call(t *testing.T) {
 					Password: "***",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				return &Register{
@@ -178,9 +176,9 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
-				hashMock := mockHash.NewMockHash(t)
+				hashMock := mocker.NewMockHash(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
 				defer span.End()
@@ -190,7 +188,7 @@ func TestRegister_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, nil)
 
 				hashMock.EXPECT().
@@ -207,7 +205,7 @@ func TestRegister_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorTransactionStoreSaveUser",
+			name: "ErrorTransactionStoreUserSave",
 			args: args{
 				ctx: context.Background(),
 				in: domain.RegisterInput{
@@ -220,11 +218,11 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
-				hashMock := mockHash.NewMockHash(t)
-				idnumMock := mockUID.NewMockNumberID(t)
-				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
+				hashMock := mocker.NewMockHash(t)
+				idnumMock := mocker.NewMockNumberID(t)
+				trxMock := sqlkit.NewNoopDB()
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
 				defer span.End()
@@ -234,7 +232,7 @@ func TestRegister_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, nil)
 
 				hashMock.EXPECT().
@@ -245,8 +243,6 @@ func TestRegister_Call(t *testing.T) {
 					Generate().
 					Return(111)
 
-				ctx = dbops.SetContextNoopTx(ctx)
-
 				dataUser := domain.User{
 					ID:       111,
 					Name:     a.in.Name,
@@ -254,7 +250,7 @@ func TestRegister_Call(t *testing.T) {
 					Password: "hash_password",
 				}
 				storeMock.EXPECT().
-					SaveUser(ctx, dataUser).
+					UserSave(ctx, dataUser).
 					Return(assert.AnError)
 
 				return &Register{
@@ -268,7 +264,7 @@ func TestRegister_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorTransactionStoreSaveAccount",
+			name: "ErrorTransactionStoreAccountSave",
 			args: args{
 				ctx: context.Background(),
 				in: domain.RegisterInput{
@@ -281,11 +277,11 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
-				hashMock := mockHash.NewMockHash(t)
-				idnumMock := mockUID.NewMockNumberID(t)
-				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
+				hashMock := mocker.NewMockHash(t)
+				idnumMock := mocker.NewMockNumberID(t)
+				trxMock := sqlkit.NewNoopDB()
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
 				defer span.End()
@@ -295,7 +291,7 @@ func TestRegister_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, nil)
 
 				hashMock.EXPECT().
@@ -307,8 +303,6 @@ func TestRegister_Call(t *testing.T) {
 					Return(111).
 					Once()
 
-				ctx = dbops.SetContextNoopTx(ctx)
-
 				dataUser := domain.User{
 					ID:       111,
 					Name:     a.in.Name,
@@ -316,7 +310,7 @@ func TestRegister_Call(t *testing.T) {
 					Password: "hash_password",
 				}
 				storeMock.EXPECT().
-					SaveUser(ctx, dataUser).
+					UserSave(ctx, dataUser).
 					Return(nil)
 
 				idnumMock.EXPECT().
@@ -329,7 +323,7 @@ func TestRegister_Call(t *testing.T) {
 					UserID: dataUser.ID,
 				}
 				storeMock.EXPECT().
-					SaveAccount(ctx, dataAccount).
+					AccountSave(ctx, dataAccount).
 					Return(assert.AnError)
 
 				return &Register{
@@ -355,11 +349,11 @@ func TestRegister_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *Register {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockRegisterStore(t)
-				hashMock := mockHash.NewMockHash(t)
-				idnumMock := mockUID.NewMockNumberID(t)
-				trxMock := dbops.NewTransaction(dbops.NewNoopDB())
+				hashMock := mocker.NewMockHash(t)
+				idnumMock := mocker.NewMockNumberID(t)
+				trxMock := sqlkit.NewNoopDB()
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.Register")
 				defer span.End()
@@ -369,7 +363,7 @@ func TestRegister_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, nil)
 
 				hashMock.EXPECT().
@@ -381,8 +375,6 @@ func TestRegister_Call(t *testing.T) {
 					Return(111).
 					Once()
 
-				ctx = dbops.SetContextNoopTx(ctx)
-
 				dataUser := domain.User{
 					ID:       111,
 					Name:     a.in.Name,
@@ -390,7 +382,7 @@ func TestRegister_Call(t *testing.T) {
 					Password: "hash_password",
 				}
 				storeMock.EXPECT().
-					SaveUser(ctx, dataUser).
+					UserSave(ctx, dataUser).
 					Return(nil)
 
 				idnumMock.EXPECT().
@@ -403,7 +395,7 @@ func TestRegister_Call(t *testing.T) {
 					UserID: dataUser.ID,
 				}
 				storeMock.EXPECT().
-					SaveAccount(ctx, dataAccount).
+					AccountSave(ctx, dataAccount).
 					Return(nil)
 
 				return &Register{

@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shandysiswandi/goreng/enum"
+	"github.com/shandysiswandi/goreng/goerror"
+	vm "github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/enum"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	vm "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,8 +41,8 @@ func TestNewUpdate(t *testing.T) {
 }
 
 func TestUpdate_Execute(t *testing.T) {
-	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
-	ctx := jwt.SetClaim(context.Background(), claim)
+	claim := lib.NewJWTClaim(11, "email", time.Time{}, nil)
+	ctx := lib.SetJWTClaim(context.Background(), claim)
 
 	type args struct {
 		ctx context.Context

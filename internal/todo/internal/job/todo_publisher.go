@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/shandysiswandi/goreng/codec"
+	"github.com/shandysiswandi/goreng/messaging"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/messaging"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type todoPublisher struct {
