@@ -11,23 +11,22 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/codec"
+	"github.com/shandysiswandi/goreng/config"
+	"github.com/shandysiswandi/goreng/goroutine"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/jwt"
+	"github.com/shandysiswandi/goreng/messaging/googlepubsub"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/instrument"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/messaging/googlepubsub"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/instrument"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -166,12 +165,11 @@ func (a *App) initDatabase() {
 	maxIdleTime := a.config.GetInt(`database.max.idletime`)
 
 	dsn := a.dsnMySQL()
-	driver := dbops.MySQLDriver
-	queryBuilder := goqu.Dialect(dbops.MySQLDriver)
-	if a.config.GetString(`database.driver`) == dbops.PostgresDriver {
+	driver := sqlkit.MySQLDriver
+
+	if a.config.GetString(`database.driver`) == sqlkit.PostgresDriver {
 		dsn = a.dsnPostgreSQL()
-		driver = dbops.PostgresDriver
-		queryBuilder = goqu.Dialect(dbops.PostgresDriver)
+		driver = sqlkit.PostgresDriver
 	}
 
 	database, err := sql.Open(driver, dsn)
@@ -188,10 +186,7 @@ func (a *App) initDatabase() {
 	database.SetConnMaxLifetime(time.Duration(maxLifetime) * time.Minute)
 	database.SetConnMaxIdleTime(time.Duration(maxIdleTime) * time.Minute)
 
-	dbops.SetVerbose(false)
-	a.database = database
-	a.queryBuilder = queryBuilder
-	a.transaction = dbops.NewTransaction(database)
+	a.sqlkitDB = sqlkit.New(driver, database, a.telemetry.Logger())
 }
 
 // initRedis initializes a Redis client using settings from the configuration.
@@ -315,7 +310,7 @@ func (a *App) initClosers() {
 			return nil
 		},
 		"Database": func(_ context.Context) error {
-			return a.database.Close()
+			return a.sqlkitDB.Close()
 		},
 		"Redis": func(_ context.Context) error {
 			return a.redisDB.Close()

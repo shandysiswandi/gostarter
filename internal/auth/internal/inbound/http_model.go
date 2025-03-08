@@ -27,6 +27,18 @@ type (
 )
 
 type (
+	VerifyRequest struct {
+		Email string `json:"email"`
+		Code  string `json:"code"`
+	}
+
+	VerifyResponse struct {
+		Email    string `json:"email"`
+		VerifyAt string `json:"verified_at"` // RFC3339
+	}
+)
+
+type (
 	RefreshTokenRequest struct {
 		RefreshToken string `json:"refresh_token"`
 	}

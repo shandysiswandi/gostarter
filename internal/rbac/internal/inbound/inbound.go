@@ -3,9 +3,9 @@ package inbound
 import (
 	"net/http"
 
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/rbac/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type Inbound struct {

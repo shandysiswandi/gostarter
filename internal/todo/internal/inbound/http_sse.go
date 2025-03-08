@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/shandysiswandi/gostarter/pkg/codec"
+	"github.com/shandysiswandi/goreng/codec"
 )
 
 type Event struct {

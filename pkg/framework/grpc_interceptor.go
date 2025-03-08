@@ -7,9 +7,9 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -78,16 +78,17 @@ func doUnaryServerJWT(ctx context.Context, req any, next grpc.UnaryHandler,
 		return nil, goerror.NewServerInternal(nil)
 	}
 
-	clm := jwt.ExtractClaimFromToken(strings.TrimPrefix(md["authorization"][0], "Bearer "))
+	clm := lib.ExtractJWTClaim(strings.TrimPrefix(md["authorization"][0], "Bearer "))
 	if clm == nil {
 		return nil, goerror.NewBusiness("invalid token", goerror.CodeUnauthorized)
 	}
 
-	if !clm.VerifyAudience(audience, true) {
-		return nil, goerror.NewBusiness("invalid token audience", goerror.CodeUnauthorized)
+	if err := clm.Validate(); err != nil {
+		return nil, goerror.NewBusiness("invalid validation token", goerror.CodeUnauthorized)
+
 	}
 
-	return next(jwt.SetClaim(ctx, clm), req)
+	return next(lib.SetJWTClaim(ctx, clm), req)
 }
 
 func UnaryServerProtoValidate(validator validation.Validator) grpc.UnaryServerInterceptor {

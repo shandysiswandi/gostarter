@@ -3,11 +3,11 @@ package usecase
 import (
 	"context"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
 )
 
 type ProfileStore interface {
@@ -31,7 +31,7 @@ func (p *Profile) Call(ctx context.Context, _ domain.ProfileInput) (*domain.User
 	defer span.End()
 
 	var email string
-	if clm := jwt.GetClaim(ctx); clm != nil {
+	if clm := lib.GetJWTClaim(ctx); clm != nil {
 		email = clm.Subject
 	}
 

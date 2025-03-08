@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shandysiswandi/goreng/enum"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/pagination"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/enum"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/pagination"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 

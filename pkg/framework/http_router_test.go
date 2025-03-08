@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/goreng/goerror"
 	"github.com/stretchr/testify/assert"
 )
 

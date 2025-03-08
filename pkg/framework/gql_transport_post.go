@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
+	"github.com/shandysiswandi/goreng/goerror"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

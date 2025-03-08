@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
 )
 
 type Dependency struct {
