@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/goreng/validation"
 	"google.golang.org/grpc"
 )
 

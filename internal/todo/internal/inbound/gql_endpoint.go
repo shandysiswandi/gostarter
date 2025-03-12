@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/shandysiswandi/goreng/telemetry"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 func getString(ptr *string) string {

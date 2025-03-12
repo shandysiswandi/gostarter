@@ -8,12 +8,12 @@ import (
 var ErrPasswordResetNotCreated = errors.New("password reset not created")
 
 type PasswordReset struct {
-	ID        uint64
-	UserID    uint64
-	Token     string
-	ExpiresAt time.Time
+	ID        uint64    `db:"id"`
+	UserID    uint64    `db:"user_id"`
+	Token     string    `db:"token"`
+	ExpiresAt time.Time `db:"expires_at"`
 }
 
-func (p *PasswordReset) ScanColumn() []any {
-	return []any{&p.ID, &p.UserID, &p.Token, &p.ExpiresAt}
+func (PasswordReset) Table() string {
+	return "password_resets"
 }

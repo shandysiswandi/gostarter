@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	mclk "github.com/shandysiswandi/goreng/mocker"
+	mu "github.com/shandysiswandi/goreng/mocker"
+	mv "github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/mockz"
-	mclk "github.com/shandysiswandi/gostarter/pkg/clock/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mu "github.com/shandysiswandi/gostarter/pkg/uid/mocker"
-	mv "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,8 +42,8 @@ func TestNewPaymentTopup(t *testing.T) {
 }
 
 func TestPaymentTopup_Call(t *testing.T) {
-	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
-	ctxJWT := jwt.SetClaim(context.Background(), claim)
+	claim := lib.NewJWTClaim(11, "email", time.Time{}, nil)
+	ctxJWT := lib.SetJWTClaim(context.Background(), claim)
 
 	type args struct {
 		ctx context.Context

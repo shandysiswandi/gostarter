@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/doug-martin/goqu/v9"
-	configMock "github.com/shandysiswandi/gostarter/pkg/config/mocker"
+	configMock "github.com/shandysiswandi/goreng/mocker"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"

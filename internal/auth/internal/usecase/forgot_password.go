@@ -5,23 +5,23 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 const msgSuccess = "If an account with this email exists, you'll receive a password reset email shortly."
 
 type ForgotPasswordStore interface {
-	FindUserByEmail(ctx context.Context, email string) (*domain.User, error)
-	FindPasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error)
-	SavePasswordReset(ctx context.Context, ps domain.PasswordReset) error
-	DeletePasswordReset(ctx context.Context, id uint64) error
+	UserByEmail(ctx context.Context, email string) (*domain.User, error)
+	PasswordResetByUserID(ctx context.Context, uid uint64) (*domain.PasswordReset, error)
+	PasswordResetSave(ctx context.Context, ps domain.PasswordReset) error
+	PasswordResetDelete(ctx context.Context, id uint64) error
 }
 
 type ForgotPassword struct {
@@ -56,7 +56,7 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
-	user, err := s.store.FindUserByEmail(ctx, in.Email)
+	user, err := s.store.UserByEmail(ctx, in.Email)
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get user", err, logger.KeyVal("email", in.Email))
 
@@ -72,7 +72,7 @@ func (s *ForgotPassword) Call(ctx context.Context, in domain.ForgotPasswordInput
 		}, nil
 	}
 
-	ps, err := s.store.FindPasswordResetByUserID(ctx, user.ID)
+	ps, err := s.store.PasswordResetByUserID(ctx, user.ID)
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get password reset", err, logger.KeyVal("email", in.Email))
 
@@ -94,7 +94,7 @@ func (s *ForgotPassword) processPasswordReset(ctx context.Context, in domain.For
 			}, nil
 		}
 
-		if err := s.store.DeletePasswordReset(ctx, ps.ID); err != nil {
+		if err := s.store.PasswordResetDelete(ctx, ps.ID); err != nil {
 			s.telemetry.Logger().Error(ctx, "failed to delete password reset", err,
 				logger.KeyVal("email", in.Email))
 
@@ -115,7 +115,7 @@ func (s *ForgotPassword) processPasswordReset(ctx context.Context, in domain.For
 		Token:     string(token),
 		ExpiresAt: now.Add(time.Hour),
 	}
-	if err := s.store.SavePasswordReset(ctx, psData); err != nil {
+	if err := s.store.PasswordResetSave(ctx, psData); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to save password reset", err,
 			logger.KeyVal("email", in.Email))
 

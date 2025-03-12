@@ -3,9 +3,8 @@ package user
 import (
 	"testing"
 
-	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,11 +18,11 @@ func TestNew(t *testing.T) {
 			name: "Success",
 			dep: func() Dependency {
 				return Dependency{
-					Database:     nil,
-					QueryBuilder: goqu.DialectWrapper{},
-					Validator:    nil,
-					Router:       framework.NewRouter(),
-					Telemetry:    telemetry.NewTelemetry(),
+					SQLKitDB:  nil,
+					Hash:      nil,
+					Validator: nil,
+					Router:    framework.NewRouter(),
+					Telemetry: telemetry.NewTelemetry(),
 				}
 			},
 			wantErr: nil,

@@ -1,12 +1,12 @@
 package domain
 
 type User struct {
-	ID       uint64
-	Name     string
-	Email    string
-	Password string
+	ID       uint64 `db:"id"`
+	Name     string `db:"name"`
+	Email    string `db:"email"`
+	Password string `db:"password"`
 }
 
-func (u *User) ScanColumn() []any {
-	return []any{&u.ID, &u.Name, &u.Email, &u.Password}
+func (User) Table() string {
+	return "users"
 }

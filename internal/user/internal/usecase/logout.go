@@ -3,15 +3,15 @@ package usecase
 import (
 	"context"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type LogoutStore interface {
-	DeleteTokenByAccess(ctx context.Context, token string) error
+	TokenDeleteByAccess(ctx context.Context, token string) error
 }
 
 type Logout struct {
@@ -47,7 +47,7 @@ func (l *Logout) Call(ctx context.Context, in domain.LogoutInput) (*domain.Logou
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	if err := l.store.DeleteTokenByAccess(ctx, string(acHash)); err != nil {
+	if err := l.store.TokenDeleteByAccess(ctx, string(acHash)); err != nil {
 		l.tel.Logger().Error(ctx, "failed to delete token by access token", err)
 
 		return nil, goerror.NewServerInternal(err)

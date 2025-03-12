@@ -3,12 +3,12 @@ package usecase
 import (
 	"context"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type UpdateStore interface {
@@ -41,7 +41,7 @@ func (p *Update) Call(ctx context.Context, in domain.UpdateInput) (*domain.User,
 
 	var email string
 	var uid uint64
-	if clm := jwt.GetClaim(ctx); clm != nil {
+	if clm := lib.GetJWTClaim(ctx); clm != nil {
 		email = clm.Subject
 		uid = clm.AuthID
 	}

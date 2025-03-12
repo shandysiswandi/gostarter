@@ -19,7 +19,7 @@ POST {{url_http}}/auth/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "aa{{authEmail}}",
+  "email": "{{authEmail}}",
   "name": "{{$guid}}",
   "password": "{{authPassword}}"
 }
@@ -90,7 +90,7 @@ POST {{url_http}}/auth/forgot-password HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "a{{authEmail}}"
+  "email": "{{authEmail}}"
 }
 
 ?? status == 200

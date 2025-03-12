@@ -1,15 +1,15 @@
 package usecase
 
 import (
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/messaging"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/codec"
+	"github.com/shandysiswandi/goreng/config"
+	"github.com/shandysiswandi/goreng/goroutine"
+	"github.com/shandysiswandi/goreng/messaging"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 )
 
 type Dependency struct {
