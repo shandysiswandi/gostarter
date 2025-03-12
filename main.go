@@ -14,11 +14,7 @@ import (
 	"github.com/shandysiswandi/gostarter/internal/app"
 )
 
-// main is the entry point of the application. It performs the following steps:
-// 1. Creates a context with a 10-second timeout to control the shutdown process.
-// 2. Initializes the application by calling app.New().
-// 3. Starts the application and waits for a termination signal.
-// 4. Stops the application gracefully using the created context.
+// main is the entry point of the application.
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

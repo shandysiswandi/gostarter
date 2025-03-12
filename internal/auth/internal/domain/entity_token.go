@@ -8,21 +8,14 @@ import (
 var ErrTokenNoRowsAffected = errors.New("token not created or update")
 
 type Token struct {
-	ID               uint64
-	UserID           uint64
-	AccessToken      string
-	RefreshToken     string
-	AccessExpiredAt  time.Time
-	RefreshExpiredAt time.Time
+	ID               uint64    `db:"id"`
+	UserID           uint64    `db:"user_id"`
+	AccessToken      string    `db:"access_token"`
+	RefreshToken     string    `db:"refresh_token"`
+	AccessExpiresAt  time.Time `db:"access_expires_at"`
+	RefreshExpiresAt time.Time `db:"refresh_expires_at"`
 }
 
-func (t *Token) ScanColumn() []any {
-	return []any{
-		&t.ID,
-		&t.UserID,
-		&t.AccessToken,
-		&t.RefreshToken,
-		&t.AccessExpiredAt,
-		&t.RefreshExpiredAt,
-	}
+func (Token) Table() string {
+	return "tokens"
 }

@@ -235,7 +235,7 @@ func (_c *MockPaymentTopupStore_SaveTransaction_Call) RunAndReturn(run func(cont
 }
 
 // UpdateAccount provides a mock function with given fields: ctx, data
-func (_m *MockPaymentTopupStore) UpdateAccount(ctx context.Context, data map[string]interface{}) error {
+func (_m *MockPaymentTopupStore) UpdateAccount(ctx context.Context, data map[string]any) error {
 	ret := _m.Called(ctx, data)
 
 	if len(ret) == 0 {
@@ -243,7 +243,7 @@ func (_m *MockPaymentTopupStore) UpdateAccount(ctx context.Context, data map[str
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]any) error); ok {
 		r0 = rf(ctx, data)
 	} else {
 		r0 = ret.Error(0)
@@ -259,14 +259,14 @@ type MockPaymentTopupStore_UpdateAccount_Call struct {
 
 // UpdateAccount is a helper method to define mock.On call
 //   - ctx context.Context
-//   - data map[string]interface{}
+//   - data map[string]any
 func (_e *MockPaymentTopupStore_Expecter) UpdateAccount(ctx interface{}, data interface{}) *MockPaymentTopupStore_UpdateAccount_Call {
 	return &MockPaymentTopupStore_UpdateAccount_Call{Call: _e.mock.On("UpdateAccount", ctx, data)}
 }
 
-func (_c *MockPaymentTopupStore_UpdateAccount_Call) Run(run func(ctx context.Context, data map[string]interface{})) *MockPaymentTopupStore_UpdateAccount_Call {
+func (_c *MockPaymentTopupStore_UpdateAccount_Call) Run(run func(ctx context.Context, data map[string]any)) *MockPaymentTopupStore_UpdateAccount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(map[string]interface{}))
+		run(args[0].(context.Context), args[1].(map[string]any))
 	})
 	return _c
 }
@@ -276,7 +276,7 @@ func (_c *MockPaymentTopupStore_UpdateAccount_Call) Return(_a0 error) *MockPayme
 	return _c
 }
 
-func (_c *MockPaymentTopupStore_UpdateAccount_Call) RunAndReturn(run func(context.Context, map[string]interface{}) error) *MockPaymentTopupStore_UpdateAccount_Call {
+func (_c *MockPaymentTopupStore_UpdateAccount_Call) RunAndReturn(run func(context.Context, map[string]any) error) *MockPaymentTopupStore_UpdateAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }

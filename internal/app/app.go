@@ -9,24 +9,22 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 
-	"github.com/doug-martin/goqu/v9"
 	"github.com/redis/go-redis/v9"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
-	"github.com/shandysiswandi/gostarter/pkg/config"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/codec"
+	"github.com/shandysiswandi/goreng/config"
+	"github.com/shandysiswandi/goreng/goroutine"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/jwt"
+	"github.com/shandysiswandi/goreng/messaging"
+	"github.com/shandysiswandi/goreng/task"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goroutine"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/messaging"
-	"github.com/shandysiswandi/gostarter/pkg/task"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 	"google.golang.org/grpc"
 )
 
@@ -43,9 +41,7 @@ type App struct {
 	validator      validation.Validator
 	protoValidator validation.Validator
 	telemetry      *telemetry.Telemetry
-	database       *sql.DB
-	transaction    dbops.Tx
-	queryBuilder   goqu.DialectWrapper
+	sqlkitDB       *sqlkit.DB
 	redisDB        *redis.Client
 	messaging      messaging.Client
 	httpServer     *http.Server

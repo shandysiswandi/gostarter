@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
+	"github.com/shandysiswandi/goreng/telemetry"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 type grpcEndpoint struct {

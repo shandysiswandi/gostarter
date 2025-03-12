@@ -1,16 +1,21 @@
 package domain
 
-import "errors"
+import (
+	"database/sql"
+	"errors"
+	"time"
+)
 
 var ErrUserNotCreated = errors.New("user not created")
 
 type User struct {
-	ID       uint64
-	Name     string
-	Email    string
-	Password string
+	ID         uint64              `db:"id"`
+	Name       string              `db:"name"`
+	Email      string              `db:"email"`
+	Password   string              `db:"password"`
+	VerifiedAt sql.Null[time.Time] `db:"verified_at"`
 }
 
-func (u *User) ScanColumn() []any {
-	return []any{&u.ID, &u.Email, &u.Password}
+func (u User) Table() string {
+	return "users"
 }

@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	mockCodec "github.com/shandysiswandi/gostarter/pkg/codec/mocker"
-	mockMessaging "github.com/shandysiswandi/gostarter/pkg/messaging/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -23,8 +22,8 @@ func Test_todoPublisher_Start(t *testing.T) {
 			wantErr: nil,
 			mockFn: func() *todoPublisher {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
-				msgMock := mockMessaging.NewMockClient(t)
+				jsonMock := mocker.NewMockCodec(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				jsonMock.EXPECT().
 					Encode(mock.Anything).
@@ -44,8 +43,8 @@ func Test_todoPublisher_Start(t *testing.T) {
 			wantErr: nil,
 			mockFn: func() *todoPublisher {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
-				msgMock := mockMessaging.NewMockClient(t)
+				jsonMock := mocker.NewMockCodec(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				jsonMock.EXPECT().
 					Encode(mock.Anything).
@@ -69,8 +68,8 @@ func Test_todoPublisher_Start(t *testing.T) {
 			wantErr: nil,
 			mockFn: func() *todoPublisher {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
-				msgMock := mockMessaging.NewMockClient(t)
+				jsonMock := mocker.NewMockCodec(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				jsonMock.EXPECT().
 					Encode(mock.Anything).
@@ -98,8 +97,8 @@ func Test_todoPublisher_Start(t *testing.T) {
 			wantErr: nil,
 			mockFn: func() *todoPublisher {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
-				msgMock := mockMessaging.NewMockClient(t)
+				jsonMock := mocker.NewMockCodec(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				jsonMock.EXPECT().
 					Encode(mock.Anything).

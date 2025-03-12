@@ -5,8 +5,8 @@ package mockz
 import (
 	context "context"
 
+	enum "github.com/shandysiswandi/goreng/enum"
 	domain "github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	enum "github.com/shandysiswandi/gostarter/pkg/enum"
 
 	mock "github.com/stretchr/testify/mock"
 )

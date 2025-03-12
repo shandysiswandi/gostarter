@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"google.golang.org/grpc"
 )
 
 func TestInbound_RegisterAuthServiceServer(t *testing.T) {
@@ -16,7 +15,6 @@ func TestInbound_RegisterAuthServiceServer(t *testing.T) {
 			name: "Success",
 			in: Inbound{
 				Router:           framework.NewRouter(),
-				GRPCServer:       grpc.NewServer(),
 				LoginUC:          nil,
 				RegisterUC:       nil,
 				RefreshTokenUC:   nil,

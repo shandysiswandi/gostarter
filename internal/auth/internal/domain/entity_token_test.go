@@ -6,32 +6,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestToken_ScanColumn(t *testing.T) {
+func TestToken_Table(t *testing.T) {
 	tests := []struct {
 		name string
-		to   *Token
-		want func(to *Token) []any
+		to   Token
+		want string
 	}{
 		{
 			name: "Success",
-			to:   &Token{},
-			want: func(to *Token) []any {
-				return []any{
-					&to.ID,
-					&to.UserID,
-					&to.AccessToken,
-					&to.RefreshToken,
-					&to.AccessExpiredAt,
-					&to.RefreshExpiredAt,
-				}
-			},
+			to:   Token{},
+			want: "tokens",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := tt.to.ScanColumn()
-			assert.Equal(t, tt.want(tt.to), got)
+			got := tt.to.Table()
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

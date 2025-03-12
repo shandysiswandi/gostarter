@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/goreng/enum"
 	"github.com/stretchr/testify/assert"
 )
 

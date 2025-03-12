@@ -3,15 +3,15 @@ package usecase
 import (
 	"context"
 
+	"github.com/shandysiswandi/goreng/clock"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/payment/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/clock"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 )
 
 type PaymentTopupStore interface {
@@ -69,7 +69,7 @@ func (pt *PaymentTopup) Call(ctx context.Context, in domain.PaymentTopupInput) (
 		return nil, goerror.NewBusiness("duplicate request topup", goerror.CodeConflict)
 	}
 
-	clm := jwt.GetClaim(ctx)
+	clm := lib.GetJWTClaim(ctx)
 	acc, err := pt.store.FindAccountByUserID(ctx, clm.AuthID)
 	if err != nil {
 		pt.telemetry.Logger().Error(ctx, "failed to find account", err, logger.KeyVal("user_id", clm.AuthID))

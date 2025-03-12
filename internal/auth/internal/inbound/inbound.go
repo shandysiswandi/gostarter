@@ -3,20 +3,18 @@ package inbound
 import (
 	"net/http"
 
-	pb "github.com/shandysiswandi/gostarter/api/gen-proto/auth"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"google.golang.org/grpc"
 )
 
 type Inbound struct {
-	Router     *framework.Router
-	GRPCServer *grpc.Server
-	Telemetry  *telemetry.Telemetry
+	Router    *framework.Router
+	Telemetry *telemetry.Telemetry
 	//
 	LoginUC          domain.Login
 	RegisterUC       domain.Register
+	VerifyUC         domain.Verify
 	RefreshTokenUC   domain.RefreshToken
 	ForgotPasswordUC domain.ForgotPassword
 	ResetPasswordUC  domain.ResetPassword
@@ -28,16 +26,7 @@ func (in Inbound) RegisterAuthServiceServer() {
 		//
 		loginUC:          in.LoginUC,
 		registerUC:       in.RegisterUC,
-		refreshTokenUC:   in.RefreshTokenUC,
-		forgotPasswordUC: in.ForgotPasswordUC,
-		resetPasswordUC:  in.ResetPasswordUC,
-	}
-
-	ge := &grpcEndpoint{
-		telemetry: in.Telemetry,
-		//
-		loginUC:          in.LoginUC,
-		registerUC:       in.RegisterUC,
+		verifyUC:         in.VerifyUC,
 		refreshTokenUC:   in.RefreshTokenUC,
 		forgotPasswordUC: in.ForgotPasswordUC,
 		resetPasswordUC:  in.ResetPasswordUC,
@@ -45,9 +34,8 @@ func (in Inbound) RegisterAuthServiceServer() {
 
 	in.Router.Endpoint(http.MethodPost, "/auth/login", he.Login)
 	in.Router.Endpoint(http.MethodPost, "/auth/register", he.Register)
+	in.Router.Endpoint(http.MethodPost, "/auth/verify", he.Verify)
 	in.Router.Endpoint(http.MethodPost, "/auth/refresh-token", he.RefreshToken)
 	in.Router.Endpoint(http.MethodPost, "/auth/forgot-password", he.ForgotPassword)
 	in.Router.Endpoint(http.MethodPost, "/auth/reset-password", he.ResetPassword)
-
-	pb.RegisterAuthServiceServer(in.GRPCServer, ge)
 }

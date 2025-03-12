@@ -22,7 +22,7 @@ func (_m *MockUpdateStore) EXPECT() *MockUpdateStore_Expecter {
 }
 
 // Update provides a mock function with given fields: ctx, user
-func (_m *MockUpdateStore) Update(ctx context.Context, user map[string]interface{}) error {
+func (_m *MockUpdateStore) Update(ctx context.Context, user map[string]any) error {
 	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
@@ -30,7 +30,7 @@ func (_m *MockUpdateStore) Update(ctx context.Context, user map[string]interface
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]any) error); ok {
 		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Error(0)
@@ -46,14 +46,14 @@ type MockUpdateStore_Update_Call struct {
 
 // Update is a helper method to define mock.On call
 //   - ctx context.Context
-//   - user map[string]interface{}
+//   - user map[string]any
 func (_e *MockUpdateStore_Expecter) Update(ctx interface{}, user interface{}) *MockUpdateStore_Update_Call {
 	return &MockUpdateStore_Update_Call{Call: _e.mock.On("Update", ctx, user)}
 }
 
-func (_c *MockUpdateStore_Update_Call) Run(run func(ctx context.Context, user map[string]interface{})) *MockUpdateStore_Update_Call {
+func (_c *MockUpdateStore_Update_Call) Run(run func(ctx context.Context, user map[string]any)) *MockUpdateStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(map[string]interface{}))
+		run(args[0].(context.Context), args[1].(map[string]any))
 	})
 	return _c
 }
@@ -63,7 +63,7 @@ func (_c *MockUpdateStore_Update_Call) Return(_a0 error) *MockUpdateStore_Update
 	return _c
 }
 
-func (_c *MockUpdateStore_Update_Call) RunAndReturn(run func(context.Context, map[string]interface{}) error) *MockUpdateStore_Update_Call {
+func (_c *MockUpdateStore_Update_Call) RunAndReturn(run func(context.Context, map[string]any) error) *MockUpdateStore_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 

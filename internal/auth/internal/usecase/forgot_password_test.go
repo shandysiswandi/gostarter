@@ -6,14 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
-	mockClock "github.com/shandysiswandi/gostarter/pkg/clock/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mockUID "github.com/shandysiswandi/gostarter/pkg/uid/mocker"
-	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -63,14 +60,18 @@ func TestForgotPassword_Call(t *testing.T) {
 			want:    nil,
 			wantErr: goerror.NewInvalidInput("Invalid request payload", assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
-				validatorMock := mockValidation.NewMockValidator(t)
+				tel := telemetry.NewTelemetry()
+				validatorMock := mocker.NewMockValidator(t)
+
+				_, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
+				defer span.End()
 
 				validatorMock.EXPECT().
 					Validate(a.in).
 					Return(assert.AnError)
 
 				return &ForgotPassword{
-					telemetry: telemetry.NewTelemetry(),
+					telemetry: tel,
 					validator: validatorMock,
 					idnum:     nil,
 					secHash:   nil,
@@ -89,7 +90,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
@@ -100,7 +101,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, assert.AnError)
 
 				return &ForgotPassword{
@@ -126,7 +127,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
@@ -137,7 +138,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Return(nil)
 
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(nil, nil)
 
 				return &ForgotPassword{
@@ -151,7 +152,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorStoreFindPasswordResetByUserID",
+			name: "ErrorStorePasswordResetByUserID",
 			args: args{
 				ctx: context.Background(),
 				in:  domain.ForgotPasswordInput{Email: "email"},
@@ -160,7 +161,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
@@ -177,11 +178,11 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(nil, assert.AnError)
 
 				return &ForgotPassword{
@@ -207,9 +208,9 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
-				clockMock := mockClock.NewMockClocker(t)
+				clockMock := mocker.NewMockClocker(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
 				defer span.End()
@@ -225,7 +226,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				now := time.Time{}
@@ -240,7 +241,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(time.Minute),
 				}
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(ps, nil)
 
 				return &ForgotPassword{
@@ -254,7 +255,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorStoreDeletePasswordReset",
+			name: "ErrorStorePasswordResetDelete",
 			args: args{
 				ctx: context.Background(),
 				in:  domain.ForgotPasswordInput{Email: "email"},
@@ -263,9 +264,9 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
-				clockMock := mockClock.NewMockClocker(t)
+				clockMock := mocker.NewMockClocker(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
 				defer span.End()
@@ -281,7 +282,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				now := time.Time{}
@@ -296,11 +297,11 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(-time.Minute),
 				}
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(ps, nil)
 
 				storeMock.EXPECT().
-					DeletePasswordReset(ctx, ps.ID).
+					PasswordResetDelete(ctx, ps.ID).
 					Return(assert.AnError)
 
 				return &ForgotPassword{
@@ -323,10 +324,10 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
-				secHashMock := mockHash.NewMockHash(t)
-				clockMock := mockClock.NewMockClocker(t)
+				secHashMock := mocker.NewMockHash(t)
+				clockMock := mocker.NewMockClocker(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
 				defer span.End()
@@ -342,7 +343,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				now := time.Time{}
@@ -357,11 +358,11 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(-time.Minute),
 				}
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(ps, nil)
 
 				storeMock.EXPECT().
-					DeletePasswordReset(ctx, ps.ID).
+					PasswordResetDelete(ctx, ps.ID).
 					Return(nil)
 
 				secHashMock.EXPECT().
@@ -379,7 +380,7 @@ func TestForgotPassword_Call(t *testing.T) {
 			},
 		},
 		{
-			name: "ErrorStoreSavePasswordReset",
+			name: "ErrorStorePasswordResetSave",
 			args: args{
 				ctx: context.Background(),
 				in:  domain.ForgotPasswordInput{Email: "email"},
@@ -388,11 +389,11 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: goerror.NewServerInternal(assert.AnError),
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
-				secHashMock := mockHash.NewMockHash(t)
-				clockMock := mockClock.NewMockClocker(t)
-				idnumMock := mockUID.NewMockNumberID(t)
+				secHashMock := mocker.NewMockHash(t)
+				clockMock := mocker.NewMockClocker(t)
+				idnumMock := mocker.NewMockNumberID(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
 				defer span.End()
@@ -408,7 +409,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				now := time.Time{}
@@ -423,11 +424,11 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(-time.Minute),
 				}
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(ps, nil)
 
 				storeMock.EXPECT().
-					DeletePasswordReset(ctx, ps.ID).
+					PasswordResetDelete(ctx, ps.ID).
 					Return(nil)
 
 				sechashResult := []byte{}
@@ -446,7 +447,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(time.Hour),
 				}
 				storeMock.EXPECT().
-					SavePasswordReset(ctx, psData).
+					PasswordResetSave(ctx, psData).
 					Return(assert.AnError)
 
 				return &ForgotPassword{
@@ -472,11 +473,11 @@ func TestForgotPassword_Call(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *ForgotPassword {
 				tel := telemetry.NewTelemetry()
-				validatorMock := mockValidation.NewMockValidator(t)
+				validatorMock := mocker.NewMockValidator(t)
 				storeMock := mockz.NewMockForgotPasswordStore(t)
-				secHashMock := mockHash.NewMockHash(t)
-				clockMock := mockClock.NewMockClocker(t)
-				idnumMock := mockUID.NewMockNumberID(t)
+				secHashMock := mocker.NewMockHash(t)
+				clockMock := mocker.NewMockClocker(t)
+				idnumMock := mocker.NewMockNumberID(t)
 
 				ctx, span := tel.Tracer().Start(a.ctx, "auth.usecase.ForgotPassword")
 				defer span.End()
@@ -492,7 +493,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					Password: "password",
 				}
 				storeMock.EXPECT().
-					FindUserByEmail(ctx, a.in.Email).
+					UserByEmail(ctx, a.in.Email).
 					Return(user, nil)
 
 				now := time.Time{}
@@ -507,11 +508,11 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(-time.Minute),
 				}
 				storeMock.EXPECT().
-					FindPasswordResetByUserID(ctx, user.ID).
+					PasswordResetByUserID(ctx, user.ID).
 					Return(ps, nil)
 
 				storeMock.EXPECT().
-					DeletePasswordReset(ctx, ps.ID).
+					PasswordResetDelete(ctx, ps.ID).
 					Return(nil)
 
 				sechashResult := []byte{}
@@ -530,7 +531,7 @@ func TestForgotPassword_Call(t *testing.T) {
 					ExpiresAt: now.Add(time.Hour),
 				}
 				storeMock.EXPECT().
-					SavePasswordReset(ctx, psData).
+					PasswordResetSave(ctx, psData).
 					Return(nil)
 
 				return &ForgotPassword{

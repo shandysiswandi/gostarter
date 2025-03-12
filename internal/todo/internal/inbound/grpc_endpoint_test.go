@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shandysiswandi/goreng/enum"
+	"github.com/shandysiswandi/goreng/telemetry"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/enum"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 

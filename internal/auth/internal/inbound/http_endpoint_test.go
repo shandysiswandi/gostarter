@@ -5,12 +5,13 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/mockz"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,7 +35,7 @@ func Test_httpEndpoint_Login(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.Login")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -55,7 +56,7 @@ func Test_httpEndpoint_Login(t *testing.T) {
 				loginMock := mockz.NewMockLogin(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Login")
 				defer span.End()
 
 				in := domain.LoginInput{
@@ -90,7 +91,7 @@ func Test_httpEndpoint_Login(t *testing.T) {
 				loginMock := mockz.NewMockLogin(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Login")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Login")
 				defer span.End()
 
 				in := domain.LoginInput{
@@ -146,7 +147,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.Register")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -167,7 +168,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 				registerMock := mockz.NewMockRegister(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Register")
 				defer span.End()
 
 				in := domain.RegisterInput{
@@ -198,7 +199,7 @@ func Test_httpEndpoint_Register(t *testing.T) {
 				registerMock := mockz.NewMockRegister(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.Register")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Register")
 				defer span.End()
 
 				in := domain.RegisterInput{
@@ -230,6 +231,114 @@ func Test_httpEndpoint_Register(t *testing.T) {
 	}
 }
 
+func Test_httpEndpoint_Verify(t *testing.T) {
+	tests := []struct {
+		name    string
+		c       func() framework.Context
+		want    any
+		wantErr error
+		mockFn  func(ctx context.Context) *httpEndpoint
+	}{
+		{
+			name: "ErrorDecodeBody",
+			c: func() framework.Context {
+				body := bytes.NewBufferString("fake request")
+				c := framework.NewTestContext(http.MethodPost, "/auth/verify", body)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: goerror.NewInvalidFormat("Request payload malformed"),
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				tel := telemetry.NewTelemetry()
+
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.Verify")
+				defer span.End()
+
+				return &httpEndpoint{
+					telemetry: tel,
+				}
+			},
+		},
+		{
+			name: "ErrorCallUC",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"code":"code22","email":"email"}`)
+				c := framework.NewTestContext(http.MethodPost, "/auth/verify", body)
+				return c.Build()
+			},
+			want:    nil,
+			wantErr: assert.AnError,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				verifyMock := mockz.NewMockVerify(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Verify")
+				defer span.End()
+
+				in := domain.VerifyInput{
+					Code:  "code22",
+					Email: "email",
+				}
+				verifyMock.EXPECT().
+					Call(ctx, in).
+					Return(nil, assert.AnError)
+
+				return &httpEndpoint{
+					telemetry: tel,
+					verifyUC:  verifyMock,
+				}
+			},
+		},
+		{
+			name: "Success",
+			c: func() framework.Context {
+				body := bytes.NewBufferString(`{"code":"code22","email":"email"}`)
+				c := framework.NewTestContext(http.MethodPost, "/auth/verify", body)
+				return c.Build()
+			},
+			want: VerifyResponse{
+				Email:    "email",
+				VerifyAt: "0001-01-01T00:00:00Z",
+			},
+			wantErr: nil,
+			mockFn: func(ctx context.Context) *httpEndpoint {
+				verifyMock := mockz.NewMockVerify(t)
+				tel := telemetry.NewTelemetry()
+
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.Verify")
+				defer span.End()
+
+				in := domain.VerifyInput{
+					Code:  "code22",
+					Email: "email",
+				}
+				out := &domain.VerifyOutput{
+					Email:    "email",
+					VerifyAt: time.Time{},
+				}
+				verifyMock.EXPECT().
+					Call(ctx, in).
+					Return(out, nil)
+
+				return &httpEndpoint{
+					telemetry: tel,
+					verifyUC:  verifyMock,
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			c := tt.c()
+			e := tt.mockFn(c.Context())
+			got, err := e.Verify(c)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_httpEndpoint_RefreshToken(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -250,7 +359,7 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.RefreshToken")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -271,7 +380,7 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 				rtMock := mockz.NewMockRefreshToken(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.RefreshToken")
 				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: "token"}
@@ -303,7 +412,7 @@ func Test_httpEndpoint_RefreshToken(t *testing.T) {
 				rtMock := mockz.NewMockRefreshToken(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.RefreshToken")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.RefreshToken")
 				defer span.End()
 
 				in := domain.RefreshTokenInput{RefreshToken: "token"}
@@ -356,7 +465,7 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -377,7 +486,7 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 				fpMock := mockz.NewMockForgotPassword(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: "email"}
@@ -407,7 +516,7 @@ func Test_httpEndpoint_ForgotPassword(t *testing.T) {
 				fpMock := mockz.NewMockForgotPassword(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				in := domain.ForgotPasswordInput{Email: "email"}
@@ -458,7 +567,7 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 			mockFn: func(ctx context.Context) *httpEndpoint {
 				tel := telemetry.NewTelemetry()
 
-				_, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				_, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				return &httpEndpoint{
@@ -479,7 +588,7 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 				rpMock := mockz.NewMockResetPassword(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				in := domain.ResetPasswordInput{
@@ -509,7 +618,7 @@ func Test_httpEndpoint_ResetPassword(t *testing.T) {
 				rpMock := mockz.NewMockResetPassword(t)
 				tel := telemetry.NewTelemetry()
 
-				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.httpEndpoint.ForgotPassword")
+				ctx, span := tel.Tracer().Start(ctx, "auth.inbound.http.ForgotPassword")
 				defer span.End()
 
 				in := domain.ResetPasswordInput{

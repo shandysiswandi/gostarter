@@ -3,13 +3,13 @@ package inbound
 import (
 	"net/http"
 
+	"github.com/shandysiswandi/goreng/codec"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
 	ql "github.com/shandysiswandi/gostarter/api/gen-gql/todo"
 	pb "github.com/shandysiswandi/gostarter/api/gen-proto/todo"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/codec"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"google.golang.org/grpc"
 )
 

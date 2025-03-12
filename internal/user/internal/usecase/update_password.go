@@ -3,18 +3,18 @@ package usecase
 import (
 	"context"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/telemetry/logger"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry/logger"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type UpdatePasswordStore interface {
-	FindUser(ctx context.Context, id uint64) (*domain.User, error)
-	UpdatePassword(ctx context.Context, user domain.User) error
+	User(ctx context.Context, id uint64) (*domain.User, error)
+	UserUpdate(ctx context.Context, user domain.User) error
 }
 
 type UpdatePassword struct {
@@ -44,11 +44,11 @@ func (up *UpdatePassword) Call(ctx context.Context, in domain.UpdatePasswordInpu
 	}
 
 	var uid uint64
-	if clm := jwt.GetClaim(ctx); clm != nil {
+	if clm := lib.GetJWTClaim(ctx); clm != nil {
 		uid = clm.AuthID
 	}
 
-	user, err := up.store.FindUser(ctx, uid)
+	user, err := up.store.User(ctx, uid)
 	if err != nil {
 		up.tel.Logger().Error(ctx, "failed to find user", err, logger.KeyVal("id", uid))
 

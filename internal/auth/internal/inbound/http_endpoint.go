@@ -2,11 +2,12 @@ package inbound
 
 import (
 	"encoding/json"
+	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 )
 
 var errInvalidBody = goerror.NewInvalidFormat("Request payload malformed")
@@ -16,13 +17,14 @@ type httpEndpoint struct {
 
 	loginUC          domain.Login
 	registerUC       domain.Register
+	verifyUC         domain.Verify
 	refreshTokenUC   domain.RefreshToken
 	forgotPasswordUC domain.ForgotPassword
 	resetPasswordUC  domain.ResetPassword
 }
 
 func (h *httpEndpoint) Login(c framework.Context) (any, error) {
-	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.Login")
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.Login")
 	defer span.End()
 
 	var req LoginRequest
@@ -47,7 +49,7 @@ func (h *httpEndpoint) Login(c framework.Context) (any, error) {
 }
 
 func (h *httpEndpoint) Register(c framework.Context) (any, error) {
-	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.Register")
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.Register")
 	defer span.End()
 
 	var req RegisterRequest
@@ -67,8 +69,31 @@ func (h *httpEndpoint) Register(c framework.Context) (any, error) {
 	return RegisterResponse{Email: resp.Email}, nil
 }
 
+func (h *httpEndpoint) Verify(c framework.Context) (any, error) {
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.Verify")
+	defer span.End()
+
+	var req VerifyRequest
+	if err := json.NewDecoder(c.Body()).Decode(&req); err != nil {
+		return nil, errInvalidBody
+	}
+
+	resp, err := h.verifyUC.Call(ctx, domain.VerifyInput{
+		Email: req.Email,
+		Code:  req.Code,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return VerifyResponse{
+		Email:    resp.Email,
+		VerifyAt: resp.VerifyAt.Format(time.RFC3339),
+	}, nil
+}
+
 func (h *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
-	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.RefreshToken")
 	defer span.End()
 
 	var req RefreshTokenRequest
@@ -90,7 +115,7 @@ func (h *httpEndpoint) RefreshToken(c framework.Context) (any, error) {
 }
 
 func (h *httpEndpoint) ForgotPassword(c framework.Context) (any, error) {
-	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.RefreshToken")
 	defer span.End()
 
 	var req ForgotPasswordRequest
@@ -110,7 +135,7 @@ func (h *httpEndpoint) ForgotPassword(c framework.Context) (any, error) {
 }
 
 func (h *httpEndpoint) ResetPassword(c framework.Context) (any, error) {
-	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.httpEndpoint.RefreshToken")
+	ctx, span := h.telemetry.Tracer().Start(c.Context(), "auth.inbound.http.RefreshToken")
 	defer span.End()
 
 	var req ResetPasswordRequest

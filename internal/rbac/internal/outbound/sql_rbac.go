@@ -6,9 +6,9 @@ import (
 	"errors"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/rbac/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/dbops"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 )
 
 type SQLRBAC struct {

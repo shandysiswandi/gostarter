@@ -1,32 +1,29 @@
 package user
 
 import (
-	"database/sql"
-
-	"github.com/doug-martin/goqu/v9"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/inbound"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/outbound"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/usecase"
 	"github.com/shandysiswandi/gostarter/pkg/framework"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
+	"github.com/shandysiswandi/gostarter/pkg/sqlkit"
 )
 
 type Expose struct{}
 
 type Dependency struct {
-	Database     *sql.DB
-	QueryBuilder goqu.DialectWrapper
-	Validator    validation.Validator
-	Hash         hash.Hash
-	Router       *framework.Router
-	Telemetry    *telemetry.Telemetry
+	SQLKitDB  *sqlkit.DB
+	Validator validation.Validator
+	Hash      hash.Hash
+	Router    *framework.Router
+	Telemetry *telemetry.Telemetry
 }
 
 func New(dep Dependency) (*Expose, error) {
 	// This block initializes outbound services: Database, HTTP client, gRPC client, Redis, etc.
-	sqlUser := outbound.NewSQLUser(dep.Database, dep.QueryBuilder, dep.Telemetry)
+	sqlUser := outbound.NewSQL(dep.SQLKitDB, dep.Telemetry)
 
 	// This block initializes core business logic or use cases to handle user interaction
 	ucDep := usecase.Dependency{

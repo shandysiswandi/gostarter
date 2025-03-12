@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mockCodec "github.com/shandysiswandi/gostarter/pkg/codec/mocker"
+	mockCodec "github.com/shandysiswandi/goreng/mocker"
 	"github.com/stretchr/testify/assert"
 )
 

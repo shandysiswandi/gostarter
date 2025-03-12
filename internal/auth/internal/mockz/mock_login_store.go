@@ -22,12 +22,12 @@ func (_m *MockLoginStore) EXPECT() *MockLoginStore_Expecter {
 	return &MockLoginStore_Expecter{mock: &_m.Mock}
 }
 
-// FindTokenByUserID provides a mock function with given fields: ctx, uid
-func (_m *MockLoginStore) FindTokenByUserID(ctx context.Context, uid uint64) (*domain.Token, error) {
+// TokenByUserID provides a mock function with given fields: ctx, uid
+func (_m *MockLoginStore) TokenByUserID(ctx context.Context, uid uint64) (*domain.Token, error) {
 	ret := _m.Called(ctx, uid)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindTokenByUserID")
+		panic("no return value specified for TokenByUserID")
 	}
 
 	var r0 *domain.Token
@@ -52,41 +52,135 @@ func (_m *MockLoginStore) FindTokenByUserID(ctx context.Context, uid uint64) (*d
 	return r0, r1
 }
 
-// MockLoginStore_FindTokenByUserID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindTokenByUserID'
-type MockLoginStore_FindTokenByUserID_Call struct {
+// MockLoginStore_TokenByUserID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenByUserID'
+type MockLoginStore_TokenByUserID_Call struct {
 	*mock.Call
 }
 
-// FindTokenByUserID is a helper method to define mock.On call
+// TokenByUserID is a helper method to define mock.On call
 //   - ctx context.Context
 //   - uid uint64
-func (_e *MockLoginStore_Expecter) FindTokenByUserID(ctx interface{}, uid interface{}) *MockLoginStore_FindTokenByUserID_Call {
-	return &MockLoginStore_FindTokenByUserID_Call{Call: _e.mock.On("FindTokenByUserID", ctx, uid)}
+func (_e *MockLoginStore_Expecter) TokenByUserID(ctx interface{}, uid interface{}) *MockLoginStore_TokenByUserID_Call {
+	return &MockLoginStore_TokenByUserID_Call{Call: _e.mock.On("TokenByUserID", ctx, uid)}
 }
 
-func (_c *MockLoginStore_FindTokenByUserID_Call) Run(run func(ctx context.Context, uid uint64)) *MockLoginStore_FindTokenByUserID_Call {
+func (_c *MockLoginStore_TokenByUserID_Call) Run(run func(ctx context.Context, uid uint64)) *MockLoginStore_TokenByUserID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint64))
 	})
 	return _c
 }
 
-func (_c *MockLoginStore_FindTokenByUserID_Call) Return(_a0 *domain.Token, _a1 error) *MockLoginStore_FindTokenByUserID_Call {
+func (_c *MockLoginStore_TokenByUserID_Call) Return(_a0 *domain.Token, _a1 error) *MockLoginStore_TokenByUserID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockLoginStore_FindTokenByUserID_Call) RunAndReturn(run func(context.Context, uint64) (*domain.Token, error)) *MockLoginStore_FindTokenByUserID_Call {
+func (_c *MockLoginStore_TokenByUserID_Call) RunAndReturn(run func(context.Context, uint64) (*domain.Token, error)) *MockLoginStore_TokenByUserID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// FindUserByEmail provides a mock function with given fields: ctx, email
-func (_m *MockLoginStore) FindUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+// TokenSave provides a mock function with given fields: ctx, token
+func (_m *MockLoginStore) TokenSave(ctx context.Context, token domain.Token) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TokenSave")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Token) error); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockLoginStore_TokenSave_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenSave'
+type MockLoginStore_TokenSave_Call struct {
+	*mock.Call
+}
+
+// TokenSave is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token domain.Token
+func (_e *MockLoginStore_Expecter) TokenSave(ctx interface{}, token interface{}) *MockLoginStore_TokenSave_Call {
+	return &MockLoginStore_TokenSave_Call{Call: _e.mock.On("TokenSave", ctx, token)}
+}
+
+func (_c *MockLoginStore_TokenSave_Call) Run(run func(ctx context.Context, token domain.Token)) *MockLoginStore_TokenSave_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.Token))
+	})
+	return _c
+}
+
+func (_c *MockLoginStore_TokenSave_Call) Return(_a0 error) *MockLoginStore_TokenSave_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockLoginStore_TokenSave_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockLoginStore_TokenSave_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TokenUpdate provides a mock function with given fields: ctx, token
+func (_m *MockLoginStore) TokenUpdate(ctx context.Context, token domain.Token) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TokenUpdate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.Token) error); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockLoginStore_TokenUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenUpdate'
+type MockLoginStore_TokenUpdate_Call struct {
+	*mock.Call
+}
+
+// TokenUpdate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token domain.Token
+func (_e *MockLoginStore_Expecter) TokenUpdate(ctx interface{}, token interface{}) *MockLoginStore_TokenUpdate_Call {
+	return &MockLoginStore_TokenUpdate_Call{Call: _e.mock.On("TokenUpdate", ctx, token)}
+}
+
+func (_c *MockLoginStore_TokenUpdate_Call) Run(run func(ctx context.Context, token domain.Token)) *MockLoginStore_TokenUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.Token))
+	})
+	return _c
+}
+
+func (_c *MockLoginStore_TokenUpdate_Call) Return(_a0 error) *MockLoginStore_TokenUpdate_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockLoginStore_TokenUpdate_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockLoginStore_TokenUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UserByEmail provides a mock function with given fields: ctx, email
+func (_m *MockLoginStore) UserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	ret := _m.Called(ctx, email)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindUserByEmail")
+		panic("no return value specified for UserByEmail")
 	}
 
 	var r0 *domain.User
@@ -111,125 +205,31 @@ func (_m *MockLoginStore) FindUserByEmail(ctx context.Context, email string) (*d
 	return r0, r1
 }
 
-// MockLoginStore_FindUserByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindUserByEmail'
-type MockLoginStore_FindUserByEmail_Call struct {
+// MockLoginStore_UserByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserByEmail'
+type MockLoginStore_UserByEmail_Call struct {
 	*mock.Call
 }
 
-// FindUserByEmail is a helper method to define mock.On call
+// UserByEmail is a helper method to define mock.On call
 //   - ctx context.Context
 //   - email string
-func (_e *MockLoginStore_Expecter) FindUserByEmail(ctx interface{}, email interface{}) *MockLoginStore_FindUserByEmail_Call {
-	return &MockLoginStore_FindUserByEmail_Call{Call: _e.mock.On("FindUserByEmail", ctx, email)}
+func (_e *MockLoginStore_Expecter) UserByEmail(ctx interface{}, email interface{}) *MockLoginStore_UserByEmail_Call {
+	return &MockLoginStore_UserByEmail_Call{Call: _e.mock.On("UserByEmail", ctx, email)}
 }
 
-func (_c *MockLoginStore_FindUserByEmail_Call) Run(run func(ctx context.Context, email string)) *MockLoginStore_FindUserByEmail_Call {
+func (_c *MockLoginStore_UserByEmail_Call) Run(run func(ctx context.Context, email string)) *MockLoginStore_UserByEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockLoginStore_FindUserByEmail_Call) Return(_a0 *domain.User, _a1 error) *MockLoginStore_FindUserByEmail_Call {
+func (_c *MockLoginStore_UserByEmail_Call) Return(_a0 *domain.User, _a1 error) *MockLoginStore_UserByEmail_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockLoginStore_FindUserByEmail_Call) RunAndReturn(run func(context.Context, string) (*domain.User, error)) *MockLoginStore_FindUserByEmail_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// SaveToken provides a mock function with given fields: ctx, token
-func (_m *MockLoginStore) SaveToken(ctx context.Context, token domain.Token) error {
-	ret := _m.Called(ctx, token)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SaveToken")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Token) error); ok {
-		r0 = rf(ctx, token)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockLoginStore_SaveToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveToken'
-type MockLoginStore_SaveToken_Call struct {
-	*mock.Call
-}
-
-// SaveToken is a helper method to define mock.On call
-//   - ctx context.Context
-//   - token domain.Token
-func (_e *MockLoginStore_Expecter) SaveToken(ctx interface{}, token interface{}) *MockLoginStore_SaveToken_Call {
-	return &MockLoginStore_SaveToken_Call{Call: _e.mock.On("SaveToken", ctx, token)}
-}
-
-func (_c *MockLoginStore_SaveToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MockLoginStore_SaveToken_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.Token))
-	})
-	return _c
-}
-
-func (_c *MockLoginStore_SaveToken_Call) Return(_a0 error) *MockLoginStore_SaveToken_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockLoginStore_SaveToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockLoginStore_SaveToken_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UpdateToken provides a mock function with given fields: ctx, token
-func (_m *MockLoginStore) UpdateToken(ctx context.Context, token domain.Token) error {
-	ret := _m.Called(ctx, token)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateToken")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Token) error); ok {
-		r0 = rf(ctx, token)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockLoginStore_UpdateToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateToken'
-type MockLoginStore_UpdateToken_Call struct {
-	*mock.Call
-}
-
-// UpdateToken is a helper method to define mock.On call
-//   - ctx context.Context
-//   - token domain.Token
-func (_e *MockLoginStore_Expecter) UpdateToken(ctx interface{}, token interface{}) *MockLoginStore_UpdateToken_Call {
-	return &MockLoginStore_UpdateToken_Call{Call: _e.mock.On("UpdateToken", ctx, token)}
-}
-
-func (_c *MockLoginStore_UpdateToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MockLoginStore_UpdateToken_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.Token))
-	})
-	return _c
-}
-
-func (_c *MockLoginStore_UpdateToken_Call) Return(_a0 error) *MockLoginStore_UpdateToken_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockLoginStore_UpdateToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockLoginStore_UpdateToken_Call {
+func (_c *MockLoginStore_UserByEmail_Call) RunAndReturn(run func(context.Context, string) (*domain.User, error)) *MockLoginStore_UserByEmail_Call {
 	_c.Call.Return(run)
 	return _c
 }

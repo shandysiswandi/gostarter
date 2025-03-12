@@ -22,12 +22,12 @@ func (_m *MockRefreshTokenStore) EXPECT() *MockRefreshTokenStore_Expecter {
 	return &MockRefreshTokenStore_Expecter{mock: &_m.Mock}
 }
 
-// FindTokenByRefresh provides a mock function with given fields: ctx, ref
-func (_m *MockRefreshTokenStore) FindTokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
+// TokenByRefresh provides a mock function with given fields: ctx, ref
+func (_m *MockRefreshTokenStore) TokenByRefresh(ctx context.Context, ref string) (*domain.Token, error) {
 	ret := _m.Called(ctx, ref)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindTokenByRefresh")
+		panic("no return value specified for TokenByRefresh")
 	}
 
 	var r0 *domain.Token
@@ -52,41 +52,41 @@ func (_m *MockRefreshTokenStore) FindTokenByRefresh(ctx context.Context, ref str
 	return r0, r1
 }
 
-// MockRefreshTokenStore_FindTokenByRefresh_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindTokenByRefresh'
-type MockRefreshTokenStore_FindTokenByRefresh_Call struct {
+// MockRefreshTokenStore_TokenByRefresh_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenByRefresh'
+type MockRefreshTokenStore_TokenByRefresh_Call struct {
 	*mock.Call
 }
 
-// FindTokenByRefresh is a helper method to define mock.On call
+// TokenByRefresh is a helper method to define mock.On call
 //   - ctx context.Context
 //   - ref string
-func (_e *MockRefreshTokenStore_Expecter) FindTokenByRefresh(ctx interface{}, ref interface{}) *MockRefreshTokenStore_FindTokenByRefresh_Call {
-	return &MockRefreshTokenStore_FindTokenByRefresh_Call{Call: _e.mock.On("FindTokenByRefresh", ctx, ref)}
+func (_e *MockRefreshTokenStore_Expecter) TokenByRefresh(ctx interface{}, ref interface{}) *MockRefreshTokenStore_TokenByRefresh_Call {
+	return &MockRefreshTokenStore_TokenByRefresh_Call{Call: _e.mock.On("TokenByRefresh", ctx, ref)}
 }
 
-func (_c *MockRefreshTokenStore_FindTokenByRefresh_Call) Run(run func(ctx context.Context, ref string)) *MockRefreshTokenStore_FindTokenByRefresh_Call {
+func (_c *MockRefreshTokenStore_TokenByRefresh_Call) Run(run func(ctx context.Context, ref string)) *MockRefreshTokenStore_TokenByRefresh_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_FindTokenByRefresh_Call) Return(_a0 *domain.Token, _a1 error) *MockRefreshTokenStore_FindTokenByRefresh_Call {
+func (_c *MockRefreshTokenStore_TokenByRefresh_Call) Return(_a0 *domain.Token, _a1 error) *MockRefreshTokenStore_TokenByRefresh_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_FindTokenByRefresh_Call) RunAndReturn(run func(context.Context, string) (*domain.Token, error)) *MockRefreshTokenStore_FindTokenByRefresh_Call {
+func (_c *MockRefreshTokenStore_TokenByRefresh_Call) RunAndReturn(run func(context.Context, string) (*domain.Token, error)) *MockRefreshTokenStore_TokenByRefresh_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// SaveToken provides a mock function with given fields: ctx, token
-func (_m *MockRefreshTokenStore) SaveToken(ctx context.Context, token domain.Token) error {
+// TokenSave provides a mock function with given fields: ctx, token
+func (_m *MockRefreshTokenStore) TokenSave(ctx context.Context, token domain.Token) error {
 	ret := _m.Called(ctx, token)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SaveToken")
+		panic("no return value specified for TokenSave")
 	}
 
 	var r0 error
@@ -99,41 +99,41 @@ func (_m *MockRefreshTokenStore) SaveToken(ctx context.Context, token domain.Tok
 	return r0
 }
 
-// MockRefreshTokenStore_SaveToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveToken'
-type MockRefreshTokenStore_SaveToken_Call struct {
+// MockRefreshTokenStore_TokenSave_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenSave'
+type MockRefreshTokenStore_TokenSave_Call struct {
 	*mock.Call
 }
 
-// SaveToken is a helper method to define mock.On call
+// TokenSave is a helper method to define mock.On call
 //   - ctx context.Context
 //   - token domain.Token
-func (_e *MockRefreshTokenStore_Expecter) SaveToken(ctx interface{}, token interface{}) *MockRefreshTokenStore_SaveToken_Call {
-	return &MockRefreshTokenStore_SaveToken_Call{Call: _e.mock.On("SaveToken", ctx, token)}
+func (_e *MockRefreshTokenStore_Expecter) TokenSave(ctx interface{}, token interface{}) *MockRefreshTokenStore_TokenSave_Call {
+	return &MockRefreshTokenStore_TokenSave_Call{Call: _e.mock.On("TokenSave", ctx, token)}
 }
 
-func (_c *MockRefreshTokenStore_SaveToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MockRefreshTokenStore_SaveToken_Call {
+func (_c *MockRefreshTokenStore_TokenSave_Call) Run(run func(ctx context.Context, token domain.Token)) *MockRefreshTokenStore_TokenSave_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.Token))
 	})
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_SaveToken_Call) Return(_a0 error) *MockRefreshTokenStore_SaveToken_Call {
+func (_c *MockRefreshTokenStore_TokenSave_Call) Return(_a0 error) *MockRefreshTokenStore_TokenSave_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_SaveToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockRefreshTokenStore_SaveToken_Call {
+func (_c *MockRefreshTokenStore_TokenSave_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockRefreshTokenStore_TokenSave_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateToken provides a mock function with given fields: ctx, token
-func (_m *MockRefreshTokenStore) UpdateToken(ctx context.Context, token domain.Token) error {
+// TokenUpdate provides a mock function with given fields: ctx, token
+func (_m *MockRefreshTokenStore) TokenUpdate(ctx context.Context, token domain.Token) error {
 	ret := _m.Called(ctx, token)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateToken")
+		panic("no return value specified for TokenUpdate")
 	}
 
 	var r0 error
@@ -146,31 +146,31 @@ func (_m *MockRefreshTokenStore) UpdateToken(ctx context.Context, token domain.T
 	return r0
 }
 
-// MockRefreshTokenStore_UpdateToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateToken'
-type MockRefreshTokenStore_UpdateToken_Call struct {
+// MockRefreshTokenStore_TokenUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenUpdate'
+type MockRefreshTokenStore_TokenUpdate_Call struct {
 	*mock.Call
 }
 
-// UpdateToken is a helper method to define mock.On call
+// TokenUpdate is a helper method to define mock.On call
 //   - ctx context.Context
 //   - token domain.Token
-func (_e *MockRefreshTokenStore_Expecter) UpdateToken(ctx interface{}, token interface{}) *MockRefreshTokenStore_UpdateToken_Call {
-	return &MockRefreshTokenStore_UpdateToken_Call{Call: _e.mock.On("UpdateToken", ctx, token)}
+func (_e *MockRefreshTokenStore_Expecter) TokenUpdate(ctx interface{}, token interface{}) *MockRefreshTokenStore_TokenUpdate_Call {
+	return &MockRefreshTokenStore_TokenUpdate_Call{Call: _e.mock.On("TokenUpdate", ctx, token)}
 }
 
-func (_c *MockRefreshTokenStore_UpdateToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MockRefreshTokenStore_UpdateToken_Call {
+func (_c *MockRefreshTokenStore_TokenUpdate_Call) Run(run func(ctx context.Context, token domain.Token)) *MockRefreshTokenStore_TokenUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.Token))
 	})
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_UpdateToken_Call) Return(_a0 error) *MockRefreshTokenStore_UpdateToken_Call {
+func (_c *MockRefreshTokenStore_TokenUpdate_Call) Return(_a0 error) *MockRefreshTokenStore_TokenUpdate_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockRefreshTokenStore_UpdateToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockRefreshTokenStore_UpdateToken_Call {
+func (_c *MockRefreshTokenStore_TokenUpdate_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MockRefreshTokenStore_TokenUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }

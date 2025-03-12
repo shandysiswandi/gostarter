@@ -3,7 +3,7 @@ package domain
 import (
 	"errors"
 
-	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/goreng/enum"
 )
 
 var (

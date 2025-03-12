@@ -3,8 +3,8 @@ package job
 import (
 	"testing"
 
-	mockConfig "github.com/shandysiswandi/gostarter/pkg/config/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/task"
+	mockConfig "github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/task"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -23,7 +23,7 @@ func (_m *MockFetchStore) EXPECT() *MockFetchStore_Expecter {
 }
 
 // Fetch provides a mock function with given fields: ctx, filter
-func (_m *MockFetchStore) Fetch(ctx context.Context, filter map[string]interface{}) ([]domain.Todo, error) {
+func (_m *MockFetchStore) Fetch(ctx context.Context, filter map[string]any) ([]domain.Todo, error) {
 	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
@@ -32,10 +32,10 @@ func (_m *MockFetchStore) Fetch(ctx context.Context, filter map[string]interface
 
 	var r0 []domain.Todo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}) ([]domain.Todo, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]any) ([]domain.Todo, error)); ok {
 		return rf(ctx, filter)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}) []domain.Todo); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]any) []domain.Todo); ok {
 		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
@@ -43,7 +43,7 @@ func (_m *MockFetchStore) Fetch(ctx context.Context, filter map[string]interface
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, map[string]interface{}) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, map[string]any) error); ok {
 		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
@@ -59,14 +59,14 @@ type MockFetchStore_Fetch_Call struct {
 
 // Fetch is a helper method to define mock.On call
 //   - ctx context.Context
-//   - filter map[string]interface{}
+//   - filter map[string]any
 func (_e *MockFetchStore_Expecter) Fetch(ctx interface{}, filter interface{}) *MockFetchStore_Fetch_Call {
 	return &MockFetchStore_Fetch_Call{Call: _e.mock.On("Fetch", ctx, filter)}
 }
 
-func (_c *MockFetchStore_Fetch_Call) Run(run func(ctx context.Context, filter map[string]interface{})) *MockFetchStore_Fetch_Call {
+func (_c *MockFetchStore_Fetch_Call) Run(run func(ctx context.Context, filter map[string]any)) *MockFetchStore_Fetch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(map[string]interface{}))
+		run(args[0].(context.Context), args[1].(map[string]any))
 	})
 	return _c
 }
@@ -76,7 +76,7 @@ func (_c *MockFetchStore_Fetch_Call) Return(_a0 []domain.Todo, _a1 error) *MockF
 	return _c
 }
 
-func (_c *MockFetchStore_Fetch_Call) RunAndReturn(run func(context.Context, map[string]interface{}) ([]domain.Todo, error)) *MockFetchStore_Fetch_Call {
+func (_c *MockFetchStore_Fetch_Call) RunAndReturn(run func(context.Context, map[string]any) ([]domain.Todo, error)) *MockFetchStore_Fetch_Call {
 	_c.Call.Return(run)
 	return _c
 }

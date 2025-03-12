@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	mockHash "github.com/shandysiswandi/goreng/mocker"
+	mockValidation "github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,8 +39,8 @@ func TestNewUpdatePassword(t *testing.T) {
 }
 
 func TestUpdatePassword_Call(t *testing.T) {
-	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
-	ctxJWT := jwt.SetClaim(context.Background(), claim)
+	claim := lib.NewJWTClaim(11, "email", time.Time{}, nil)
+	ctxJWT := lib.SetJWTClaim(context.Background(), claim)
 
 	type args struct {
 		ctx context.Context

@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	mockHash "github.com/shandysiswandi/goreng/mocker"
+	mockValidation "github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	mockHash "github.com/shandysiswandi/gostarter/pkg/hash/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	mockValidation "github.com/shandysiswandi/gostarter/pkg/validation/mocker"
 	"github.com/stretchr/testify/assert"
 )
 

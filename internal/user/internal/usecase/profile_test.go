@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/user/internal/mockz"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,8 +37,8 @@ func TestNewProfile(t *testing.T) {
 }
 
 func TestProfile_Call(t *testing.T) {
-	claim := jwt.NewClaim(11, "email", time.Time{}, nil)
-	ctxJWT := jwt.SetClaim(context.Background(), claim)
+	claim := lib.NewJWTClaim(11, "email", time.Time{}, nil)
+	ctxJWT := lib.SetJWTClaim(context.Background(), claim)
 
 	type args struct {
 		ctx context.Context

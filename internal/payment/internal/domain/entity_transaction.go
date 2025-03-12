@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/shandysiswandi/gostarter/pkg/enum"
+	"github.com/shandysiswandi/goreng/enum"
 	"github.com/shopspring/decimal"
 )
 

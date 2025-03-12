@@ -22,12 +22,12 @@ func (_m *MocktokenSaver) EXPECT() *MocktokenSaver_Expecter {
 	return &MocktokenSaver_Expecter{mock: &_m.Mock}
 }
 
-// SaveToken provides a mock function with given fields: ctx, token
-func (_m *MocktokenSaver) SaveToken(ctx context.Context, token domain.Token) error {
+// TokenSave provides a mock function with given fields: ctx, token
+func (_m *MocktokenSaver) TokenSave(ctx context.Context, token domain.Token) error {
 	ret := _m.Called(ctx, token)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SaveToken")
+		panic("no return value specified for TokenSave")
 	}
 
 	var r0 error
@@ -40,41 +40,41 @@ func (_m *MocktokenSaver) SaveToken(ctx context.Context, token domain.Token) err
 	return r0
 }
 
-// MocktokenSaver_SaveToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveToken'
-type MocktokenSaver_SaveToken_Call struct {
+// MocktokenSaver_TokenSave_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenSave'
+type MocktokenSaver_TokenSave_Call struct {
 	*mock.Call
 }
 
-// SaveToken is a helper method to define mock.On call
+// TokenSave is a helper method to define mock.On call
 //   - ctx context.Context
 //   - token domain.Token
-func (_e *MocktokenSaver_Expecter) SaveToken(ctx interface{}, token interface{}) *MocktokenSaver_SaveToken_Call {
-	return &MocktokenSaver_SaveToken_Call{Call: _e.mock.On("SaveToken", ctx, token)}
+func (_e *MocktokenSaver_Expecter) TokenSave(ctx interface{}, token interface{}) *MocktokenSaver_TokenSave_Call {
+	return &MocktokenSaver_TokenSave_Call{Call: _e.mock.On("TokenSave", ctx, token)}
 }
 
-func (_c *MocktokenSaver_SaveToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MocktokenSaver_SaveToken_Call {
+func (_c *MocktokenSaver_TokenSave_Call) Run(run func(ctx context.Context, token domain.Token)) *MocktokenSaver_TokenSave_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.Token))
 	})
 	return _c
 }
 
-func (_c *MocktokenSaver_SaveToken_Call) Return(_a0 error) *MocktokenSaver_SaveToken_Call {
+func (_c *MocktokenSaver_TokenSave_Call) Return(_a0 error) *MocktokenSaver_TokenSave_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MocktokenSaver_SaveToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MocktokenSaver_SaveToken_Call {
+func (_c *MocktokenSaver_TokenSave_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MocktokenSaver_TokenSave_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateToken provides a mock function with given fields: ctx, token
-func (_m *MocktokenSaver) UpdateToken(ctx context.Context, token domain.Token) error {
+// TokenUpdate provides a mock function with given fields: ctx, token
+func (_m *MocktokenSaver) TokenUpdate(ctx context.Context, token domain.Token) error {
 	ret := _m.Called(ctx, token)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateToken")
+		panic("no return value specified for TokenUpdate")
 	}
 
 	var r0 error
@@ -87,31 +87,31 @@ func (_m *MocktokenSaver) UpdateToken(ctx context.Context, token domain.Token) e
 	return r0
 }
 
-// MocktokenSaver_UpdateToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateToken'
-type MocktokenSaver_UpdateToken_Call struct {
+// MocktokenSaver_TokenUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenUpdate'
+type MocktokenSaver_TokenUpdate_Call struct {
 	*mock.Call
 }
 
-// UpdateToken is a helper method to define mock.On call
+// TokenUpdate is a helper method to define mock.On call
 //   - ctx context.Context
 //   - token domain.Token
-func (_e *MocktokenSaver_Expecter) UpdateToken(ctx interface{}, token interface{}) *MocktokenSaver_UpdateToken_Call {
-	return &MocktokenSaver_UpdateToken_Call{Call: _e.mock.On("UpdateToken", ctx, token)}
+func (_e *MocktokenSaver_Expecter) TokenUpdate(ctx interface{}, token interface{}) *MocktokenSaver_TokenUpdate_Call {
+	return &MocktokenSaver_TokenUpdate_Call{Call: _e.mock.On("TokenUpdate", ctx, token)}
 }
 
-func (_c *MocktokenSaver_UpdateToken_Call) Run(run func(ctx context.Context, token domain.Token)) *MocktokenSaver_UpdateToken_Call {
+func (_c *MocktokenSaver_TokenUpdate_Call) Run(run func(ctx context.Context, token domain.Token)) *MocktokenSaver_TokenUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(domain.Token))
 	})
 	return _c
 }
 
-func (_c *MocktokenSaver_UpdateToken_Call) Return(_a0 error) *MocktokenSaver_UpdateToken_Call {
+func (_c *MocktokenSaver_TokenUpdate_Call) Return(_a0 error) *MocktokenSaver_TokenUpdate_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MocktokenSaver_UpdateToken_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MocktokenSaver_UpdateToken_Call {
+func (_c *MocktokenSaver_TokenUpdate_Call) RunAndReturn(run func(context.Context, domain.Token) error) *MocktokenSaver_TokenUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }

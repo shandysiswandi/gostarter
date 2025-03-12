@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/shandysiswandi/goreng/enum"
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/uid"
+	"github.com/shandysiswandi/goreng/validation"
+	"github.com/shandysiswandi/gostarter/internal/lib"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/enum"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/jwt"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/uid"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type CreateStore interface {
@@ -45,7 +45,7 @@ func (s *Create) Call(ctx context.Context, in domain.CreateInput) (*domain.Creat
 
 	id := s.uidnumber.Generate()
 	userID := uint64(0)
-	if clm := jwt.GetClaim(ctx); clm != nil {
+	if clm := lib.GetJWTClaim(ctx); clm != nil {
 		userID = clm.AuthID
 	}
 

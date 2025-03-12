@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
+	"github.com/shandysiswandi/goreng/goerror"
+	"github.com/shandysiswandi/goreng/hash"
+	"github.com/shandysiswandi/goreng/telemetry"
+	"github.com/shandysiswandi/goreng/validation"
 	"github.com/shandysiswandi/gostarter/internal/auth/internal/domain"
-	"github.com/shandysiswandi/gostarter/pkg/goerror"
-	"github.com/shandysiswandi/gostarter/pkg/hash"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
-	"github.com/shandysiswandi/gostarter/pkg/validation"
 )
 
 type ResetPasswordStore interface {
-	FindPasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error)
-	DeletePasswordReset(ctx context.Context, id uint64) error
-	UpdateUserPassword(ctx context.Context, id uint64, pass string) error
+	PasswordResetByToken(ctx context.Context, t string) (*domain.PasswordReset, error)
+	PasswordResetDelete(ctx context.Context, id uint64) error
+	UserUpdatePassword(ctx context.Context, id uint64, pass string) error
 }
 
 type ResetPassword struct {
@@ -45,7 +45,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 		return nil, goerror.NewInvalidInput("Invalid request payload", err)
 	}
 
-	ps, err := s.store.FindPasswordResetByToken(ctx, in.Token)
+	ps, err := s.store.PasswordResetByToken(ctx, in.Token)
 	if err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to get password reset", err)
 
@@ -55,7 +55,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 	if ps == nil {
 		s.telemetry.Logger().Warn(ctx, "password reset not found")
 
-		return nil, goerror.NewBusiness("invalid token", goerror.CodeUnauthorized)
+		return nil, goerror.NewBusiness("Invalid token", goerror.CodeUnauthorized)
 	}
 
 	if ps.ExpiresAt.Before(time.Now()) {
@@ -64,7 +64,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 		return nil, goerror.NewBusiness("Token has expired", goerror.CodeUnauthorized)
 	}
 
-	if err := s.store.DeletePasswordReset(ctx, ps.ID); err != nil {
+	if err := s.store.PasswordResetDelete(ctx, ps.ID); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to delete password reset", err)
 
 		return nil, goerror.NewServerInternal(err)
@@ -77,7 +77,7 @@ func (s *ResetPassword) Call(ctx context.Context, in domain.ResetPasswordInput) 
 		return nil, goerror.NewServerInternal(err)
 	}
 
-	if err := s.store.UpdateUserPassword(ctx, ps.UserID, string(passHash)); err != nil {
+	if err := s.store.UserUpdatePassword(ctx, ps.UserID, string(passHash)); err != nil {
 		s.telemetry.Logger().Error(ctx, "failed to delete password reset", err)
 
 		return nil, goerror.NewServerInternal(err)

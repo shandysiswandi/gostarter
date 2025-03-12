@@ -4,12 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shandysiswandi/goreng/messaging"
+	"github.com/shandysiswandi/goreng/mocker"
+	"github.com/shandysiswandi/goreng/telemetry"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/domain"
 	"github.com/shandysiswandi/gostarter/internal/todo/internal/mockz"
-	mockCodec "github.com/shandysiswandi/gostarter/pkg/codec/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/messaging"
-	mockMessaging "github.com/shandysiswandi/gostarter/pkg/messaging/mocker"
-	"github.com/shandysiswandi/gostarter/pkg/telemetry"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -25,7 +24,7 @@ func Test_todoSubscriber_Start(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func() *todoSubscriber {
 				tel := telemetry.NewTelemetry()
-				msgMock := mockMessaging.NewMockClient(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				msgMock.EXPECT().
 					Subscribe(mock.Anything, "topic", "subscription", mock.Anything).
@@ -69,8 +68,8 @@ func Test_todoSubscriber_do(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *todoSubscriber {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
-				msgMock := mockMessaging.NewMockClient(t)
+				jsonMock := mocker.NewMockCodec(t)
+				msgMock := mocker.NewMockMessagingClient(t)
 
 				jsonMock.EXPECT().
 					Decode(a.data.Msg, mock.Anything).
@@ -95,7 +94,7 @@ func Test_todoSubscriber_do(t *testing.T) {
 			wantErr: assert.AnError,
 			mockFn: func(a args) *todoSubscriber {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
+				jsonMock := mocker.NewMockCodec(t)
 				createUC := mockz.NewMockCreate(t)
 
 				jsonMock.EXPECT().
@@ -122,7 +121,7 @@ func Test_todoSubscriber_do(t *testing.T) {
 			wantErr: nil,
 			mockFn: func(a args) *todoSubscriber {
 				tel := telemetry.NewTelemetry()
-				jsonMock := mockCodec.NewMockCodec(t)
+				jsonMock := mocker.NewMockCodec(t)
 				createUC := mockz.NewMockCreate(t)
 
 				jsonMock.EXPECT().
